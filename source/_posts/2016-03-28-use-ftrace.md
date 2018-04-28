@@ -6,7 +6,7 @@ categories: kernel
 tags: ftrace kernel
 ---
 
-```
+``` java
 #!/bin/sh
 ROOT_DEBUGFS="/debug"
 ROOT_FTRACE="${ROOT_DEBUGFS}/tracing"
