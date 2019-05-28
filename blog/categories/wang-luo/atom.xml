@@ -1,0 +1,651 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: 网络 | Iskey's Blog]]></title>
+  <link href="http://iskey.github.io/blog/categories/wang-luo/atom.xml" rel="self"/>
+  <link href="http://iskey.github.io/"/>
+  <updated>2019-05-29T00:12:35+08:00</updated>
+  <id>http://iskey.github.io/</id>
+  <author>
+    <name><![CDATA[Iskey]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[建立IP隧道]]></title>
+    <link href="http://iskey.github.io/blog/2018/03/08/ip-tunnel/"/>
+    <updated>2018-03-08T08:44:00+00:00</updated>
+    <id>http://iskey.github.io/blog/2018/03/08/ip-tunnel</id>
+    <content type="html"><![CDATA[<h2>需求</h2>
+
+<p>  有2个相互隔离的网络，拓扑见下图。ServerA想直接访问到ServerB连接的私有网络</p>
+
+<pre><code>                    |
+1.1.1.1               2.2.2.2       |
++---------+  Public   +---------+   | Private
+| ServerA +-----------+ ServerB +-------+
++---------+  Network  +---------+   | Network
+                    |
+                    | 192.168.1.0/24 
+</code></pre>
+
+<h2>实现</h2>
+
+<p>  通过ip tunnel建立ipip隧道，再通过iptables进行nat，便可以实现。</p>
+
+<h3>Step 1. 建立ip隧道</h3>
+
+<p>  ServerA配置iptunnel,并给tunnel接口配置上ip</p>
+
+<pre><code>#ip tunnel add a2b mode ipip remote 2.2.2.2 local 1.1.1.1
+
+#ifconfig a2b 192.168.2.1 netmask 255.255.255.0
+</code></pre>
+
+<p>  ServerB配置iptunnel,并给tunnel接口配置上ip
+```</p>
+
+<h1>ip tunnel add a2b mode ipip remote 1.1.1.1 local 2.2.2.2</h1>
+
+<h1>ifconfig a2b 192.168.2.2 netmask 255.255.255.0</h1>
+
+<pre><code>  隧道配置完成后，请在ServerA上192.168.2.2，看是否可以ping通，ping通则继续，ping不通需要再看一下上面的命令执行是否有报错
+
+### Step 2. 添加路由和nat
+
+  ServerA上，添加到192.168.1.0/24的路由
+</code></pre>
+
+<h1>/sbin/route add -net 192.168.1.0/24 gw 192.168.2.2</h1>
+
+<pre><code>  ServerB上，添加iptables nat，将ServerA过了访问192.168.1.0/24段的包进行NAT，并开启ip foward功能
+</code></pre>
+
+<h1>iptables -t nat -A POSTROUTING -s 192.168.2.1 -d 192.168.1.0/24 -j MASQUERADE</h1>
+
+<h1>sysctl -w net.ipv4.ip_forward=1</h1>
+
+<h1>sed -i &lsquo;/net.ipv4.ip_forward/ s/0/1/&rsquo;  /etc/sysctl.conf</h1>
+
+<p>```</p>
+
+<p>  至此，完成了两端的配置，ServerA可以直接访问ServerB 所接的私网了。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[跨网段修改ip地址]]></title>
+    <link href="http://iskey.github.io/blog/2016/04/20/Fix-ip-for-two-netmask/"/>
+    <updated>2016-04-20T22:36:00+00:00</updated>
+    <id>http://iskey.github.io/blog/2016/04/20/Fix-ip-for-two-netmask</id>
+    <content type="html"><![CDATA[<p>最近有个需求，需要在windows客户端下，远程修改linux服务器的ip地址，而且要求能够跨网段修改，首先相当的，当然是组播了，下边是实际的源码。</p>
+
+<p>windows端，在visual studio 2013上编译通过，使用方法，send [ip] [netmask],该程序会在windows上的所有网卡上发送组播报文。</p>
+
+<p>Linux客户端，使用方法recv  [eth].</p>
+
+<p>recv.c</p>
+
+<pre><code class="c">    #include &lt;stdlib.h&gt;  
+    #include &lt;sys/types.h&gt;  
+    #include &lt;sys/socket.h&gt;  
+    #include &lt;netinet/in.h&gt;  
+    #include &lt;arpa/inet.h&gt;  
+    #include &lt;time.h&gt;  
+    #include &lt;string.h&gt;  
+    #include &lt;stdio.h&gt;  
+    #include &lt;unistd.h&gt;  
+
+    #define MAX_LEN  1024    /* maximum string size to send */
+    #define MIN_PORT 1024    /* minimum port allowed */
+    #define MAX_PORT 65535   /* maximum port allowed */
+
+    #define HELLO_PORT 12345
+    #define HELLO_GROUP "225.0.0.37"
+    #define MSGBUFSIZE 256  
+    #define RAW_DATA_LEN 250
+    #define CMD_HEAD 0x57579090
+    #define CMD_MAX_SIZE 250
+
+
+    typedef struct _BROADCAST_CMD_{
+        uint32_t    head;
+        uint8_t     cmd;
+        uint16_t    data_len;
+        uint8_t     raw_data[RAW_DATA_LEN];
+        uint16_t    crc;
+    }BROADCAST_CMD;
+
+    enum{
+        CMD_SET_IP = 0,
+        CMD_SET_NETMASK,
+        CMD_SET_IP_NETMASK,
+    };
+
+    struct __IP_MASK__{
+        uint32_t ip;
+        uint32_t netmask;
+    };
+
+    #define INVERT_TO_BIG_ENDIAN16(val) (((uint16_t)val&amp; (uint16_t)0xff00) &gt;&gt;8  | \
+                                            ((uint16_t)val&amp; (uint16_t)0x00ff)&lt;&lt; 8)
+
+    #define INVERT_TO_BIG_ENDIAIN32(val) (((uint32_t)val&amp; (uint32_t)0xff000000)&gt;&gt; 24        | \
+                                            ((uint32_t)val&amp; (uint32_t)0x00ff0000)&gt;&gt; 8   | \
+                                            ((uint32_t)val&amp; (uint32_t)0x0000ff00)&lt;&lt; 8   | \
+                                            ((uint32_t)val&amp; (uint32_t)0x000000ff)&lt;&lt; 24)
+
+    #define INVERT_TO_BIG_ENDIAN64(val) (((uint64_t) (val) &amp; (uint64_t)(0x00000000000000ffU)) &lt;&lt; 56) | \
+                                            (((uint64_t)(val)&amp; (uint64_t)(0x000000000000ff00U)) &lt;&lt; 40) | \
+                                            (((uint64_t)(val)&amp; (uint64_t)(0x0000000000ff0000U)) &lt;&lt; 24) | \
+                                            (((uint64_t)(val)&amp; (uint64_t)(0x00000000ff000000U)) &lt;&lt; 8) | \
+                                            (((uint64_t)(val)&amp; (uint64_t)(0x000000ff00000000U)) &gt;&gt; 8) | \
+                                            (((uint64_t)(val)&amp; (uint64_t)(0x0000ff0000000000U)) &gt;&gt; 24) | \
+                                            (((uint64_t)(val)&amp; (uint64_t)(0x00ff000000000000U)) &gt;&gt; 40) | \
+                                            (((uint64_t)(val)&amp; (uint64_t)(0xff00000000000000U)) &gt;&gt; 56)))
+
+
+    #define TO_NET16(val) INVERT_TO_BIG_ENDIAN16(val)
+    #define TO_NET32(val) INVERT_TO_BIG_ENDIAIN32(val)
+    #define TO_NET64(val) INVERT_TO_BIG_ENDIAN64(val)
+
+    int isBigEndian()
+    {
+        union MyUnion
+        {
+            uint8_t a[2];
+            uint16_t b;
+        };
+
+        union MyUnion test;
+        test.b = 1;
+        return test.a[0];
+    }
+
+    int main(int argc, char *argv[])  
+    {  
+        struct sockaddr_in addr;  
+        int fd, nbytes,addrlen;  
+        struct ip_mreq mreq;  
+        char msgbuf[MSGBUFSIZE];  
+        char str_cmd[CMD_MAX_SIZE];
+        char ip[50];
+        char netmask[50];
+
+        u_int yes=1; /*** MODIFICATION TO ORIGINAL */  
+
+        if(argc!=2){
+            printf("Usage: %s [eth_name]\n", argv[0]);
+            return 0;
+        }
+
+        snprintf(str_cmd, CMD_MAX_SIZE, "route add -net 0.0.0.0 %s", argv[1]);
+        system(str_cmd);
+
+        /* create what looks like an ordinary UDP socket */  
+        if ((fd=socket(AF_INET,SOCK_DGRAM,0)) &lt; 0)   
+        {  
+            perror("socket");  
+            exit(1);  
+        }  
+
+        /**** MODIFICATION TO ORIGINAL */  
+        /* allow multiple sockets to use the same PORT number */  
+        if (setsockopt(fd,SOL_SOCKET,SO_REUSEADDR,&amp;yes,sizeof(yes)) &lt; 0)   
+        {  
+            perror("Reusing ADDR failed");  
+            exit(1);  
+        }  
+        /*** END OF MODIFICATION TO ORIGINAL */  
+
+        /* set up destination address */  
+        memset(&amp;addr,0,sizeof(addr));  
+        addr.sin_family=AF_INET;  
+        addr.sin_addr.s_addr=htonl(INADDR_ANY); /* N.B.: differs from sender */  
+        addr.sin_port=htons(HELLO_PORT);  
+
+        /* bind to receive address */  
+        if (bind(fd,(struct sockaddr *) &amp;addr,sizeof(addr)) &lt; 0)  
+        {  
+            perror("bind");  
+            exit(1);  
+        }  
+
+        /* use setsockopt() to request that the kernel join a multicast group */  
+        mreq.imr_multiaddr.s_addr=inet_addr(HELLO_GROUP);  
+        mreq.imr_interface.s_addr=htonl(INADDR_ANY);  
+        if (setsockopt(fd,IPPROTO_IP,IP_ADD_MEMBERSHIP,&amp;mreq,sizeof(mreq)) &lt; 0)   
+        {  
+            perror("setsockopt");  
+            exit(1);  
+        }  
+
+        /* now just enter a read-print loop */  
+        while (1)   
+        {  
+            addrlen=sizeof(addr);  
+            if ((nbytes=recvfrom(fd,msgbuf,MSGBUFSIZE,0, (struct sockaddr *) &amp;addr,(socklen_t*)&amp;addrlen)) &lt; 0)   
+            {  
+                perror("recvfrom");  
+                exit(1);  
+            }
+
+            BROADCAST_CMD cmd, *p_cmd = (BROADCAST_CMD *)msgbuf;
+            struct __IP_MASK__ ip_mask, *p_ip_mask=  (struct __IP_MASK__*)(p_cmd-&gt;raw_data);
+
+            ip_mask.ip = p_ip_mask-&gt;ip;
+            ip_mask.netmask = p_ip_mask-&gt;netmask;
+            if (isBigEndian()){
+                cmd.head = p_cmd-&gt;head;
+                cmd.cmd = p_cmd-&gt;cmd;
+                cmd.data_len = p_cmd-&gt;data_len;
+            }
+            else
+            {
+                cmd.head = TO_NET32(p_cmd-&gt;head);
+                cmd.cmd = p_cmd-&gt;cmd;
+                cmd.data_len = TO_NET16(p_cmd-&gt;data_len);
+            }
+
+            if (cmd.head == CMD_HEAD){
+                printf("cmd head is 0x%08x.\n", cmd.head);
+                printf("cmd.cmd is 0x%02x\n", cmd.cmd);
+                snprintf(ip, sizeof(ip), "%s", (char*)(inet_ntoa(*(struct in_addr*)&amp;ip_mask.ip)));
+                snprintf(netmask, sizeof(netmask), "%s", (char*)(inet_ntoa(*(struct in_addr*)&amp;ip_mask.netmask)));
+                printf("ip is %s.\n", ip);
+                printf("netmask is %s.\n", netmask);
+            }
+
+            snprintf(str_cmd, CMD_MAX_SIZE, "ifconfig %s %s netmask %s", argv[1], ip, netmask);
+            printf("cmd is %s.\n", str_cmd);
+            system(str_cmd);
+        }  
+
+        return 0;  
+    }  
+</code></pre>
+
+<p>send.c</p>
+
+<pre><code class="">    #include &lt;sys/types.h&gt;   /* for type definitions */
+    #include &lt;winsock2.h&gt;    /* for win socket API calls */
+    #include &lt;ws2tcpip.h&gt;    /* for win socket structs */
+    #include &lt;stdio.h&gt;       /* for printf() */
+    #include &lt;stdlib.h&gt;      /* for atoi() */
+    #include &lt;string.h&gt;      /* for strlen() */
+
+    #include "inttypes.h"
+    #include "stdint.h"
+
+    #define MAX_LEN  1024    /* maximum string size to send */
+    #define MIN_PORT 1024    /* minimum port allowed */
+    #define MAX_PORT 65535   /* maximum port allowed */
+
+    #define HELLO_PORT 12345
+    #define HELLO_GROUP "225.0.0.37"
+    #define RAW_DATA_LEN 250
+    #define CMD_HEAD 0x57579090
+
+    typedef struct _BROADCAST_CMD_{
+        uint32_t    head;
+        uint8_t     cmd;
+        uint16_t    data_len;
+        uint8_t     raw_data[RAW_DATA_LEN];
+        uint16_t    crc;
+    }BROADCAST_CMD;
+
+    enum{
+        CMD_SET_IP = 0,
+        CMD_SET_NETMASK,
+        CMD_SET_IP_NETMASK,
+    };
+
+    struct __IP_MASK__{
+        uint32_t ip;
+        uint32_t netmask;
+    };
+
+    #define INVERT_TO_BIG_ENDIAN16(val) (((uint16_t)val&amp; (uint16_t)0xff00) &gt;&gt;8  | \
+        ((uint16_t)val&amp; (uint16_t)0x00ff) &lt;&lt; 8)
+
+    #define INVERT_TO_BIG_ENDIAIN32(val) (((uint32_t)val&amp; (uint32_t)0xff000000)&gt;&gt; 24        | \
+        ((uint32_t)val&amp; (uint32_t)0x00ff0000) &gt;&gt; 8 | \
+        ((uint32_t)val&amp; (uint32_t)0x0000ff00) &lt;&lt; 8 | \
+        ((uint32_t)val&amp; (uint32_t)0x000000ff) &lt;&lt; 24)
+
+    #define INVERT_TO_BIG_ENDIAN64(val) (((uint64_t) (val) &amp; (uint64_t)(0x00000000000000ffU)) &lt;&lt; 56) | \
+        (((uint64_t)(val)&amp; (uint64_t)(0x000000000000ff00U)) &lt;&lt; 40) | \
+        (((uint64_t)(val)&amp; (uint64_t)(0x0000000000ff0000U)) &lt;&lt; 24) | \
+        (((uint64_t)(val)&amp; (uint64_t)(0x00000000ff000000U)) &lt;&lt; 8) | \
+        (((uint64_t)(val)&amp; (uint64_t)(0x000000ff00000000U)) &gt;&gt; 8) | \
+        (((uint64_t)(val)&amp; (uint64_t)(0x0000ff0000000000U)) &gt;&gt; 24) | \
+        (((uint64_t)(val)&amp; (uint64_t)(0x00ff000000000000U)) &gt;&gt; 40) | \
+        (((uint64_t)(val)&amp; (uint64_t)(0xff00000000000000U)) &gt;&gt; 56)))
+
+    #define TO_NET16(val) INVERT_TO_BIG_ENDIAN16(val)
+    #define TO_NET32(val) INVERT_TO_BIG_ENDIAIN32(val)
+    #define TO_NET64(val) INVERT_TO_BIG_ENDIAN64(val)
+
+    int isBigEndian()
+    {
+        union MyUnion
+        {
+            uint8_t a[2];
+            uint16_t b;
+        };
+
+        union MyUnion test;
+        test.b = 1;
+        return test.a[0];
+    }
+
+    void usage(char *cmd)
+    {
+        printf("Usage:\"%s [ip] [netmask]\"\n \t e.g.: %s eth0 1.1.1.1 255.255.255.0\n", cmd, cmd);
+    }
+
+    #pragma comment(lib,"Ws2_32.lib") 
+
+    int send_ip_set_cmd(char* local_ip, char* remote_ip, char* remote_netmask)
+    {
+        int sock;                   /* socket descriptor */
+        struct sockaddr_in mc_addr; /* socket address structure */
+        //char* mc_addr_str;          /* multicast IP address */
+        //unsigned short mc_port;     /* multicast port */
+        unsigned char mc_ttl = 1;     /* time to live (hop count) */
+
+        struct __IP_MASK__ ip_mask;
+        BROADCAST_CMD cmd;
+
+        ip_mask.ip = inet_addr(remote_ip);
+        ip_mask.netmask = inet_addr(remote_netmask);
+       if (isBigEndian()){
+            cmd.head = CMD_HEAD;
+            cmd.cmd = CMD_SET_IP;
+            cmd.data_len = sizeof(struct __IP_MASK__);
+        }
+        else{
+            cmd.head = TO_NET32(CMD_HEAD);
+            cmd.cmd = CMD_SET_IP;
+            cmd.data_len = TO_NET16(sizeof(struct __IP_MASK__));
+        }
+
+        memcpy(cmd.raw_data, &amp;ip_mask, sizeof(ip_mask));
+
+
+        /* create a socket for sending to the multicast address */
+        if ((sock = socket(PF_INET, SOCK_DGRAM, IPPROTO_UDP)) &lt; 0) {
+            perror("socket() failed");
+            exit(1);
+        }
+
+        SOCKADDR_IN local_addr;
+        local_addr.sin_addr.S_un.S_addr=inet_addr(local_ip);
+        local_addr.sin_family=PF_INET;
+        local_addr.sin_port=htons(15501);
+
+        if(-1== bind(sock, (SOCKADDR *)&amp; local_addr, sizeof(SOCKADDR))){
+            printf("bind error.\n");
+        }
+
+        /* set the TTL (time to live/hop count) for the send */
+        if ((setsockopt(sock, IPPROTO_IP, IP_MULTICAST_TTL,
+            (const char*)&amp;mc_ttl, sizeof(mc_ttl))) &lt; 0) {
+            perror("setsockopt() failed");
+            exit(1);
+        }
+
+        /* construct a multicast address structure */
+        memset(&amp;mc_addr, 0, sizeof(mc_addr));
+        mc_addr.sin_family = AF_INET;
+        mc_addr.sin_addr.s_addr = inet_addr(HELLO_GROUP);
+        mc_addr.sin_port = htons(HELLO_PORT);
+
+
+        if (sendto(sock, (const char*)&amp;cmd, sizeof(BROADCAST_CMD), 0, (struct sockaddr *) &amp;mc_addr, sizeof(mc_addr)) &lt; 0)
+        {
+            perror("sendto error.\n");
+            exit(1);
+        }
+
+
+        printf("command send ok. ip addr is %s, netmask is %s\n", remote_ip, remote_netmask);
+
+
+        closesocket(sock);
+
+        return 0;
+    }
+
+    int main(int argc, char *argv[])
+    {
+
+        char szHostName[128];
+        WSADATA wsaData;            /* Windows socket DLL structure */
+
+        /* validate number of arguments */
+        if (argc != 3) {
+            usage(argv[0]);
+            exit(1);
+        }
+
+        printf("ip addr is %s, netmask is %s\n", argv[1], argv[2]);
+        //mc_addr_str = argv[1];       /* arg 1: multicast IP address */
+        //mc_port = atoi(argv[2]); /* arg 2: multicast port number */
+
+        /* validate the port range */
+        if ((HELLO_PORT &lt; MIN_PORT) || (HELLO_PORT &gt; MAX_PORT)) {
+            fprintf(stderr, "Invalid port number argument %d.\n",
+                HELLO_PORT);
+            fprintf(stderr, "Valid range is between %d and %d.\n",
+                MIN_PORT, MAX_PORT);
+            exit(1);
+        }
+
+        /* Load Winsock 2.0 DLL */
+        if (WSAStartup(MAKEWORD(2, 0), &amp;wsaData) != 0) {
+            fprintf(stderr, "WSAStartup() failed");
+            exit(1);
+        }
+
+        if( gethostname(szHostName, 128) == 0 )
+        {
+            // Get host adresses
+            struct hostent * pHost; 
+            int i;  
+            pHost = gethostbyname(szHostName); 
+            for( i = 0; pHost!= NULL &amp;&amp; pHost-&gt;h_addr_list[i]!= NULL; i++ )  
+            {
+                char * eth_name=inet_ntoa (*(struct in_addr *)pHost-&gt;h_addr_list[i]);
+                send_ip_set_cmd(eth_name, argv[1], argv[2]);
+            }
+        }
+
+        WSACleanup();  /* Cleanup Winsock */
+
+        return 0;
+    }
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[组播通讯实例]]></title>
+    <link href="http://iskey.github.io/blog/2016/03/03/broadcast/"/>
+    <updated>2016-03-03T16:26:00+00:00</updated>
+    <id>http://iskey.github.io/blog/2016/03/03/broadcast</id>
+    <content type="html"><![CDATA[<h4>sender.c</h4>
+
+<pre><code>#include &lt;stdlib.h&gt;  
+#include &lt;sys/types.h&gt;  
+#include &lt;sys/socket.h&gt;  
+#include &lt;netinet/in.h&gt;  
+#include &lt;arpa/inet.h&gt;  
+#include &lt;time.h&gt;  
+#include &lt;string.h&gt;  
+#include &lt;stdio.h&gt;  
+#include &lt;unistd.h&gt;  
+
+#define HELLO_PORT 12345  
+#define HELLO_GROUP "225.0.0.37"  
+
+int main(int argc, char *argv[])  
+{  
+    struct sockaddr_in addr;  
+    int fd, cnt;  
+    struct ip_mreq mreq;  
+    char *message="Hello, World!";  
+
+    /* create what looks like an ordinary UDP socket */  
+    if ((fd=socket(AF_INET,SOCK_DGRAM,0)) &lt; 0)   
+    {  
+        perror("socket");  
+        exit(1);  
+    }  
+
+    /* set up destination address */  
+    memset(&amp;addr,0,sizeof(addr));  
+    addr.sin_family=AF_INET;  
+    addr.sin_addr.s_addr=inet_addr(HELLO_GROUP);  
+    addr.sin_port=htons(HELLO_PORT);  
+
+    /* now just sendto() our destination! */  
+    while (1)  
+    {  
+        if (sendto(fd,message, strlen(message), 0, (struct sockaddr *) &amp;addr, sizeof(addr)) &lt; 0)   
+        {  
+            perror("sendto");  
+            exit(1);  
+        }  
+        sleep(1);  
+    }  
+}  
+</code></pre>
+
+<h4>receiver.c</h4>
+
+<pre><code>#include &lt;stdlib.h&gt;  
+#include &lt;sys/types.h&gt;  
+#include &lt;sys/socket.h&gt;  
+#include &lt;netinet/in.h&gt;  
+#include &lt;arpa/inet.h&gt;  
+#include &lt;time.h&gt;  
+#include &lt;string.h&gt;  
+#include &lt;stdio.h&gt;  
+#include &lt;unistd.h&gt;  
+
+#define HELLO_PORT  12345  
+#define HELLO_GROUP "225.0.0.37"  
+#define MSGBUFSIZE 256  
+
+int main(int argc, char *argv[])  
+{  
+    struct sockaddr_in addr;  
+    int fd, nbytes,addrlen;  
+    struct ip_mreq mreq;  
+    char msgbuf[MSGBUFSIZE];  
+
+    u_int yes=1; /*** MODIFICATION TO ORIGINAL */  
+
+    /* create what looks like an ordinary UDP socket */  
+    if ((fd=socket(AF_INET,SOCK_DGRAM,0)) &lt; 0)   
+    {  
+        perror("socket");  
+        exit(1);  
+    }  
+
+
+    /**** MODIFICATION TO ORIGINAL */  
+    /* allow multiple sockets to use the same PORT number */  
+    if (setsockopt(fd,SOL_SOCKET,SO_REUSEADDR,&amp;yes,sizeof(yes)) &lt; 0)   
+    {  
+        perror("Reusing ADDR failed");  
+        exit(1);  
+    }  
+    /*** END OF MODIFICATION TO ORIGINAL */  
+
+    /* set up destination address */  
+    memset(&amp;addr,0,sizeof(addr));  
+    addr.sin_family=AF_INET;  
+    addr.sin_addr.s_addr=htonl(INADDR_ANY); /* N.B.: differs from sender */  
+    addr.sin_port=htons(HELLO_PORT);  
+
+    /* bind to receive address */  
+    if (bind(fd,(struct sockaddr *) &amp;addr,sizeof(addr)) &lt; 0)  
+    {  
+        perror("bind");  
+        exit(1);  
+    }  
+
+    /* use setsockopt() to request that the kernel join a multicast group */  
+    mreq.imr_multiaddr.s_addr=inet_addr(HELLO_GROUP);  
+    mreq.imr_interface.s_addr=htonl(INADDR_ANY);  
+    if (setsockopt(fd,IPPROTO_IP,IP_ADD_MEMBERSHIP,&amp;mreq,sizeof(mreq)) &lt; 0)   
+    {  
+        perror("setsockopt");  
+        exit(1);  
+    }  
+
+    /* now just enter a read-print loop */  
+    while (1)   
+    {  
+        addrlen=sizeof(addr);  
+        if ((nbytes=recvfrom(fd,msgbuf,MSGBUFSIZE,0, (struct sockaddr *) &amp;addr,(socklen_t*)&amp;addrlen)) &lt; 0)   
+        {  
+            perror("recvfrom");  
+            exit(1);  
+        }  
+        puts(msgbuf);  
+    }  
+
+    return 0;  
+}  
+</code></pre>
+
+<h4>Makefile</h4>
+
+<pre><code>CC = gcc  
+CXX = g++  
+CFLAGS = -Wall -D_DEBUG -DDEBUG -g -O0  
+LDFLAGS =   
+
+MODULE_INC = -I/usr/include  
+MODULE_LIB = -L/usr/lib  
+
+CFLAGS  += $(MODULE_INC)  
+LDFLAGS += $(MODULE_LIB)  
+
+
+SENDOBJS = sender.o  
+RECVOBJS = receiver.o  
+
+
+TARGET = sender receiver  
+
+all: $(TARGET)  
+
+sender: $(SENDOBJS)  
+
+    $(CXX) -o $@ $^ $(LDFLAGS)  
+
+receiver: $(RECVOBJS)  
+
+    $(CXX) -o $@ $^ $(LDFLAGS)  
+
+clean:   
+    rm -f *.o 
+    rm -f $(TARGET)  
+    rm -f http/*.o  
+# make rule  
+%.o : %.c  
+    $(CC) $(CFLAGS) -c $^ -o $@   
+
+%.o : %.cpp  
+    $(CC) $(CFLAGS) -c $^ -o $@  
+</code></pre>
+]]></content>
+  </entry>
+  
+</feed>

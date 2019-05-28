@@ -1,0 +1,450 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Xubuntu Upgrade - Iskey's Blog</title>
+  <meta name="author" content="Iskey">
+
+  
+  <meta name="description" content="升级ubuntu内核 apt-get upgrade命令进行升级，如果内核有更新，会直接更新 关于boot分区 现在的ubuntu系统，一般都不建议再单独安装/boot分区来存放内核/initrd等文件了，可以直接放到根分区之下，如果要单独划分/boot分区的话,最好设置的大一点（ &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://iskey.github.io/blog/2019/05/28/xubuntu-upgrade/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Iskey's Blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Iskey's Blog</a></h1>
+  
+    <h2>A free place to write something down.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="iskey.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Xubuntu Upgrade</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2019-05-28T23:37:53+08:00'><span class='date'><span class='date-month'>May</span> <span class='date-day'>28</span><span class='date-suffix'>th</span>, <span class='date-year'>2019</span></span> <span class='time'>11:37 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><hr />
+
+<h2>升级ubuntu内核</h2>
+
+<hr />
+
+<p><code>apt-get upgrade</code>命令进行升级，如果内核有更新，会直接更新</p>
+
+<h3>关于boot分区</h3>
+
+<p>现在的ubuntu系统，一般都不建议再单独安装/boot分区来存放内核/initrd等文件了，可以直接放到根分区之下，如果要单独划分/boot分区的话,最好设置的大一点（以前翻看资料经典的推荐设置200M，现在推荐设置500M~1G）,避免后续升级的时候,出现空间不够用.</p>
+
+<h3>清理旧的系统映像</h3>
+
+<p>经过几次更新以后，boot分区一般会保留了好多不用的旧版本内核/初始文件系统，可以使用命令<code>sudo apt-get autoremove</code>来进行清理，
+也可以制定版本号进行清理：<code>sudo apt-get remove linux-image-(版本号)</code></p>
+
+<h3>升级内核之后，设备异常（一般是网卡/声卡）</h3>
+
+<p>我在升级完成后，就遇到了网卡不识别的问题，这时候通过grub启动菜单，切换回之前的版本，查看一下网卡驱动</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>~: lspci -k | grep Ethernet -A5
+</span><span class='line'>05:00.0 Ethernet controller: Qualcomm Atheros AR8161 Gigabit Ethernet (rev 10)
+</span><span class='line'>  Subsystem: Gigabyte Technology Co., Ltd AR8161 Gigabit Ethernet
+</span><span class='line'>  Kernel driver in use: alx
+</span><span class='line'>  Kernel modules: alx</span></code></pre></td></tr></table></div></figure>
+
+
+<p>可以看到旧的内核用的驱动是<code>alx</code>,通过查询资料<code>Qualcomm Atheros AR8161 Gigabit Ethernet</code>,找到了<code>https://mirrors.edge.kernel.org/pub/linux/kernel/projects/backports/</code>,打开后可以看到如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>v3.8-rc5/                                          26-Jan-2013 17:47       -
+</span><span class='line'>v3.8-rc7/                                          10-Feb-2013 23:35       -
+</span><span class='line'>v3.8.2/                                            11-Mar-2013 23:44       -
+</span><span class='line'>v3.8.3/                                            15-Mar-2013 21:55       -
+</span><span class='line'>v3.9-rc1/                                          09-Mar-2013 07:20       -
+</span><span class='line'>v3.9-rc2/                                          12-Mar-2013 00:45       -
+</span><span class='line'>v3.9-rc3/                                          29-Mar-2013 02:43       -
+</span><span class='line'>v3.9-rc4/                                          29-Mar-2013 06:04       -
+</span><span class='line'>v4.0.1/                                            29-Apr-2015 20:14       -
+</span><span class='line'>v4.1-rc1/                                          28-Apr-2015 21:26       -
+</span><span class='line'>v4.1.1/                                            01-Jul-2015 21:14       -
+</span><span class='line'>v4.14-rc2/                                         30-Sep-2017 16:02       -
+</span><span class='line'>v4.19-rc5/                                         25-Sep-2018 20:14       -
+</span><span class='line'>v4.19.23/                                          15-Feb-2019 19:41       -
+</span><span class='line'>v4.19.32/                                          28-Mar-2019 14:42       -
+</span><span class='line'>v4.19.7/                                           07-Dec-2018 19:25       -
+</span><span class='line'>v4.2-rc1/                                          11-Jul-2015 23:32       -
+</span><span class='line'>v4.2.6/                                            15-Nov-2015 21:22       -
+</span><span class='line'>v4.20-rc5/                                         06-Dec-2018 22:27       -
+</span><span class='line'>v4.20.10/                                          15-Feb-2019 22:03       -
+</span><span class='line'>v4.20.17/                                          28-Mar-2019 12:58       -
+</span><span class='line'>v4.3/                                              15-Nov-2015 18:31       -
+</span><span class='line'>v4.4-rc2/                                          25-Nov-2015 22:24       -
+</span><span class='line'>v4.4.2/                                            18-Feb-2016 21:44       -
+</span><span class='line'>v5.0-rc6/                                          13-Feb-2019 20:46       -
+</span><span class='line'>v5.0.5/                                            28-Mar-2019 01:06       -
+</span><span class='line'>v5.1-rc2/                                          27-Mar-2019 23:17       -</span></code></pre></td></tr></table></div></figure>
+
+
+<p>左边一列是内核版本号，找到与自己的内核版本对应的版本，查看内核版本号的方法如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>~ uname -r
+</span><span class='line'>4.4.0-145-generic</span></code></pre></td></tr></table></div></figure>
+
+
+<p>所以我下载了<code>v4.4-rc2</code>的版本（<code>backports-4.4-rc2-1.tar.gz</code>[<a href="https://mirrors.edge.kernel.org/pub/linux/kernel/projects/backports/stable/v4.4-rc2/backports-4.4-rc2-1.tar.gz">https://mirrors.edge.kernel.org/pub/linux/kernel/projects/backports/stable/v4.4-rc2/backports-4.4-rc2-1.tar.gz</a>]），</p>
+
+<p>下载并解压，编译并安装alx驱动，就可以了</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>| Your backport package isn't configured, please configure it
+</span><span class='line'>| using one of the following options:
+</span><span class='line'>| To configure manually:
+</span><span class='line'>|     make oldconfig
+</span><span class='line'>|     make menuconfig
+</span><span class='line'>|
+</span><span class='line'>| To get defaults for certain drivers:
+</span><span class='line'>|     make defconfig-alx
+</span><span class='line'>|     make defconfig-ar5523
+</span><span class='line'>|     make defconfig-ath10k
+</span><span class='line'>|     make defconfig-ath5k
+</span><span class='line'>|     make defconfig-ath6kl
+</span><span class='line'>|     make defconfig-ath9k
+</span><span class='line'>|     make defconfig-ath9k-debug
+</span><span class='line'>|     make defconfig-b43
+</span><span class='line'>|     make defconfig-b43legacy
+</span><span class='line'>|     make defconfig-brcmfmac
+</span><span class='line'>|     make defconfig-brcmsmac
+</span><span class='line'>|     make defconfig-carl9170
+</span><span class='line'>|     make defconfig-cw1200
+</span><span class='line'>|     make defconfig-hwsim
+</span><span class='line'>|     make defconfig-ieee802154
+</span><span class='line'>|     make defconfig-igb
+</span><span class='line'>|     make defconfig-iwlwifi
+</span><span class='line'>|     make defconfig-media
+</span><span class='line'>|     make defconfig-nfc
+</span><span class='line'>|     make defconfig-rtlwifi
+</span><span class='line'>|     make defconfig-wcn36xx
+</span><span class='line'>|     make defconfig-wifi
+</span><span class='line'>|     make defconfig-wil6210
+</span><span class='line'>|     make defconfig-wwan
+</span><span class='line'>\--
+</span><span class='line'>Makefile.real:45: recipe for target '.config' failed
+</span><span class='line'>make[2]: *** [.config] Error 1
+</span><span class='line'>Makefile:40: recipe for target 'modules' failed
+</span><span class='line'>make[1]: *** [modules] Error 2
+</span><span class='line'>Makefile:30: recipe for target 'default' failed
+</span><span class='line'>make: *** [default] Error 2</span></code></pre></td></tr></table></div></figure>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>~: sudo make defconfig-alx
+</span><span class='line'>~: sudo make install
+</span><span class='line'>~: reboot</span></code></pre></td></tr></table></div></figure>
+
+
+<p>安装完成后，重启就可以找到网卡了</p>
+
+<h3>　其它</h3>
+
+<p>中间有个插曲，升级后Grub进不去了，不得已，用ubuntuＵ盘系统进去，使用boot-repaire重新修复了Grub,</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo apt-add-repository ppa:yannubuntu/boot-repair
+</span><span class='line'>
+</span><span class='line'>sudo apt-get update
+</span><span class='line'>
+</span><span class='line'>sudo apt-get install -y boot-repair
+</span><span class='line'>
+</span><span class='line'>boot-repair</span></code></pre></td></tr></table></div></figure>
+
+
+<p>但是Grub菜单里的Windows系统没有了，所有又安装了grub-customizer进行调整：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>1. Open terminal either via Ctrl+Alt+T or by searching for ‘terminal’ from app launcher. When it opens, run command to add the PPA:
+</span><span class='line'>
+</span><span class='line'>sudo add-apt-repository ppa:danielrichter2007/grub-customizer
+</span><span class='line'>
+</span><span class='line'>Input your password (no visual feedback while typing) when it prompts and hit Enter to continue.
+</span><span class='line'>
+</span><span class='line'>grub-customizer-ppa
+</span><span class='line'>
+</span><span class='line'>2. After added the PPA, run commands one by one to refresh package cache and install Grub Customizer:
+</span><span class='line'>
+</span><span class='line'>sudo apt-get update
+</span><span class='line'>
+</span><span class='line'>sudo apt-get install grub-customizer
+</span><span class='line'>
+</span><span class='line'>Once installed, launch the software from your application launcher and enjoy!
+</span><span class='line'>Uninstall:
+</span><span class='line'>
+</span><span class='line'>To remove the software, run command in terminal:
+</span><span class='line'>
+</span><span class='line'>sudo apt-get remove --autoremove grub-customizer</span></code></pre></td></tr></table></div></figure>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Iskey</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2019-05-28T23:37:53+08:00'><span class='date'><span class='date-month'>May</span> <span class='date-day'>28</span><span class='date-suffix'>th</span>, <span class='date-year'>2019</span></span> <span class='time'>11:37 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ubuntu/'>ubuntu</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2019/05/28/reset-env-for-running-process/" title="Previous Post: reset-env-for-running-process">&laquo; reset-env-for-running-process</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2019/05/28/xubuntu-upgrade/">Xubuntu Upgrade</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2019/05/28/reset-env-for-running-process/">Reset-env-for-running-process</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/04/27/iptables-with-time/">Iptables时间规则匹配</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/04/27/redirect-extern-request-to-localhost/">重定向外部连接到本地环回地址</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/04/27/linux-sysctl-dot-conf-you-hua/">Linux sysctl.conf 优化</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+  <h1>Categories</h1>
+    <ul id="category-list"><li><a href='/blog/categories/iptables/'>iptables (1)</a></li><li><a href='/blog/categories/kernel/'>kernel (5)</a></li><li><a href='/blog/categories/linuxc/'>linuxc (1)</a></li><li><a href='/blog/categories/linuxbian-cheng/'>linux编程 (1)</a></li><li><a href='/blog/categories/makefile/'>makefile (2)</a></li><li><a href='/blog/categories/netfilter/'>netfilter (1)</a></li><li><a href='/blog/categories/ocp/'>ocp (2)</a></li><li><a href='/blog/categories/python/'>python (1)</a></li><li><a href='/blog/categories/regax/'>regax (1)</a></li><li><a href='/blog/categories/shell/'>shell (3)</a></li><li><a href='/blog/categories/sourceinsight/'>sourceinsight (1)</a></li><li><a href='/blog/categories/sysctl/'>sysctl (1)</a></li><li><a href='/blog/categories/todo/'>todo (1)</a></li><li><a href='/blog/categories/ubuntu/'>ubuntu (1)</a></li><li><a href='/blog/categories/vim/'>vim (1)</a></li><li><a href='/blog/categories/chuan-kou/'>串口 (1)</a></li><li><a href='/blog/categories/gong-ju/'>工具 (2)</a></li><li><a href='/blog/categories/wang-luo/'>网络 (3)</a></li><li><a href='/blog/categories/she-ji-mo-shi/'>设计模式 (1)</a></li></ul>
+</section>
+<section>
+  <h1>Tag Cloud</h1>
+    <span id="tag-cloud"><a href='/blog/categories/iptables' style='font-size: 112.0%'>iptables(1)</a> <a href='/blog/categories/kernel' style='font-size: 160.0%'>kernel(5)</a> <a href='/blog/categories/linuxc' style='font-size: 112.0%'>linuxc(1)</a> <a href='/blog/categories/linuxbian-cheng' style='font-size: 112.0%'>linux编程(1)</a> <a href='/blog/categories/makefile' style='font-size: 124.0%'>makefile(2)</a> <a href='/blog/categories/netfilter' style='font-size: 112.0%'>netfilter(1)</a> <a href='/blog/categories/ocp' style='font-size: 124.0%'>ocp(2)</a> <a href='/blog/categories/python' style='font-size: 112.0%'>python(1)</a> <a href='/blog/categories/regax' style='font-size: 112.0%'>regax(1)</a> <a href='/blog/categories/shell' style='font-size: 136.0%'>shell(3)</a> <a href='/blog/categories/sourceinsight' style='font-size: 112.0%'>sourceinsight(1)</a> <a href='/blog/categories/sysctl' style='font-size: 112.0%'>sysctl(1)</a> <a href='/blog/categories/todo' style='font-size: 112.0%'>todo(1)</a> <a href='/blog/categories/ubuntu' style='font-size: 112.0%'>ubuntu(1)</a> <a href='/blog/categories/vim' style='font-size: 112.0%'>vim(1)</a> <a href='/blog/categories/chuan-kou' style='font-size: 112.0%'>串口(1)</a> <a href='/blog/categories/gong-ju' style='font-size: 124.0%'>工具(2)</a> <a href='/blog/categories/wang-luo' style='font-size: 136.0%'>网络(3)</a> <a href='/blog/categories/she-ji-mo-shi' style='font-size: 112.0%'>设计模式(1)</a> </span>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2019 - Iskey -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

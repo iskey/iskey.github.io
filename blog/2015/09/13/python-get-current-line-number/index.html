@@ -1,0 +1,453 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Python获取当前行号 - Iskey's Blog</title>
+  <meta name="author" content="Iskey">
+
+  
+  <meta name="description" content="对于python，这几天一直有两个问题在困扰我:
+- python中没办法直接取得当前的行号和函数名?,
+这是有人在论坛里提出的问题，底下一群人只是在猜测python为什么不像file一样提供line和func，但是却最终也没有找到解决方案。
+- 如果一个函数在不知道自己名字的情况下， &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://iskey.github.io/blog/2015/09/13/python-get-current-line-number/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Iskey's Blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Iskey's Blog</a></h1>
+  
+    <h2>A free place to write something down.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="iskey.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Python获取当前行号</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2015-09-13T23:44:00+00:00'><span class='date'><span class='date-month'>Sep</span> <span class='date-day'>13</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>11:44 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>对于python，这几天一直有两个问题在困扰我:
+- <strong>python中没办法直接取得当前的行号和函数名?</strong>,
+这是有人在论坛里提出的问题，底下一群人只是在猜测python为什么不像<strong>file</strong>一样提供<strong>line</strong>和<strong>func</strong>，但是却最终也没有找到解决方案。
+- <strong>如果一个函数在不知道自己名字的情况下，怎么才能递归调用自己</strong>。
+这是我一个同事问我的，其实也是获取函数名，但是当时也是回答不出来。</p>
+
+<p>但是今晚！所有的问题都有了答案。
+一切还要从我用python的logging模块说起，logging中的format中是有如下选项的:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>%(name)s            Name of the logger (logging channel)
+</span><span class='line'>%(levelno)s         Numeric logging level for the message (DEBUG, INFO,
+</span><span class='line'>                    WARNING, ERROR, CRITICAL)
+</span><span class='line'>%(levelname)s       Text logging level for the message ("DEBUG", "INFO",
+</span><span class='line'>                    "WARNING", "ERROR", "CRITICAL")
+</span><span class='line'>%(pathname)s        Full pathname of the source file where the logging
+</span><span class='line'>                    call was issued (if available)
+</span><span class='line'>%(filename)s        Filename portion of pathname
+</span><span class='line'>%(module)s          Module (name portion of filename)
+</span><span class='line'>%(lineno)d          Source line number where the logging call was issued
+</span><span class='line'>                    (if available)
+</span><span class='line'>%(funcName)s        Function name
+</span><span class='line'>%(created)f         Time when the LogRecord was created (time.time()
+</span><span class='line'>                    return value)
+</span><span class='line'>%(asctime)s         Textual time when the LogRecord was created
+</span><span class='line'>%(msecs)d           Millisecond portion of the creation time
+</span><span class='line'>%(relativeCreated)d Time in milliseconds when the LogRecord was created,
+</span><span class='line'>                    relative to the time the logging module was loaded
+</span><span class='line'>                    (typically at application startup time)
+</span><span class='line'>%(thread)d          Thread ID (if available)
+</span><span class='line'>%(threadName)s      Thread name (if available)
+</span><span class='line'>%(process)d         Process ID (if available)
+</span><span class='line'>%(message)s         The result of record.getMessage(), computed just as
+</span><span class='line'>                    the record is emitted</span></code></pre></td></tr></table></div></figure>
+
+
+<p>也就是说，logging是能够获取到调用者的行号和函数名的，那会不会也可以获取到自己的行号和函数名呢？
+我们来看一下源码，主要部分如下:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>def currentframe():
+</span><span class='line'>    """Return the frame object for the caller's stack frame."""
+</span><span class='line'>    try:
+</span><span class='line'>        raise Exception
+</span><span class='line'>    except:
+</span><span class='line'>        return sys.exc_info()[2].tb_frame.f_back
+</span><span class='line'>def findCaller(self):
+</span><span class='line'>    """
+</span><span class='line'>    Find the stack frame of the caller so that we can note the source
+</span><span class='line'>    file name, line number and function name.
+</span><span class='line'>    """
+</span><span class='line'>    f = currentframe()
+</span><span class='line'>    #On some versions of IronPython, currentframe() returns None if
+</span><span class='line'>    #IronPython isn't run with -X:Frames.
+</span><span class='line'>    if f is not None:
+</span><span class='line'>        f = f.f_back
+</span><span class='line'>    rv = "(unknown file)", 0, "(unknown function)"
+</span><span class='line'>    while hasattr(f, "f_code"):
+</span><span class='line'>        co = f.f_code
+</span><span class='line'>        filename = os.path.normcase(co.co_filename)
+</span><span class='line'>        if filename == _srcfile:
+</span><span class='line'>            f = f.f_back
+</span><span class='line'>            continue
+</span><span class='line'>        rv = (co.co_filename, f.f_lineno, co.co_name)
+</span><span class='line'>        break
+</span><span class='line'>    return rv
+</span><span class='line'>def _log(self, level, msg, args, exc_info=None, extra=None):
+</span><span class='line'>    """
+</span><span class='line'>    Low-level logging routine which creates a LogRecord and then calls
+</span><span class='line'>    all the handlers of this logger to handle the record.
+</span><span class='line'>    """
+</span><span class='line'>    if _srcfile:
+</span><span class='line'>        #IronPython doesn't track Python frames, so findCaller throws an
+</span><span class='line'>        #exception on some versions of IronPython. We trap it here so that
+</span><span class='line'>        #IronPython can use logging.
+</span><span class='line'>        try:
+</span><span class='line'>            fn, lno, func = self.findCaller()
+</span><span class='line'>        except ValueError:
+</span><span class='line'>            fn, lno, func = "(unknown file)", 0, "(unknown function)"
+</span><span class='line'>    else:
+</span><span class='line'>        fn, lno, func = "(unknown file)", 0, "(unknown function)"
+</span><span class='line'>    if exc_info:
+</span><span class='line'>        if not isinstance(exc_info, tuple):
+</span><span class='line'>            exc_info = sys.exc_info()
+</span><span class='line'>    record = self.makeRecord(self.name, level, fn, lno, msg, args, exc_info, func, extra)
+</span><span class='line'>    self.handle(record)</span></code></pre></td></tr></table></div></figure>
+
+
+<p>我简单解释一下，实际上是通过在currentframe函数中抛出一个异常，然后通过向上查找的方式，找到调用的信息。其中</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>rv = (co.co_filename, f.f_lineno, co.co_name)</span></code></pre></td></tr></table></div></figure>
+
+
+<p>的三个值分别为文件名，行号，函数名。(可以去<a href="http://docs.python.org/library/sys.html">http://docs.python.org/library/sys.html</a> 来看一下代码中几个系统函数的说明)
+OK，如果已经看懂了源码，那获取当前位置的行号和函数名相信也非常清楚了，代码如下:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#!/usr/bin/python
+</span><span class='line'># -*- coding: utf-8 -*-
+</span><span class='line'>'''
+</span><span class='line'>#=============================================================================
+</span><span class='line'>#  Author:          dantezhu - http://www.vimer.cn
+</span><span class='line'>#  Email:           zny2008@gmail.com
+</span><span class='line'>#  FileName:        xf.py
+</span><span class='line'>#  Description:     获取当前位置的行号和函数名
+</span><span class='line'>#  Version:         1.0
+</span><span class='line'>#  LastChange:      2010-12-17 01:19:19
+</span><span class='line'>#  History:         
+</span><span class='line'>#=============================================================================
+</span><span class='line'>'''
+</span><span class='line'>import sys
+</span><span class='line'>def get_cur_info():
+</span><span class='line'>    """Return the frame object for the caller's stack frame."""
+</span><span class='line'>    try:
+</span><span class='line'>        raise Exception
+</span><span class='line'>    except:
+</span><span class='line'>        f = sys.exc_info()[2].tb_frame.f_back
+</span><span class='line'>    return (f.f_code.co_name, f.f_lineno)
+</span><span class='line'>
+</span><span class='line'>def callfunc():
+</span><span class='line'>    print get_cur_info()
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>if __name__ == '__main__':
+</span><span class='line'>    callfunc()</span></code></pre></td></tr></table></div></figure>
+
+
+<p>输出结果是：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>('callfunc', 24)</span></code></pre></td></tr></table></div></figure>
+
+
+<p>后来发现，其实也可以有更简单的方法，如下:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>import sys
+</span><span class='line'>def get_cur_info():
+</span><span class='line'>    print sys._getframe().f_code.co_name
+</span><span class='line'>    print sys._getframe().f_back.f_code.co_name
+</span><span class='line'>get_cur_info()</span></code></pre></td></tr></table></div></figure>
+
+
+<p>调用结果是:</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>get_cur_info
+</span><span class='line'>&lt;module&gt;</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="http://www.vimer.cn/2010/12/%E5%9C%A8python%E4%B8%AD%E8%8E%B7%E5%8F%96%E5%BD%93%E5%89%8D%E4%BD%8D%E7%BD%AE%E6%89%80%E5%9C%A8%E7%9A%84%E8%A1%8C%E5%8F%B7%E5%92%8C%E5%87%BD%E6%95%B0%E5%90%8D.html">转载地址</a></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Iskey</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2015-09-13T23:44:00+00:00'><span class='date'><span class='date-month'>Sep</span> <span class='date-day'>13</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>11:44 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/python/'>python</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2015/06/18/linux-self-extract/" title="Previous Post: linux自解压文件">&laquo; linux自解压文件</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2015/10/06/svn-snapshot/" title="Next Post: svn源码树快照生成工具">svn源码树快照生成工具 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2019/05/28/xubuntu-upgrade/">Xubuntu Upgrade</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2019/05/28/reset-env-for-running-process/">Reset-env-for-running-process</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/04/27/iptables-with-time/">Iptables时间规则匹配</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/04/27/redirect-extern-request-to-localhost/">重定向外部连接到本地环回地址</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/04/27/linux-sysctl-dot-conf-you-hua/">Linux sysctl.conf 优化</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+  <h1>Categories</h1>
+    <ul id="category-list"><li><a href='/blog/categories/iptables/'>iptables (1)</a></li><li><a href='/blog/categories/kernel/'>kernel (5)</a></li><li><a href='/blog/categories/linuxc/'>linuxc (1)</a></li><li><a href='/blog/categories/linuxbian-cheng/'>linux编程 (1)</a></li><li><a href='/blog/categories/makefile/'>makefile (2)</a></li><li><a href='/blog/categories/netfilter/'>netfilter (1)</a></li><li><a href='/blog/categories/ocp/'>ocp (2)</a></li><li><a href='/blog/categories/python/'>python (1)</a></li><li><a href='/blog/categories/regax/'>regax (1)</a></li><li><a href='/blog/categories/shell/'>shell (3)</a></li><li><a href='/blog/categories/sourceinsight/'>sourceinsight (1)</a></li><li><a href='/blog/categories/sysctl/'>sysctl (1)</a></li><li><a href='/blog/categories/todo/'>todo (1)</a></li><li><a href='/blog/categories/ubuntu/'>ubuntu (1)</a></li><li><a href='/blog/categories/vim/'>vim (1)</a></li><li><a href='/blog/categories/chuan-kou/'>串口 (1)</a></li><li><a href='/blog/categories/gong-ju/'>工具 (2)</a></li><li><a href='/blog/categories/wang-luo/'>网络 (3)</a></li><li><a href='/blog/categories/she-ji-mo-shi/'>设计模式 (1)</a></li></ul>
+</section>
+<section>
+  <h1>Tag Cloud</h1>
+    <span id="tag-cloud"><a href='/blog/categories/iptables' style='font-size: 112.0%'>iptables(1)</a> <a href='/blog/categories/kernel' style='font-size: 160.0%'>kernel(5)</a> <a href='/blog/categories/linuxc' style='font-size: 112.0%'>linuxc(1)</a> <a href='/blog/categories/linuxbian-cheng' style='font-size: 112.0%'>linux编程(1)</a> <a href='/blog/categories/makefile' style='font-size: 124.0%'>makefile(2)</a> <a href='/blog/categories/netfilter' style='font-size: 112.0%'>netfilter(1)</a> <a href='/blog/categories/ocp' style='font-size: 124.0%'>ocp(2)</a> <a href='/blog/categories/python' style='font-size: 112.0%'>python(1)</a> <a href='/blog/categories/regax' style='font-size: 112.0%'>regax(1)</a> <a href='/blog/categories/shell' style='font-size: 136.0%'>shell(3)</a> <a href='/blog/categories/sourceinsight' style='font-size: 112.0%'>sourceinsight(1)</a> <a href='/blog/categories/sysctl' style='font-size: 112.0%'>sysctl(1)</a> <a href='/blog/categories/todo' style='font-size: 112.0%'>todo(1)</a> <a href='/blog/categories/ubuntu' style='font-size: 112.0%'>ubuntu(1)</a> <a href='/blog/categories/vim' style='font-size: 112.0%'>vim(1)</a> <a href='/blog/categories/chuan-kou' style='font-size: 112.0%'>串口(1)</a> <a href='/blog/categories/gong-ju' style='font-size: 124.0%'>工具(2)</a> <a href='/blog/categories/wang-luo' style='font-size: 136.0%'>网络(3)</a> <a href='/blog/categories/she-ji-mo-shi' style='font-size: 112.0%'>设计模式(1)</a> </span>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2019 - Iskey -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

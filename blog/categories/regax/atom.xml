@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Regax | Iskey's Blog]]></title>
+  <link href="http://iskey.github.io/blog/categories/regax/atom.xml" rel="self"/>
+  <link href="http://iskey.github.io/"/>
+  <updated>2019-05-29T00:12:35+08:00</updated>
+  <id>http://iskey.github.io/</id>
+  <author>
+    <name><![CDATA[Iskey]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Vim中断零宽断言-正则环视]]></title>
+    <link href="http://iskey.github.io/blog/2016/04/22/vim-regax/"/>
+    <updated>2016-04-22T20:36:00+00:00</updated>
+    <id>http://iskey.github.io/blog/2016/04/22/vim-regax</id>
+    <content type="html"><![CDATA[<h2>转载》vim中断零宽断言-正则环视</h2>
+
+<p>vim与perl的零宽断言表达式相比，(?换成了\@，并且这个符号应该跟在匹配模式的后边。
+vim Perl 意义</p>
+
+<h3>\@=   (?= 顺序环视</h3>
+
+<pre><code>eg:查找后面是sql的my： /my\(sql\)\@=
+</code></pre>
+
+<h3>\@!   (?! 顺序否定环视</h3>
+
+<pre><code>eg:查找后面不是sql的my： /my\(sql\)\@!
+</code></pre>
+
+<h3>\@&lt;=   (?&lt;= 逆序环视</h3>
+
+<pre><code>eg: 查找前面是my的sql： /\(my\)\@&lt;=sql
+</code></pre>
+
+<h3>\@&lt;!   (?&lt;! 逆序否定环视</h3>
+
+<pre><code>eg:查找前面不是my的sql： /\(my\)\@&lt;!sql
+</code></pre>
+
+<h3>\@>   (?> 固化分组</h3>
+
+<h3>\%(atom)   (?: 非捕获型括号</h3>
+
+<pre><code>意思是，此分组不捕获，可以理解为不算在分组信息中，eg：
+:%s/\%(my\)sql\(ok\)/\1
+上面的命令会将mysqlok替换为 ok ，由于my为捕获在分组中，故组中\1 为ok。
+</code></pre>
+]]></content>
+  </entry>
+  
+</feed>

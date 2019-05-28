@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Netfilter | Iskey's Blog]]></title>
+  <link href="http://iskey.github.io/blog/categories/netfilter/atom.xml" rel="self"/>
+  <link href="http://iskey.github.io/"/>
+  <updated>2019-05-29T00:12:35+08:00</updated>
+  <id>http://iskey.github.io/</id>
+  <author>
+    <name><![CDATA[Iskey]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Netfilter Example]]></title>
+    <link href="http://iskey.github.io/blog/2017/03/02/netfilter_example/"/>
+    <updated>2017-03-02T21:42:00+00:00</updated>
+    <id>http://iskey.github.io/blog/2017/03/02/netfilter_example</id>
+    <content type="html"><![CDATA[<pre><code>
+    #include &lt;linux/module.h&gt;
+    #include &lt;linux/kernel.h&gt;
+    #include &lt;linux/init.h&gt;
+    #include &lt;linux/types.h&gt;
+    #include &lt;linux/netdevice.h&gt;
+    #include &lt;linux/skbuff.h&gt;
+    #include &lt;linux/netfilter_ipv4.h&gt;
+    #include &lt;linux/inet.h&gt;
+    #include &lt;linux/in.h&gt;
+    #include &lt;linux/ip.h&gt;
+
+    MODULE_LICENSE("GPL");
+    #define NIPQUAD(addr) \
+      ((unsigned char *)&amp;addr)[0], \
+      ((unsigned char *)&amp;addr)[1], \
+      ((unsigned char *)&amp;addr)[2], \
+      ((unsigned char *)&amp;addr)[3]
+
+    static unsigned int sample(
+    unsigned int hooknum,
+    struct sk_buff * skb,
+    const struct net_device *in,
+    const struct net_device *out,
+    int (*okfn) (struct sk_buff *))
+    {
+        __be32 sip,dip;
+     if(skb){
+       struct sk_buff *sb = NULL;
+       sb = skb;
+       struct iphdr *iph;
+       iph  = ip_hdr(sb);
+       sip = iph-&gt;saddr;
+       dip = iph-&gt;daddr;
+       printk("Packet for source address: %d.%d.%d.%d\n destination address: %d.%d.%d.%d\n ", NIPQUAD(sip), NIPQUAD(dip));
+        }
+     return NF_ACCEPT;
+    }
+
+     struct nf_hook_ops sample_ops = {
+       .list =  {NULL,NULL},
+       .hook = sample,
+       .pf = PF_INET,
+       .hooknum = NF_INET_PRE_ROUTING,
+       .priority = NF_IP_PRI_FILTER+2
+     };
+
+    static int __init sample_init(void) {
+      nf_register_hook(&amp;sample_ops);
+      return 0;
+    }
+
+
+    static void __exit sample_exit(void) {
+      nf_unregister_hook(&amp;sample_ops);
+    }
+
+     module_init(sample_init);
+     module_exit(sample_exit);
+     MODULE_AUTHOR("chenkangrui");
+     MODULE_DESCRIPTION("sample");  
+</code></pre>
+]]></content>
+  </entry>
+  
+</feed>

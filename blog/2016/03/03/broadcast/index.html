@@ -1,0 +1,569 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>组播通讯实例 - Iskey's Blog</title>
+  <meta name="author" content="Iskey">
+
+  
+  <meta name="description" content="sender.c 1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+#include &lt; &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://iskey.github.io/blog/2016/03/03/broadcast/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Iskey's Blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Iskey's Blog</a></h1>
+  
+    <h2>A free place to write something down.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="iskey.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">组播通讯实例</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2016-03-03T16:26:00+00:00'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>3</span><span class='date-suffix'>rd</span>, <span class='date-year'>2016</span></span> <span class='time'>4:26 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h4>sender.c</h4>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#include &lt;stdlib.h&gt;  
+</span><span class='line'>#include &lt;sys/types.h&gt;  
+</span><span class='line'>#include &lt;sys/socket.h&gt;  
+</span><span class='line'>#include &lt;netinet/in.h&gt;  
+</span><span class='line'>#include &lt;arpa/inet.h&gt;  
+</span><span class='line'>#include &lt;time.h&gt;  
+</span><span class='line'>#include &lt;string.h&gt;  
+</span><span class='line'>#include &lt;stdio.h&gt;  
+</span><span class='line'>#include &lt;unistd.h&gt;  
+</span><span class='line'>  
+</span><span class='line'>#define HELLO_PORT 12345  
+</span><span class='line'>#define HELLO_GROUP "225.0.0.37"  
+</span><span class='line'>  
+</span><span class='line'>int main(int argc, char *argv[])  
+</span><span class='line'>{  
+</span><span class='line'>  struct sockaddr_in addr;  
+</span><span class='line'>  int fd, cnt;  
+</span><span class='line'>  struct ip_mreq mreq;  
+</span><span class='line'>  char *message="Hello, World!";  
+</span><span class='line'>  
+</span><span class='line'>  /* create what looks like an ordinary UDP socket */  
+</span><span class='line'>  if ((fd=socket(AF_INET,SOCK_DGRAM,0)) &lt; 0)   
+</span><span class='line'>  {  
+</span><span class='line'>      perror("socket");  
+</span><span class='line'>      exit(1);  
+</span><span class='line'>  }  
+</span><span class='line'>  
+</span><span class='line'>  /* set up destination address */  
+</span><span class='line'>  memset(&addr,0,sizeof(addr));  
+</span><span class='line'>  addr.sin_family=AF_INET;  
+</span><span class='line'>  addr.sin_addr.s_addr=inet_addr(HELLO_GROUP);  
+</span><span class='line'>  addr.sin_port=htons(HELLO_PORT);  
+</span><span class='line'>  
+</span><span class='line'>  /* now just sendto() our destination! */  
+</span><span class='line'>  while (1)  
+</span><span class='line'>  {  
+</span><span class='line'>      if (sendto(fd,message, strlen(message), 0, (struct sockaddr *) &addr, sizeof(addr)) &lt; 0)   
+</span><span class='line'>      {  
+</span><span class='line'>          perror("sendto");  
+</span><span class='line'>          exit(1);  
+</span><span class='line'>      }  
+</span><span class='line'>      sleep(1);  
+</span><span class='line'>  }  
+</span><span class='line'>}  </span></code></pre></td></tr></table></div></figure>
+
+
+<h4>receiver.c</h4>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#include &lt;stdlib.h&gt;  
+</span><span class='line'>#include &lt;sys/types.h&gt;  
+</span><span class='line'>#include &lt;sys/socket.h&gt;  
+</span><span class='line'>#include &lt;netinet/in.h&gt;  
+</span><span class='line'>#include &lt;arpa/inet.h&gt;  
+</span><span class='line'>#include &lt;time.h&gt;  
+</span><span class='line'>#include &lt;string.h&gt;  
+</span><span class='line'>#include &lt;stdio.h&gt;  
+</span><span class='line'>#include &lt;unistd.h&gt;  
+</span><span class='line'>  
+</span><span class='line'>#define HELLO_PORT  12345  
+</span><span class='line'>#define HELLO_GROUP "225.0.0.37"  
+</span><span class='line'>#define MSGBUFSIZE 256  
+</span><span class='line'>  
+</span><span class='line'>int main(int argc, char *argv[])  
+</span><span class='line'>{  
+</span><span class='line'>  struct sockaddr_in addr;  
+</span><span class='line'>  int fd, nbytes,addrlen;  
+</span><span class='line'>  struct ip_mreq mreq;  
+</span><span class='line'>  char msgbuf[MSGBUFSIZE];  
+</span><span class='line'>  
+</span><span class='line'>  u_int yes=1; /*** MODIFICATION TO ORIGINAL */  
+</span><span class='line'>  
+</span><span class='line'>  /* create what looks like an ordinary UDP socket */  
+</span><span class='line'>  if ((fd=socket(AF_INET,SOCK_DGRAM,0)) &lt; 0)   
+</span><span class='line'>  {  
+</span><span class='line'>      perror("socket");  
+</span><span class='line'>      exit(1);  
+</span><span class='line'>  }  
+</span><span class='line'>  
+</span><span class='line'>  
+</span><span class='line'>  /**** MODIFICATION TO ORIGINAL */  
+</span><span class='line'>  /* allow multiple sockets to use the same PORT number */  
+</span><span class='line'>  if (setsockopt(fd,SOL_SOCKET,SO_REUSEADDR,&yes,sizeof(yes)) &lt; 0)   
+</span><span class='line'>  {  
+</span><span class='line'>      perror("Reusing ADDR failed");  
+</span><span class='line'>      exit(1);  
+</span><span class='line'>  }  
+</span><span class='line'>  /*** END OF MODIFICATION TO ORIGINAL */  
+</span><span class='line'>  
+</span><span class='line'>  /* set up destination address */  
+</span><span class='line'>  memset(&addr,0,sizeof(addr));  
+</span><span class='line'>  addr.sin_family=AF_INET;  
+</span><span class='line'>  addr.sin_addr.s_addr=htonl(INADDR_ANY); /* N.B.: differs from sender */  
+</span><span class='line'>  addr.sin_port=htons(HELLO_PORT);  
+</span><span class='line'>  
+</span><span class='line'>  /* bind to receive address */  
+</span><span class='line'>  if (bind(fd,(struct sockaddr *) &addr,sizeof(addr)) &lt; 0)  
+</span><span class='line'>  {  
+</span><span class='line'>      perror("bind");  
+</span><span class='line'>      exit(1);  
+</span><span class='line'>  }  
+</span><span class='line'>  
+</span><span class='line'>  /* use setsockopt() to request that the kernel join a multicast group */  
+</span><span class='line'>  mreq.imr_multiaddr.s_addr=inet_addr(HELLO_GROUP);  
+</span><span class='line'>  mreq.imr_interface.s_addr=htonl(INADDR_ANY);  
+</span><span class='line'>  if (setsockopt(fd,IPPROTO_IP,IP_ADD_MEMBERSHIP,&mreq,sizeof(mreq)) &lt; 0)   
+</span><span class='line'>  {  
+</span><span class='line'>      perror("setsockopt");  
+</span><span class='line'>      exit(1);  
+</span><span class='line'>  }  
+</span><span class='line'>  
+</span><span class='line'>  /* now just enter a read-print loop */  
+</span><span class='line'>  while (1)   
+</span><span class='line'>  {  
+</span><span class='line'>      addrlen=sizeof(addr);  
+</span><span class='line'>      if ((nbytes=recvfrom(fd,msgbuf,MSGBUFSIZE,0, (struct sockaddr *) &addr,(socklen_t*)&addrlen)) &lt; 0)   
+</span><span class='line'>      {  
+</span><span class='line'>          perror("recvfrom");  
+</span><span class='line'>          exit(1);  
+</span><span class='line'>      }  
+</span><span class='line'>      puts(msgbuf);  
+</span><span class='line'>  }  
+</span><span class='line'>  
+</span><span class='line'>  return 0;  
+</span><span class='line'>}  </span></code></pre></td></tr></table></div></figure>
+
+
+<h4>Makefile</h4>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>CC = gcc  
+</span><span class='line'>CXX = g++  
+</span><span class='line'>CFLAGS = -Wall -D_DEBUG -DDEBUG -g -O0  
+</span><span class='line'>LDFLAGS =   
+</span><span class='line'>  
+</span><span class='line'>MODULE_INC = -I/usr/include  
+</span><span class='line'>MODULE_LIB = -L/usr/lib  
+</span><span class='line'>  
+</span><span class='line'>CFLAGS  += $(MODULE_INC)  
+</span><span class='line'>LDFLAGS += $(MODULE_LIB)  
+</span><span class='line'>  
+</span><span class='line'>  
+</span><span class='line'>SENDOBJS = sender.o  
+</span><span class='line'>RECVOBJS = receiver.o  
+</span><span class='line'>  
+</span><span class='line'>  
+</span><span class='line'>TARGET = sender receiver  
+</span><span class='line'>  
+</span><span class='line'>all: $(TARGET)  
+</span><span class='line'>  
+</span><span class='line'>sender: $(SENDOBJS)  
+</span><span class='line'>
+</span><span class='line'>  $(CXX) -o $@ $^ $(LDFLAGS)  
+</span><span class='line'>  
+</span><span class='line'>receiver: $(RECVOBJS)  
+</span><span class='line'>  
+</span><span class='line'>  $(CXX) -o $@ $^ $(LDFLAGS)  
+</span><span class='line'>  
+</span><span class='line'>clean:   
+</span><span class='line'>  rm -f *.o 
+</span><span class='line'>  rm -f $(TARGET)  
+</span><span class='line'>  rm -f http/*.o  
+</span><span class='line'># make rule  
+</span><span class='line'>%.o : %.c  
+</span><span class='line'>  $(CC) $(CFLAGS) -c $^ -o $@   
+</span><span class='line'>  
+</span><span class='line'>%.o : %.cpp  
+</span><span class='line'>  $(CC) $(CFLAGS) -c $^ -o $@  </span></code></pre></td></tr></table></div></figure>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Iskey</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2016-03-03T16:26:00+00:00'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>3</span><span class='date-suffix'>rd</span>, <span class='date-year'>2016</span></span> <span class='time'>4:26 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/wang-luo/'>网络</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2016/01/23/OCP-open-switch-ONIE/" title="Previous Post: OCP开源交换机之ONIE杂记">&laquo; OCP开源交换机之ONIE杂记</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2016/03/27/open-switch-ONIE/" title="Next Post: 开源交换机安装环境ONIE">开源交换机安装环境ONIE &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2019/05/28/xubuntu-upgrade/">Xubuntu Upgrade</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2019/05/28/reset-env-for-running-process/">Reset-env-for-running-process</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/04/27/iptables-with-time/">Iptables时间规则匹配</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/04/27/redirect-extern-request-to-localhost/">重定向外部连接到本地环回地址</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/04/27/linux-sysctl-dot-conf-you-hua/">Linux sysctl.conf 优化</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+  <h1>Categories</h1>
+    <ul id="category-list"><li><a href='/blog/categories/iptables/'>iptables (1)</a></li><li><a href='/blog/categories/kernel/'>kernel (5)</a></li><li><a href='/blog/categories/linuxc/'>linuxc (1)</a></li><li><a href='/blog/categories/linuxbian-cheng/'>linux编程 (1)</a></li><li><a href='/blog/categories/makefile/'>makefile (2)</a></li><li><a href='/blog/categories/netfilter/'>netfilter (1)</a></li><li><a href='/blog/categories/ocp/'>ocp (2)</a></li><li><a href='/blog/categories/python/'>python (1)</a></li><li><a href='/blog/categories/regax/'>regax (1)</a></li><li><a href='/blog/categories/shell/'>shell (3)</a></li><li><a href='/blog/categories/sourceinsight/'>sourceinsight (1)</a></li><li><a href='/blog/categories/sysctl/'>sysctl (1)</a></li><li><a href='/blog/categories/todo/'>todo (1)</a></li><li><a href='/blog/categories/ubuntu/'>ubuntu (1)</a></li><li><a href='/blog/categories/vim/'>vim (1)</a></li><li><a href='/blog/categories/chuan-kou/'>串口 (1)</a></li><li><a href='/blog/categories/gong-ju/'>工具 (2)</a></li><li><a href='/blog/categories/wang-luo/'>网络 (3)</a></li><li><a href='/blog/categories/she-ji-mo-shi/'>设计模式 (1)</a></li></ul>
+</section>
+<section>
+  <h1>Tag Cloud</h1>
+    <span id="tag-cloud"><a href='/blog/categories/iptables' style='font-size: 112.0%'>iptables(1)</a> <a href='/blog/categories/kernel' style='font-size: 160.0%'>kernel(5)</a> <a href='/blog/categories/linuxc' style='font-size: 112.0%'>linuxc(1)</a> <a href='/blog/categories/linuxbian-cheng' style='font-size: 112.0%'>linux编程(1)</a> <a href='/blog/categories/makefile' style='font-size: 124.0%'>makefile(2)</a> <a href='/blog/categories/netfilter' style='font-size: 112.0%'>netfilter(1)</a> <a href='/blog/categories/ocp' style='font-size: 124.0%'>ocp(2)</a> <a href='/blog/categories/python' style='font-size: 112.0%'>python(1)</a> <a href='/blog/categories/regax' style='font-size: 112.0%'>regax(1)</a> <a href='/blog/categories/shell' style='font-size: 136.0%'>shell(3)</a> <a href='/blog/categories/sourceinsight' style='font-size: 112.0%'>sourceinsight(1)</a> <a href='/blog/categories/sysctl' style='font-size: 112.0%'>sysctl(1)</a> <a href='/blog/categories/todo' style='font-size: 112.0%'>todo(1)</a> <a href='/blog/categories/ubuntu' style='font-size: 112.0%'>ubuntu(1)</a> <a href='/blog/categories/vim' style='font-size: 112.0%'>vim(1)</a> <a href='/blog/categories/chuan-kou' style='font-size: 112.0%'>串口(1)</a> <a href='/blog/categories/gong-ju' style='font-size: 124.0%'>工具(2)</a> <a href='/blog/categories/wang-luo' style='font-size: 136.0%'>网络(3)</a> <a href='/blog/categories/she-ji-mo-shi' style='font-size: 112.0%'>设计模式(1)</a> </span>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2019 - Iskey -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

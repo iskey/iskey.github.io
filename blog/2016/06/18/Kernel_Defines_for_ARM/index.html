@@ -1,0 +1,369 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Kernel Defines for ARM - Iskey's Blog</title>
+  <meta name="author" content="Iskey">
+
+  
+  <meta name="description" content="Initial definitions The following symbol definitions rely on you knowing the translation that
+__virt_to_phys() does for your machine. This macro &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://iskey.github.io/blog/2016/06/18/Kernel_Defines_for_ARM/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Iskey's Blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Iskey's Blog</a></h1>
+  
+    <h2>A free place to write something down.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="iskey.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Kernel Defines for ARM</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2016-06-18T20:21:00+00:00'><span class='date'><span class='date-month'>Jun</span> <span class='date-day'>18</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>8:21 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h2>Initial definitions</h2>
+
+<p>The following symbol definitions rely on you knowing the translation that
+<code>__virt_to_phys()</code> does for your machine.  This macro converts the passed
+virtual address to a physical address.  Normally, it is simply:</p>
+
+<pre><code>    phys = virt - PAGE_OFFSET + PHYS_OFFSET
+</code></pre>
+
+<h2>Decompressor Symbols</h2>
+
+<hr />
+
+<h4>ZTEXTADDR</h4>
+
+<pre><code>Start address of decompressor.  There's no point in talking about
+virtual or physical addresses here, since the MMU will be off at
+the time when you call the decompressor code.  You normally call
+the kernel at this address to start it booting.  This doesn't have
+to be located in RAM, it can be in flash or other read-only or
+read-write addressable medium.
+</code></pre>
+
+<h4>ZBSSADDR</h4>
+
+<pre><code>Start address of zero-initialised work area for the decompressor.
+This must be pointing at RAM.  The decompressor will zero initialise
+this for you.  Again, the MMU will be off.
+</code></pre>
+
+<h4>ZRELADDR</h4>
+
+<pre><code>This is the address where the decompressed kernel will be written,
+and eventually executed.  The following constraint must be valid:
+
+    __virt_to_phys(TEXTADDR) == ZRELADDR
+
+The initial part of the kernel is carefully coded to be position
+independent.
+</code></pre>
+
+<h4>INITRD_PHYS</h4>
+
+<pre><code>Physical address to place the initial RAM disk.  Only relevant if
+you are using the bootpImage stuff (which only works on the old
+struct param_struct).
+</code></pre>
+
+<h4>INITRD_VIRT</h4>
+
+<pre><code>Virtual address of the initial RAM disk.  The following  constraint
+must be valid:
+
+    __virt_to_phys(INITRD_VIRT) == INITRD_PHYS
+</code></pre>
+
+<h4>PARAMS_PHYS</h4>
+
+<pre><code>Physical address of the struct param_struct or tag list, giving the
+kernel various parameters about its execution environment.
+</code></pre>
+
+<h2>Kernel Symbols</h2>
+
+<hr />
+
+<h4>PHYS_OFFSET</h4>
+
+<pre><code>Physical start address of the first bank of RAM.
+</code></pre>
+
+<h4>PAGE_OFFSET</h4>
+
+<pre><code>Virtual start address of the first bank of RAM.  During the kernel
+boot phase, virtual address PAGE_OFFSET will be mapped to physical
+address PHYS_OFFSET, along with any other mappings you supply.
+This should be the same value as TASK_SIZE.
+</code></pre>
+
+<h4>TASK_SIZE</h4>
+
+<pre><code>The maximum size of a user process in bytes.  Since user space
+always starts at zero, this is the maximum address that a user
+process can access+1.  The user space stack grows down from this
+address.
+
+Any virtual address below TASK_SIZE is deemed to be user process
+area, and therefore managed dynamically on a process by process
+basis by the kernel.  I'll call this the user segment.
+
+Anything above TASK_SIZE is common to all processes.  I'll call
+this the kernel segment.
+
+(In other words, you can't put IO mappings below TASK_SIZE, and
+hence PAGE_OFFSET).
+</code></pre>
+
+<h4>TEXTADDR</h4>
+
+<pre><code>Virtual start address of kernel, normally PAGE_OFFSET + 0x8000.
+This is where the kernel image ends up.  With the latest kernels,
+it must be located at 32768 bytes into a 128MB region.  Previous
+kernels placed a restriction of 256MB here.
+</code></pre>
+
+<h4>DATAADDR</h4>
+
+<pre><code>Virtual address for the kernel data segment.  Must not be defined
+when using the decompressor.
+</code></pre>
+
+<h4>VMALLOC_START</h4>
+
+<h4>VMALLOC_END</h4>
+
+<pre><code>Virtual addresses bounding the vmalloc() area.  There must not be
+any static mappings in this area; vmalloc will overwrite them.
+The addresses must also be in the kernel segment (see above).
+Normally, the vmalloc() area starts VMALLOC_OFFSET bytes above the
+last virtual RAM address (found using variable high_memory).
+</code></pre>
+
+<h4>VMALLOC_OFFSET</h4>
+
+<pre><code>Offset normally incorporated into VMALLOC_START to provide a hole
+between virtual RAM and the vmalloc area.  We do this to allow
+out of bounds memory accesses (eg, something writing off the end
+of the mapped memory map) to be caught.  Normally set to 8MB.
+</code></pre>
+
+<h2>Architecture Specific Macros</h2>
+
+<hr />
+
+<h4>BOOT_MEM(pram,pio,vio)</h4>
+
+<pre><code>`pram' specifies the physical start address of RAM.  Must always
+be present, and should be the same as PHYS_OFFSET.
+
+`pio' is the physical address of an 8MB region containing IO for
+use with the debugging macros in arch/arm/kernel/debug-armv.S.
+
+`vio' is the virtual address of the 8MB debugging region.
+
+It is expected that the debugging region will be re-initialised
+by the architecture specific code later in the code (via the
+MAPIO function).
+</code></pre>
+
+<h4>BOOT_PARAMS</h4>
+
+<pre><code>Same as, and see PARAMS_PHYS.
+</code></pre>
+
+<h4>FIXUP(func)</h4>
+
+<pre><code>Machine specific fixups, run before memory subsystems have been
+initialised.
+</code></pre>
+
+<h4>MAPIO(func)</h4>
+
+<pre><code>Machine specific function to map IO areas (including the debug
+region above).
+</code></pre>
+
+<h4>INITIRQ(func)</h4>
+
+<pre><code>Machine specific function to initialise interrupts.
+</code></pre>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Iskey</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2016-06-18T20:21:00+00:00'><span class='date'><span class='date-month'>Jun</span> <span class='date-day'>18</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>8:21 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/kernel/'>kernel</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2016/05/13/change-env-for-running-program/" title="Previous Post: 如何修改运行程序的环境变量">&laquo; 如何修改运行程序的环境变量</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2017/01/02/ctom_of_SourceInsight_for_kernel/" title="Next Post: c.tom of SourceInsight for kernel">c.tom of SourceInsight for kernel &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2019/05/28/xubuntu-upgrade/">Xubuntu Upgrade</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2019/05/28/reset-env-for-running-process/">Reset-env-for-running-process</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/04/27/iptables-with-time/">Iptables时间规则匹配</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/04/27/redirect-extern-request-to-localhost/">重定向外部连接到本地环回地址</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2018/04/27/linux-sysctl-dot-conf-you-hua/">Linux sysctl.conf 优化</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+  <h1>Categories</h1>
+    <ul id="category-list"><li><a href='/blog/categories/iptables/'>iptables (1)</a></li><li><a href='/blog/categories/kernel/'>kernel (5)</a></li><li><a href='/blog/categories/linuxc/'>linuxc (1)</a></li><li><a href='/blog/categories/linuxbian-cheng/'>linux编程 (1)</a></li><li><a href='/blog/categories/makefile/'>makefile (2)</a></li><li><a href='/blog/categories/netfilter/'>netfilter (1)</a></li><li><a href='/blog/categories/ocp/'>ocp (2)</a></li><li><a href='/blog/categories/python/'>python (1)</a></li><li><a href='/blog/categories/regax/'>regax (1)</a></li><li><a href='/blog/categories/shell/'>shell (3)</a></li><li><a href='/blog/categories/sourceinsight/'>sourceinsight (1)</a></li><li><a href='/blog/categories/sysctl/'>sysctl (1)</a></li><li><a href='/blog/categories/todo/'>todo (1)</a></li><li><a href='/blog/categories/ubuntu/'>ubuntu (1)</a></li><li><a href='/blog/categories/vim/'>vim (1)</a></li><li><a href='/blog/categories/chuan-kou/'>串口 (1)</a></li><li><a href='/blog/categories/gong-ju/'>工具 (2)</a></li><li><a href='/blog/categories/wang-luo/'>网络 (3)</a></li><li><a href='/blog/categories/she-ji-mo-shi/'>设计模式 (1)</a></li></ul>
+</section>
+<section>
+  <h1>Tag Cloud</h1>
+    <span id="tag-cloud"><a href='/blog/categories/iptables' style='font-size: 112.0%'>iptables(1)</a> <a href='/blog/categories/kernel' style='font-size: 160.0%'>kernel(5)</a> <a href='/blog/categories/linuxc' style='font-size: 112.0%'>linuxc(1)</a> <a href='/blog/categories/linuxbian-cheng' style='font-size: 112.0%'>linux编程(1)</a> <a href='/blog/categories/makefile' style='font-size: 124.0%'>makefile(2)</a> <a href='/blog/categories/netfilter' style='font-size: 112.0%'>netfilter(1)</a> <a href='/blog/categories/ocp' style='font-size: 124.0%'>ocp(2)</a> <a href='/blog/categories/python' style='font-size: 112.0%'>python(1)</a> <a href='/blog/categories/regax' style='font-size: 112.0%'>regax(1)</a> <a href='/blog/categories/shell' style='font-size: 136.0%'>shell(3)</a> <a href='/blog/categories/sourceinsight' style='font-size: 112.0%'>sourceinsight(1)</a> <a href='/blog/categories/sysctl' style='font-size: 112.0%'>sysctl(1)</a> <a href='/blog/categories/todo' style='font-size: 112.0%'>todo(1)</a> <a href='/blog/categories/ubuntu' style='font-size: 112.0%'>ubuntu(1)</a> <a href='/blog/categories/vim' style='font-size: 112.0%'>vim(1)</a> <a href='/blog/categories/chuan-kou' style='font-size: 112.0%'>串口(1)</a> <a href='/blog/categories/gong-ju' style='font-size: 124.0%'>工具(2)</a> <a href='/blog/categories/wang-luo' style='font-size: 136.0%'>网络(3)</a> <a href='/blog/categories/she-ji-mo-shi' style='font-size: 112.0%'>设计模式(1)</a> </span>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2019 - Iskey -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

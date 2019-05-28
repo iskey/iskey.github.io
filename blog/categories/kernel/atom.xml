@@ -1,0 +1,872 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Kernel | Iskey's Blog]]></title>
+  <link href="http://iskey.github.io/blog/categories/kernel/atom.xml" rel="self"/>
+  <link href="http://iskey.github.io/"/>
+  <updated>2019-05-29T00:12:35+08:00</updated>
+  <id>http://iskey.github.io/</id>
+  <author>
+    <name><![CDATA[Iskey]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[User Mode Linux]]></title>
+    <link href="http://iskey.github.io/blog/2017/03/06/user_mode_linux/"/>
+    <updated>2017-03-06T21:12:00+00:00</updated>
+    <id>http://iskey.github.io/blog/2017/03/06/user_mode_linux</id>
+    <content type="html"><![CDATA[<p>以前研究内核，总是要依靠开发板或者自己编译内核．近来留意到了ＵＭＬ，才发现linux可以像进程一样跑起来，而且跑起来不不难，深感惭愧，以下是简单的使用方法介绍．</p>
+
+<h2>简介</h2>
+
+<p>用户模式Linux（User ModeLinux，UML）不同于其他Linux虚拟化项目，UML尽量将它自己作为一个普通的程序。从Linux2.6.9版本起，用户模式Linux（User mode Linux,UML）已随Linux内核源代码一起发布，它存放于arch/um目录下。编译好UML的内核之后，可直接用gdb运行编译好的内核并进行调试。</p>
+
+<p>参考：<a href="http://uml.devloop.org.uk/howto.html">http://uml.devloop.org.uk/howto.html</a></p>
+
+<h2>编译内核</h2>
+
+<h3>以-O2编译内核</h3>
+
+<pre><code>make ARCH=um defconfig
+make menuconfig ARCH=um
+make ARCH=um
+</code></pre>
+
+<p><a href="http://user-mode-linux.sourceforge.net/source.html">参考</a></p>
+
+<h3>以-O0编译内核</h3>
+
+<p><a href="http://blog.chinaunix.net/uid-234303-id-2425015.html">参考</a></p>
+
+<h2>根文件系统</h2>
+
+<ul>
+<li><p><a href="http://fs.devloop.org.uk/">下载现成的根文件系统</a></p></li>
+<li><p><a href="http://fancymore.com/reading/linux-kernel-debugging.html">制作根文件系统</a></p></li>
+</ul>
+
+
+<h2>调试</h2>
+
+<pre><code># gdb ./linux   
+(gdb) handle SIGSEGV pass nostop noprint   
+(gdb) handle SIGUSR1 pass nostop noprint 
+(gdb) start ubd0=/root/srcpkg/filesystem/CentOS6.x-x86-root_fs mem=256m
+</code></pre>
+
+<p><code>http://blog.csdn.net/ztz0223/article/details/7874759</code></p>
+
+<p>五、常见问题</p>
+
+<p>1、
+<a href="http://moodlearchive.epfl.ch/2010-2011/mod/forum/discuss.php?d=108781">http://moodlearchive.epfl.ch/2010-2011/mod/forum/discuss.php?d=108781</a></p>
+
+<p>2、
+<a href="http://www.lenky.info/archives/2012/04/1471">http://www.lenky.info/archives/2012/04/1471</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Netfilter Example]]></title>
+    <link href="http://iskey.github.io/blog/2017/03/02/netfilter_example/"/>
+    <updated>2017-03-02T21:42:00+00:00</updated>
+    <id>http://iskey.github.io/blog/2017/03/02/netfilter_example</id>
+    <content type="html"><![CDATA[<pre><code>
+    #include &lt;linux/module.h&gt;
+    #include &lt;linux/kernel.h&gt;
+    #include &lt;linux/init.h&gt;
+    #include &lt;linux/types.h&gt;
+    #include &lt;linux/netdevice.h&gt;
+    #include &lt;linux/skbuff.h&gt;
+    #include &lt;linux/netfilter_ipv4.h&gt;
+    #include &lt;linux/inet.h&gt;
+    #include &lt;linux/in.h&gt;
+    #include &lt;linux/ip.h&gt;
+
+    MODULE_LICENSE("GPL");
+    #define NIPQUAD(addr) \
+      ((unsigned char *)&amp;addr)[0], \
+      ((unsigned char *)&amp;addr)[1], \
+      ((unsigned char *)&amp;addr)[2], \
+      ((unsigned char *)&amp;addr)[3]
+
+    static unsigned int sample(
+    unsigned int hooknum,
+    struct sk_buff * skb,
+    const struct net_device *in,
+    const struct net_device *out,
+    int (*okfn) (struct sk_buff *))
+    {
+        __be32 sip,dip;
+     if(skb){
+       struct sk_buff *sb = NULL;
+       sb = skb;
+       struct iphdr *iph;
+       iph  = ip_hdr(sb);
+       sip = iph-&gt;saddr;
+       dip = iph-&gt;daddr;
+       printk("Packet for source address: %d.%d.%d.%d\n destination address: %d.%d.%d.%d\n ", NIPQUAD(sip), NIPQUAD(dip));
+        }
+     return NF_ACCEPT;
+    }
+
+     struct nf_hook_ops sample_ops = {
+       .list =  {NULL,NULL},
+       .hook = sample,
+       .pf = PF_INET,
+       .hooknum = NF_INET_PRE_ROUTING,
+       .priority = NF_IP_PRI_FILTER+2
+     };
+
+    static int __init sample_init(void) {
+      nf_register_hook(&amp;sample_ops);
+      return 0;
+    }
+
+
+    static void __exit sample_exit(void) {
+      nf_unregister_hook(&amp;sample_ops);
+    }
+
+     module_init(sample_init);
+     module_exit(sample_exit);
+     MODULE_AUTHOR("chenkangrui");
+     MODULE_DESCRIPTION("sample");  
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Kernel Defines for ARM]]></title>
+    <link href="http://iskey.github.io/blog/2016/06/18/Kernel_Defines_for_ARM/"/>
+    <updated>2016-06-18T20:21:00+00:00</updated>
+    <id>http://iskey.github.io/blog/2016/06/18/Kernel_Defines_for_ARM</id>
+    <content type="html"><![CDATA[<h2>Initial definitions</h2>
+
+<p>The following symbol definitions rely on you knowing the translation that
+<code>__virt_to_phys()</code> does for your machine.  This macro converts the passed
+virtual address to a physical address.  Normally, it is simply:</p>
+
+<pre><code>    phys = virt - PAGE_OFFSET + PHYS_OFFSET
+</code></pre>
+
+<h2>Decompressor Symbols</h2>
+
+<hr />
+
+<h4>ZTEXTADDR</h4>
+
+<pre><code>Start address of decompressor.  There's no point in talking about
+virtual or physical addresses here, since the MMU will be off at
+the time when you call the decompressor code.  You normally call
+the kernel at this address to start it booting.  This doesn't have
+to be located in RAM, it can be in flash or other read-only or
+read-write addressable medium.
+</code></pre>
+
+<h4>ZBSSADDR</h4>
+
+<pre><code>Start address of zero-initialised work area for the decompressor.
+This must be pointing at RAM.  The decompressor will zero initialise
+this for you.  Again, the MMU will be off.
+</code></pre>
+
+<h4>ZRELADDR</h4>
+
+<pre><code>This is the address where the decompressed kernel will be written,
+and eventually executed.  The following constraint must be valid:
+
+    __virt_to_phys(TEXTADDR) == ZRELADDR
+
+The initial part of the kernel is carefully coded to be position
+independent.
+</code></pre>
+
+<h4>INITRD_PHYS</h4>
+
+<pre><code>Physical address to place the initial RAM disk.  Only relevant if
+you are using the bootpImage stuff (which only works on the old
+struct param_struct).
+</code></pre>
+
+<h4>INITRD_VIRT</h4>
+
+<pre><code>Virtual address of the initial RAM disk.  The following  constraint
+must be valid:
+
+    __virt_to_phys(INITRD_VIRT) == INITRD_PHYS
+</code></pre>
+
+<h4>PARAMS_PHYS</h4>
+
+<pre><code>Physical address of the struct param_struct or tag list, giving the
+kernel various parameters about its execution environment.
+</code></pre>
+
+<h2>Kernel Symbols</h2>
+
+<hr />
+
+<h4>PHYS_OFFSET</h4>
+
+<pre><code>Physical start address of the first bank of RAM.
+</code></pre>
+
+<h4>PAGE_OFFSET</h4>
+
+<pre><code>Virtual start address of the first bank of RAM.  During the kernel
+boot phase, virtual address PAGE_OFFSET will be mapped to physical
+address PHYS_OFFSET, along with any other mappings you supply.
+This should be the same value as TASK_SIZE.
+</code></pre>
+
+<h4>TASK_SIZE</h4>
+
+<pre><code>The maximum size of a user process in bytes.  Since user space
+always starts at zero, this is the maximum address that a user
+process can access+1.  The user space stack grows down from this
+address.
+
+Any virtual address below TASK_SIZE is deemed to be user process
+area, and therefore managed dynamically on a process by process
+basis by the kernel.  I'll call this the user segment.
+
+Anything above TASK_SIZE is common to all processes.  I'll call
+this the kernel segment.
+
+(In other words, you can't put IO mappings below TASK_SIZE, and
+hence PAGE_OFFSET).
+</code></pre>
+
+<h4>TEXTADDR</h4>
+
+<pre><code>Virtual start address of kernel, normally PAGE_OFFSET + 0x8000.
+This is where the kernel image ends up.  With the latest kernels,
+it must be located at 32768 bytes into a 128MB region.  Previous
+kernels placed a restriction of 256MB here.
+</code></pre>
+
+<h4>DATAADDR</h4>
+
+<pre><code>Virtual address for the kernel data segment.  Must not be defined
+when using the decompressor.
+</code></pre>
+
+<h4>VMALLOC_START</h4>
+
+<h4>VMALLOC_END</h4>
+
+<pre><code>Virtual addresses bounding the vmalloc() area.  There must not be
+any static mappings in this area; vmalloc will overwrite them.
+The addresses must also be in the kernel segment (see above).
+Normally, the vmalloc() area starts VMALLOC_OFFSET bytes above the
+last virtual RAM address (found using variable high_memory).
+</code></pre>
+
+<h4>VMALLOC_OFFSET</h4>
+
+<pre><code>Offset normally incorporated into VMALLOC_START to provide a hole
+between virtual RAM and the vmalloc area.  We do this to allow
+out of bounds memory accesses (eg, something writing off the end
+of the mapped memory map) to be caught.  Normally set to 8MB.
+</code></pre>
+
+<h2>Architecture Specific Macros</h2>
+
+<hr />
+
+<h4>BOOT_MEM(pram,pio,vio)</h4>
+
+<pre><code>`pram' specifies the physical start address of RAM.  Must always
+be present, and should be the same as PHYS_OFFSET.
+
+`pio' is the physical address of an 8MB region containing IO for
+use with the debugging macros in arch/arm/kernel/debug-armv.S.
+
+`vio' is the virtual address of the 8MB debugging region.
+
+It is expected that the debugging region will be re-initialised
+by the architecture specific code later in the code (via the
+MAPIO function).
+</code></pre>
+
+<h4>BOOT_PARAMS</h4>
+
+<pre><code>Same as, and see PARAMS_PHYS.
+</code></pre>
+
+<h4>FIXUP(func)</h4>
+
+<pre><code>Machine specific fixups, run before memory subsystems have been
+initialised.
+</code></pre>
+
+<h4>MAPIO(func)</h4>
+
+<pre><code>Machine specific function to map IO areas (including the debug
+region above).
+</code></pre>
+
+<h4>INITIRQ(func)</h4>
+
+<pre><code>Machine specific function to initialise interrupts.
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Linux Netlink通讯]]></title>
+    <link href="http://iskey.github.io/blog/2016/04/07/linux-netlink-conn/"/>
+    <updated>2016-04-07T13:12:00+00:00</updated>
+    <id>http://iskey.github.io/blog/2016/04/07/linux-netlink-conn</id>
+    <content type="html"><![CDATA[<p>最近需要使用netlink来完成内核层和用户层的通讯，搜集了一个网上的例子，暂时摘抄在此，并计划再接下来再补充一些东西：</p>
+
+<p><strong>ToDoList:</strong></p>
+
+<blockquote><ul>
+<li>[x] 重写netlink内核实现，把处理函数放在内核线程里。</li>
+<li>[ ] 使用net_namespace机制下的general netlink接口写一个列子。</li>
+</ul>
+</blockquote>
+
+<h1>摘录版本</h1>
+
+<hr />
+
+<h2>内核代码</h2>
+
+<pre><code>#include &lt;linux/init.h&gt;
+#include &lt;linux/module.h&gt;
+#include &lt;linux/timer.h&gt;
+#include &lt;linux/time.h&gt;
+#include &lt;linux/types.h&gt;
+#include &lt;net/sock.h&gt;
+#include &lt;net/netlink.h&gt;
+
+#define NETLINK_TEST 25
+#define MAX_MSGSIZE 1024
+int stringlength(char *s);
+void sendnlmsg(int pid, char * message);
+int err;
+struct sock *nl_sk = NULL;
+
+void sendnlmsg(int pid, char *message)
+{
+    struct sk_buff *skb_1;
+    struct nlmsghdr *nlh;
+    int len = NLMSG_SPACE(MAX_MSGSIZE);
+    int slen = 0;
+    if(!message || !nl_sk)
+    {
+        return ;
+    }
+    skb_1 = alloc_skb(len,GFP_KERNEL);
+    if(!skb_1)
+    {
+        printk(KERN_ERR "my_net_link:alloc_skb_1 error\n");
+    }
+    slen = stringlength(message);
+    nlh = nlmsg_put(skb_1,0,0,0,MAX_MSGSIZE,0);
+
+    NETLINK_CB(skb_1).pid = 0;
+    NETLINK_CB(skb_1).dst_group = 0;
+
+    message[slen]= '\0';
+    memcpy(NLMSG_DATA(nlh),message,slen+1);
+    printk("my_net_link:send message '%s'.\n",(char *)NLMSG_DATA(nlh));
+
+    netlink_unicast(nl_sk,skb_1,pid,MSG_DONTWAIT);
+
+}
+
+int stringlength(char *s)
+{
+    int slen = 0;
+
+    for(; *s; s++){
+        slen++;
+    }
+
+    return slen;
+}
+
+void nl_data_ready(struct sk_buff *__skb)
+ {
+    struct sk_buff *skb;
+    struct nlmsghdr *nlh;
+    char str[100];
+    struct completion cmpl;
+    int i=2;
+    skb = skb_get(__skb);
+    if(skb-&gt;len &gt;= NLMSG_SPACE(0))
+    {
+        nlh = nlmsg_hdr(skb);
+
+        memcpy(str, NLMSG_DATA(nlh), sizeof(str));
+        printk("Message received from pid-%d:%s\n",nlh-&gt;nlmsg_pid, str) ;
+        while(i--)
+        {
+            init_completion(&amp;cmpl);
+            wait_for_completion_timeout(&amp;cmpl,3 * HZ);
+            sendnlmsg(nlh-&gt;nlmsg_pid, "I am from kernel!");
+        }
+        kfree_skb(skb);
+    }
+
+ }
+
+// Initialize netlink
+int netlink_init(void)
+{
+    nl_sk = netlink_kernel_create(&amp;init_net, NETLINK_TEST, 1,
+                                 nl_data_ready, NULL, THIS_MODULE);
+
+    if(!nl_sk){
+        printk(KERN_ERR "my_net_link: create netlink socket error.\n");
+        return 1;
+    }
+
+    printk("my_net_link_3: create netlink socket ok.\n");
+
+    return 0;
+}
+
+static void netlink_exit(void)
+{
+    if(nl_sk != NULL){
+        sock_release(nl_sk-&gt;sk_socket);
+    }
+
+    printk("my_net_link: self module exited\n");
+}
+
+module_init(netlink_init);
+module_exit(netlink_exit);
+
+MODULE_AUTHOR("frankzfz");
+MODULE_LICENSE("GPL");
+</code></pre>
+
+<h2>　用户空间代码</h2>
+
+<pre><code>#include &lt;sys/stat.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;sys/socket.h&gt;
+#include &lt;sys/types.h&gt;
+#include &lt;string.h&gt;
+#include &lt;asm/types.h&gt;
+#include &lt;linux/netlink.h&gt;
+#include &lt;linux/socket.h&gt;
+#include &lt;errno.h&gt;
+
+#define NETLINK_TEST 25
+#define MAX_PAYLOAD 1024 // maximum payload size
+
+int main(int argc, char* argv[])
+{
+    int state;
+    struct sockaddr_nl src_addr, dest_addr;
+    struct nlmsghdr *nlh = NULL;
+    struct iovec iov;
+    struct msghdr msg;
+    int sock_fd, retval;
+    int state_smg = 0;
+
+    // Create a socket
+    sock_fd = socket(AF_NETLINK, SOCK_RAW, NETLINK_TEST);
+    if(sock_fd == -1){
+        printf("error getting socket: %s", strerror(errno));
+        return -1;
+    }
+
+    // To prepare binding
+    memset(&amp;msg,0,sizeof(msg));
+    memset(&amp;src_addr, 0, sizeof(src_addr));
+    src_addr.nl_family = AF_NETLINK;
+    src_addr.nl_pid = getpid(); // self pid
+    src_addr.nl_groups = 0; // multi cast
+
+    retval = bind(sock_fd, (struct sockaddr*)&amp;src_addr, sizeof(src_addr));
+    if(retval &lt; 0){
+        printf("bind failed: %s", strerror(errno));
+        close(sock_fd);
+        return -1;
+    }
+
+    // To prepare recvmsg
+    nlh = (struct nlmsghdr *)malloc(NLMSG_SPACE(MAX_PAYLOAD));
+    if(!nlh){
+        printf("malloc nlmsghdr error!\n");
+        close(sock_fd);
+        return -1;
+    }
+
+    memset(&amp;dest_addr,0,sizeof(dest_addr));
+    dest_addr.nl_family = AF_NETLINK;
+    dest_addr.nl_pid = 0;
+    dest_addr.nl_groups = 0;
+
+    nlh-&gt;nlmsg_len = NLMSG_SPACE(MAX_PAYLOAD);
+    nlh-&gt;nlmsg_pid = getpid();
+    nlh-&gt;nlmsg_flags = 0;
+    strcpy(NLMSG_DATA(nlh),"Hello you iskey!");
+
+    iov.iov_base = (void *)nlh;
+    iov.iov_len = NLMSG_SPACE(MAX_PAYLOAD);
+//    iov.iov_len = nlh-&gt;nlmsg_len;
+
+    memset(&amp;msg, 0, sizeof(msg));
+    msg.msg_name = (void *)&amp;dest_addr;
+    msg.msg_namelen = sizeof(dest_addr);
+    msg.msg_iov = &amp;iov;
+    msg.msg_iovlen = 1;
+
+    state_smg = sendmsg(sock_fd,&amp;msg,0);
+    if(state_smg == -1)
+    {
+        printf("get error sendmsg = %s\n",strerror(errno));
+    }
+    printf("send netlink message ok.\n");
+
+    memset(nlh,0,NLMSG_SPACE(MAX_PAYLOAD));   
+    // Read message from kernel
+    while(1){
+        printf("In while recvmsg\n");
+        state = recvmsg(sock_fd, &amp;msg, 0);
+        if(state&lt;0)
+        {
+            printf("state&lt;1");
+        }
+        printf("Received message: %s\n",(char *) NLMSG_DATA(nlh));
+    }
+
+    close(sock_fd);
+
+    return 0;
+}
+</code></pre>
+
+<h1>内核线程版本</h1>
+
+<hr />
+
+<h2>内核代码</h2>
+
+<pre><code>#include &lt;linux/init.h&gt;
+#include &lt;linux/module.h&gt;
+#include &lt;linux/timer.h&gt;
+#include &lt;linux/time.h&gt;
+#include &lt;linux/types.h&gt;
+#include &lt;net/sock.h&gt;
+#include &lt;net/netlink.h&gt;
+#include "linux/list.h"
+#include &lt;linux/kthread.h&gt;
+
+#define NETLINK_TEST 25
+#define MAX_MSGSIZE 1024
+int stringlength(char *s);
+void sendnlmsg(int pid, char * message);
+int err;
+struct sock *nl_sk = NULL;
+
+struct _my_user_client_{
+    int pid;
+    unsigned char *msg;
+    struct list_head list; 
+};
+
+//struct list_head client_head;
+LIST_HEAD(client_head);
+spinlock_t g_cli_list_lock= SPIN_LOCK_UNLOCKED;
+struct task_struct *g_thread[10];
+
+int client_thread(void *data)
+{
+    struct list_head *plist, *list_n;
+    struct _my_user_client_ *my_client;
+    struct completion cmpl;
+
+    init_completion(&amp;cmpl);
+    daemonize("iskey_cli");
+
+    while(!kthread_should_stop())
+    //while(1)
+    {        
+        spin_lock(&amp;g_cli_list_lock);
+        list_for_each_safe(plist, list_n, &amp;client_head){
+            my_client= (struct _my_user_client_ *)list_entry(plist, struct _my_user_client_, list);
+            printk(KERN_ERR "kernel received msg:%s pid:%d.\n", my_client-&gt;msg, my_client-&gt;pid);
+            sendnlmsg(my_client-&gt;pid, "I am from kernel!");
+            list_del(plist);
+            kfree(my_client);
+        }
+        spin_unlock(&amp;g_cli_list_lock);
+        schedule_timeout_interruptible(msecs_to_jiffies(1));
+        wait_for_completion_timeout(&amp;cmpl,3 * HZ);
+    }
+    printk(KERN_ERR "### thread end.\n");
+
+    return 0;
+}
+
+void sendnlmsg(int pid, char *message)
+{
+    struct sk_buff *skb_1;
+    struct nlmsghdr *nlh;
+    int len = NLMSG_SPACE(MAX_MSGSIZE);
+    int slen = 0;
+    if(!message || !nl_sk)
+    {
+        return ;
+    }
+    skb_1 = alloc_skb(len,GFP_KERNEL);
+    if(!skb_1)
+    {
+        printk(KERN_ERR "my_net_link:alloc_skb_1 error\n");
+    }
+    slen = stringlength(message);
+    nlh = nlmsg_put(skb_1,0,0,0,MAX_MSGSIZE,0);
+
+    NETLINK_CB(skb_1).pid = 0;
+    NETLINK_CB(skb_1).dst_group = 0;
+
+    message[slen]= '\0';
+    memcpy(NLMSG_DATA(nlh),message,slen+1);
+    printk("my_net_link:send message '%s' pid:%d.\n",(char *)NLMSG_DATA(nlh), pid);
+
+    netlink_unicast(nl_sk,skb_1,pid,MSG_DONTWAIT);
+
+}
+
+int stringlength(char *s)
+{
+    int slen = 0;
+
+    for(; *s; s++){
+        slen++;
+    }
+
+    return slen;
+}
+
+void nl_data_ready(struct sk_buff *__skb)
+ {
+    struct sk_buff *skb;
+    struct nlmsghdr *nlh;
+    char str[100];
+    struct completion cmpl;
+    int i=2;
+    skb = skb_get(__skb);
+    if(skb-&gt;len &gt;= NLMSG_SPACE(0))
+    {
+        nlh = nlmsg_hdr(skb);
+
+        memcpy(str, NLMSG_DATA(nlh), sizeof(str));
+
+        struct _my_user_client_ *client= kmalloc(sizeof(struct _my_user_client_), GFP_KERNEL);
+        unsigned char *t_data= kmalloc(sizeof(str),GFP_KERNEL);
+        memcpy(t_data, str, sizeof(str));
+        client-&gt;msg= t_data;
+        client-&gt;pid= nlh-&gt;nlmsg_pid;
+        spin_lock(&amp;g_cli_list_lock);
+        list_add(&amp;(client-&gt;list),&amp;client_head);
+        spin_unlock(&amp;g_cli_list_lock);
+
+        printk("Message received from pid-%d:%s\n",nlh-&gt;nlmsg_pid, str) ;
+//        while(i--)
+//        {
+//            init_completion(&amp;cmpl);
+//            wait_for_completion_timeout(&amp;cmpl,3 * HZ);
+//            sendnlmsg(nlh-&gt;nlmsg_pid, "I am from kernel!");
+//        }
+        kfree_skb(skb);
+    }
+
+ }
+
+// Initialize netlink
+int netlink_init(void)
+{
+    nl_sk = netlink_kernel_create(&amp;init_net, NETLINK_TEST, 1,
+                                 nl_data_ready, NULL, THIS_MODULE);
+
+    if(!nl_sk){
+        printk(KERN_ERR "my_net_link: create netlink socket error.\n");
+        return 1;
+    }
+
+    int cpu=0;
+
+//    for_each_present_cpu(cpu){
+        printk(KERN_ERR "cpu id is %d.\n", cpu);
+        g_thread[cpu]= kthread_create(client_thread, &amp;cpu, "netlink_thread%d", cpu);
+        if(IS_ERR(g_thread[cpu])){
+            printk(KERN_ERR "client_thread start error.\n");
+            return 2;
+        }
+
+        printk(KERN_ERR "netlink_thread :%s\n", g_thread[0]-&gt;comm);
+
+        wake_up_process(g_thread[cpu]);
+//    }
+
+    printk("my_net_link_3: create netlink socket ok.\n");
+
+    return 0;
+}
+
+static void netlink_exit(void)
+{
+    if(nl_sk != NULL){
+        sock_release(nl_sk-&gt;sk_socket);
+    }
+
+    int cpu= 0;
+//    for_each_present_cpu(cpu){
+        kthread_stop(g_thread[cpu]);
+//    }
+
+    printk("my_net_link: self module exited\n");
+}
+
+module_init(netlink_init);
+module_exit(netlink_exit);
+
+MODULE_AUTHOR("frankzfz");
+MODULE_LICENSE("GPL");
+</code></pre>
+
+<h2>　用户空间代码</h2>
+
+<pre><code>#include &lt;sys/stat.h&gt;
+#include &lt;unistd.h&gt;
+#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;sys/socket.h&gt;
+#include &lt;sys/types.h&gt;
+#include &lt;string.h&gt;
+#include &lt;asm/types.h&gt;
+#include &lt;linux/netlink.h&gt;
+#include &lt;linux/socket.h&gt;
+#include &lt;errno.h&gt;
+
+#define NETLINK_TEST 25
+#define MAX_PAYLOAD 1024 // maximum payload size
+
+
+int main(int argc, char* argv[])
+{
+    int state;
+    struct sockaddr_nl src_addr, dest_addr;
+    struct nlmsghdr *nlh = NULL;
+    struct iovec iov;
+    struct msghdr msg;
+    int sock_fd, retval;
+    int state_smg = 0;
+
+    // Create a socket
+    sock_fd = socket(AF_NETLINK, SOCK_RAW, NETLINK_TEST);
+    if(sock_fd == -1){
+        printf("error getting socket: %s", strerror(errno));
+        return -1;
+    }
+
+    // To prepare binding
+    memset(&amp;msg,0,sizeof(msg));
+    memset(&amp;src_addr, 0, sizeof(src_addr));
+    src_addr.nl_family = AF_NETLINK;
+    src_addr.nl_pid = getpid(); // self pid
+    src_addr.nl_groups = 0; // multi cast
+
+    retval = bind(sock_fd, (struct sockaddr*)&amp;src_addr, sizeof(src_addr));
+    if(retval &lt; 0){
+        printf("bind failed: %s", strerror(errno));
+        close(sock_fd);
+        return -1;
+    }
+
+    // To prepare recvmsg
+    nlh = (struct nlmsghdr *)malloc(NLMSG_SPACE(MAX_PAYLOAD));
+    if(!nlh){
+        printf("malloc nlmsghdr error!\n");
+        close(sock_fd);
+        return -1;
+    }
+
+    memset(&amp;dest_addr,0,sizeof(dest_addr));
+    dest_addr.nl_family = AF_NETLINK;
+    dest_addr.nl_pid = 0;
+    dest_addr.nl_groups = 0;
+
+    nlh-&gt;nlmsg_len = NLMSG_SPACE(MAX_PAYLOAD);
+    nlh-&gt;nlmsg_pid = getpid();
+    nlh-&gt;nlmsg_flags = 0;
+    strcpy(NLMSG_DATA(nlh),"Hello you iskey!");
+
+    iov.iov_base = (void *)nlh;
+    iov.iov_len = NLMSG_SPACE(MAX_PAYLOAD);
+//    iov.iov_len = nlh-&gt;nlmsg_len;
+
+    memset(&amp;msg, 0, sizeof(msg));
+    msg.msg_name = (void *)&amp;dest_addr;
+    msg.msg_namelen = sizeof(dest_addr);
+    msg.msg_iov = &amp;iov;
+    msg.msg_iovlen = 1;
+
+    state_smg = sendmsg(sock_fd,&amp;msg,0);
+    if(state_smg == -1)
+    {
+        printf("[user] get error sendmsg = %s\n",strerror(errno));
+    }
+    printf("[user] send netlink message ok.\n");
+
+    memset(nlh,0,NLMSG_SPACE(MAX_PAYLOAD));   
+    // Read message from kernel
+    //while(1){
+        printf("[user] receiving netlink msg...\n");
+        state = recvmsg(sock_fd, &amp;msg, 0);
+        if(state&lt;0)
+        {
+            printf("[user] state&lt;1");
+        }
+        printf("[user] Received message: %s\n",(char *) NLMSG_DATA(nlh));
+    //}
+
+    close(sock_fd);
+
+    return 0;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[内核使用ftrace]]></title>
+    <link href="http://iskey.github.io/blog/2016/03/28/use-ftrace/"/>
+    <updated>2016-03-28T23:44:00+00:00</updated>
+    <id>http://iskey.github.io/blog/2016/03/28/use-ftrace</id>
+    <content type="html"><![CDATA[<pre><code class="java">#!/bin/sh
+ROOT_DEBUGFS="/debug"
+ROOT_FTRACE="${ROOT_DEBUGFS}/tracing"
+#mount -t debugfs nodev ${ROOT_DEBUGFS}
+echo 0 &gt; ${ROOT_FTRACE}/trace
+echo $$ &gt; ${ROOT_FTRACE}/set_ftrace_pid
+echo 1 &gt; ${ROOT_FTRACE}/tracing_enabled
+echo 1 &gt; ${ROOT_FTRACE}/tracing_on
+# can set other filtering here
+echo function &gt; ${ROOT_FTRACE}/current_tracer
+echo start_trace_marker &gt; ${ROOT_FTRACE}/trace_marker
+exec $*
+echo end_trace_marker &gt; ${ROOT_FTRACE}/trace_marker
+echo 0 &gt; ${ROOT_FTRACE}/tracing_on
+echo 0 &gt; ${ROOT_FTRACE}/tracing_enabled
+</code></pre>
+]]></content>
+  </entry>
+  
+</feed>
