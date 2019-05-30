@@ -9,59 +9,7 @@
   <meta name="author" content="Iskey">
 
   
-  <meta name="description" content="1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-22
-23
-24
-25
-26
-27
-28
-29
-30
-31
-32
-33
-34
-35
-36
-37
-38
-39
-40
-41
-42
-43
-44
-45
-46
-47
-48
-49
-50
-51
-52
-53 &hellip;">
+  <meta name="description" content="以前研究内核，总是要依靠开发板或者自己编译内核．近来留意到了ＵＭＬ，才发现linux可以像进程一样跑起来，而且跑起来不不难，深感惭愧，以下是简单的使用方法介绍． 简介 用户模式Linux（User ModeLinux，UML）不同于其他Linux虚拟化项目，UML尽量将它自己作为一个普通的程序。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -115,6 +63,89 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2017/03/06/user_mode_linux/">User Mode Linux</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2017-03-06T21:12:00+00:00'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>6</span><span class='date-suffix'>th</span>, <span class='date-year'>2017</span></span> <span class='time'>9:12 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>以前研究内核，总是要依靠开发板或者自己编译内核．近来留意到了ＵＭＬ，才发现linux可以像进程一样跑起来，而且跑起来不不难，深感惭愧，以下是简单的使用方法介绍．</p>
+
+<h2>简介</h2>
+
+<p>用户模式Linux（User ModeLinux，UML）不同于其他Linux虚拟化项目，UML尽量将它自己作为一个普通的程序。从Linux2.6.9版本起，用户模式Linux（User mode Linux,UML）已随Linux内核源代码一起发布，它存放于arch/um目录下。编译好UML的内核之后，可直接用gdb运行编译好的内核并进行调试。</p>
+
+<p>参考：<a href="http://uml.devloop.org.uk/howto.html">http://uml.devloop.org.uk/howto.html</a></p>
+
+<h2>编译内核</h2>
+
+<h3>以-O2编译内核</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>make ARCH=um defconfig
+</span><span class='line'>make menuconfig ARCH=um
+</span><span class='line'>make ARCH=um</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="http://user-mode-linux.sourceforge.net/source.html">参考</a></p>
+
+<h3>以-O0编译内核</h3>
+
+<p><a href="http://blog.chinaunix.net/uid-234303-id-2425015.html">参考</a></p>
+
+<h2>根文件系统</h2>
+
+<ul>
+<li><p><a href="http://fs.devloop.org.uk/">下载现成的根文件系统</a></p></li>
+<li><p><a href="http://fancymore.com/reading/linux-kernel-debugging.html">制作根文件系统</a></p></li>
+</ul>
+
+
+<h2>调试</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># gdb ./linux   
+</span><span class='line'>(gdb) handle SIGSEGV pass nostop noprint   
+</span><span class='line'>(gdb) handle SIGUSR1 pass nostop noprint 
+</span><span class='line'>(gdb) start ubd0=/root/srcpkg/filesystem/CentOS6.x-x86-root_fs mem=256m</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>http://blog.csdn.net/ztz0223/article/details/7874759</code></p>
+
+<p>五、常见问题</p>
+
+<p>1、
+<a href="http://moodlearchive.epfl.ch/2010-2011/mod/forum/discuss.php?d=108781">http://moodlearchive.epfl.ch/2010-2011/mod/forum/discuss.php?d=108781</a></p>
+
+<p>2、
+<a href="http://www.lenky.info/archives/2012/04/1471">http://www.lenky.info/archives/2012/04/1471</a></p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -3024,1041 +3055,6 @@ all：
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/04/07/linux-netlink-conn/">Linux Netlink通讯</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2016-04-07T13:12:00+00:00'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>7</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>1:12 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>最近需要使用netlink来完成内核层和用户层的通讯，搜集了一个网上的例子，暂时摘抄在此，并计划再接下来再补充一些东西：</p>
-
-<p><strong>ToDoList:</strong></p>
-
-<blockquote><ul>
-<li>[x] 重写netlink内核实现，把处理函数放在内核线程里。</li>
-<li>[ ] 使用net_namespace机制下的general netlink接口写一个列子。</li>
-</ul>
-</blockquote>
-
-<h1>摘录版本</h1>
-
-<hr />
-
-<h2>内核代码</h2>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-<span class='line-number'>63</span>
-<span class='line-number'>64</span>
-<span class='line-number'>65</span>
-<span class='line-number'>66</span>
-<span class='line-number'>67</span>
-<span class='line-number'>68</span>
-<span class='line-number'>69</span>
-<span class='line-number'>70</span>
-<span class='line-number'>71</span>
-<span class='line-number'>72</span>
-<span class='line-number'>73</span>
-<span class='line-number'>74</span>
-<span class='line-number'>75</span>
-<span class='line-number'>76</span>
-<span class='line-number'>77</span>
-<span class='line-number'>78</span>
-<span class='line-number'>79</span>
-<span class='line-number'>80</span>
-<span class='line-number'>81</span>
-<span class='line-number'>82</span>
-<span class='line-number'>83</span>
-<span class='line-number'>84</span>
-<span class='line-number'>85</span>
-<span class='line-number'>86</span>
-<span class='line-number'>87</span>
-<span class='line-number'>88</span>
-<span class='line-number'>89</span>
-<span class='line-number'>90</span>
-<span class='line-number'>91</span>
-<span class='line-number'>92</span>
-<span class='line-number'>93</span>
-<span class='line-number'>94</span>
-<span class='line-number'>95</span>
-<span class='line-number'>96</span>
-<span class='line-number'>97</span>
-<span class='line-number'>98</span>
-<span class='line-number'>99</span>
-<span class='line-number'>100</span>
-<span class='line-number'>101</span>
-<span class='line-number'>102</span>
-<span class='line-number'>103</span>
-<span class='line-number'>104</span>
-<span class='line-number'>105</span>
-<span class='line-number'>106</span>
-<span class='line-number'>107</span>
-<span class='line-number'>108</span>
-<span class='line-number'>109</span>
-<span class='line-number'>110</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>#include &lt;linux/init.h&gt;
-</span><span class='line'>#include &lt;linux/module.h&gt;
-</span><span class='line'>#include &lt;linux/timer.h&gt;
-</span><span class='line'>#include &lt;linux/time.h&gt;
-</span><span class='line'>#include &lt;linux/types.h&gt;
-</span><span class='line'>#include &lt;net/sock.h&gt;
-</span><span class='line'>#include &lt;net/netlink.h&gt;
-</span><span class='line'>
-</span><span class='line'>#define NETLINK_TEST 25
-</span><span class='line'>#define MAX_MSGSIZE 1024
-</span><span class='line'>int stringlength(char *s);
-</span><span class='line'>void sendnlmsg(int pid, char * message);
-</span><span class='line'>int err;
-</span><span class='line'>struct sock *nl_sk = NULL;
-</span><span class='line'>
-</span><span class='line'>void sendnlmsg(int pid, char *message)
-</span><span class='line'>{
-</span><span class='line'>    struct sk_buff *skb_1;
-</span><span class='line'>    struct nlmsghdr *nlh;
-</span><span class='line'>    int len = NLMSG_SPACE(MAX_MSGSIZE);
-</span><span class='line'>    int slen = 0;
-</span><span class='line'>    if(!message || !nl_sk)
-</span><span class='line'>    {
-</span><span class='line'>        return ;
-</span><span class='line'>    }
-</span><span class='line'>    skb_1 = alloc_skb(len,GFP_KERNEL);
-</span><span class='line'>    if(!skb_1)
-</span><span class='line'>    {
-</span><span class='line'>        printk(KERN_ERR "my_net_link:alloc_skb_1 error\n");
-</span><span class='line'>    }
-</span><span class='line'>    slen = stringlength(message);
-</span><span class='line'>    nlh = nlmsg_put(skb_1,0,0,0,MAX_MSGSIZE,0);
-</span><span class='line'>
-</span><span class='line'>    NETLINK_CB(skb_1).pid = 0;
-</span><span class='line'>    NETLINK_CB(skb_1).dst_group = 0;
-</span><span class='line'>
-</span><span class='line'>    message[slen]= '\0';
-</span><span class='line'>    memcpy(NLMSG_DATA(nlh),message,slen+1);
-</span><span class='line'>    printk("my_net_link:send message '%s'.\n",(char *)NLMSG_DATA(nlh));
-</span><span class='line'>
-</span><span class='line'>    netlink_unicast(nl_sk,skb_1,pid,MSG_DONTWAIT);
-</span><span class='line'>
-</span><span class='line'>}
-</span><span class='line'>
-</span><span class='line'>int stringlength(char *s)
-</span><span class='line'>{
-</span><span class='line'>    int slen = 0;
-</span><span class='line'>
-</span><span class='line'>    for(; *s; s++){
-</span><span class='line'>        slen++;
-</span><span class='line'>    }
-</span><span class='line'>
-</span><span class='line'>    return slen;
-</span><span class='line'>}
-</span><span class='line'>
-</span><span class='line'>void nl_data_ready(struct sk_buff *__skb)
-</span><span class='line'> {
-</span><span class='line'>    struct sk_buff *skb;
-</span><span class='line'>    struct nlmsghdr *nlh;
-</span><span class='line'>    char str[100];
-</span><span class='line'>    struct completion cmpl;
-</span><span class='line'>    int i=2;
-</span><span class='line'>    skb = skb_get(__skb);
-</span><span class='line'>    if(skb-&gt;len &gt;= NLMSG_SPACE(0))
-</span><span class='line'>    {
-</span><span class='line'>        nlh = nlmsg_hdr(skb);
-</span><span class='line'>
-</span><span class='line'>        memcpy(str, NLMSG_DATA(nlh), sizeof(str));
-</span><span class='line'>        printk("Message received from pid-%d:%s\n",nlh-&gt;nlmsg_pid, str) ;
-</span><span class='line'>        while(i--)
-</span><span class='line'>        {
-</span><span class='line'>            init_completion(&cmpl);
-</span><span class='line'>            wait_for_completion_timeout(&cmpl,3 * HZ);
-</span><span class='line'>            sendnlmsg(nlh-&gt;nlmsg_pid, "I am from kernel!");
-</span><span class='line'>        }
-</span><span class='line'>        kfree_skb(skb);
-</span><span class='line'>    }
-</span><span class='line'>
-</span><span class='line'> }
-</span><span class='line'>
-</span><span class='line'>// Initialize netlink
-</span><span class='line'>int netlink_init(void)
-</span><span class='line'>{
-</span><span class='line'>    nl_sk = netlink_kernel_create(&init_net, NETLINK_TEST, 1,
-</span><span class='line'>                                 nl_data_ready, NULL, THIS_MODULE);
-</span><span class='line'>
-</span><span class='line'>    if(!nl_sk){
-</span><span class='line'>        printk(KERN_ERR "my_net_link: create netlink socket error.\n");
-</span><span class='line'>        return 1;
-</span><span class='line'>    }
-</span><span class='line'>
-</span><span class='line'>    printk("my_net_link_3: create netlink socket ok.\n");
-</span><span class='line'>
-</span><span class='line'>    return 0;
-</span><span class='line'>}
-</span><span class='line'>
-</span><span class='line'>static void netlink_exit(void)
-</span><span class='line'>{
-</span><span class='line'>    if(nl_sk != NULL){
-</span><span class='line'>        sock_release(nl_sk-&gt;sk_socket);
-</span><span class='line'>    }
-</span><span class='line'>
-</span><span class='line'>    printk("my_net_link: self module exited\n");
-</span><span class='line'>}
-</span><span class='line'>
-</span><span class='line'>module_init(netlink_init);
-</span><span class='line'>module_exit(netlink_exit);
-</span><span class='line'>
-</span><span class='line'>MODULE_AUTHOR("frankzfz");
-</span><span class='line'>MODULE_LICENSE("GPL");</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>　用户空间代码</h2>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-<span class='line-number'>63</span>
-<span class='line-number'>64</span>
-<span class='line-number'>65</span>
-<span class='line-number'>66</span>
-<span class='line-number'>67</span>
-<span class='line-number'>68</span>
-<span class='line-number'>69</span>
-<span class='line-number'>70</span>
-<span class='line-number'>71</span>
-<span class='line-number'>72</span>
-<span class='line-number'>73</span>
-<span class='line-number'>74</span>
-<span class='line-number'>75</span>
-<span class='line-number'>76</span>
-<span class='line-number'>77</span>
-<span class='line-number'>78</span>
-<span class='line-number'>79</span>
-<span class='line-number'>80</span>
-<span class='line-number'>81</span>
-<span class='line-number'>82</span>
-<span class='line-number'>83</span>
-<span class='line-number'>84</span>
-<span class='line-number'>85</span>
-<span class='line-number'>86</span>
-<span class='line-number'>87</span>
-<span class='line-number'>88</span>
-<span class='line-number'>89</span>
-<span class='line-number'>90</span>
-<span class='line-number'>91</span>
-<span class='line-number'>92</span>
-<span class='line-number'>93</span>
-<span class='line-number'>94</span>
-<span class='line-number'>95</span>
-<span class='line-number'>96</span>
-<span class='line-number'>97</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>#include &lt;sys/stat.h&gt;
-</span><span class='line'>#include &lt;unistd.h&gt;
-</span><span class='line'>#include &lt;stdio.h&gt;
-</span><span class='line'>#include &lt;stdlib.h&gt;
-</span><span class='line'>#include &lt;sys/socket.h&gt;
-</span><span class='line'>#include &lt;sys/types.h&gt;
-</span><span class='line'>#include &lt;string.h&gt;
-</span><span class='line'>#include &lt;asm/types.h&gt;
-</span><span class='line'>#include &lt;linux/netlink.h&gt;
-</span><span class='line'>#include &lt;linux/socket.h&gt;
-</span><span class='line'>#include &lt;errno.h&gt;
-</span><span class='line'>
-</span><span class='line'>#define NETLINK_TEST 25
-</span><span class='line'>#define MAX_PAYLOAD 1024 // maximum payload size
-</span><span class='line'>
-</span><span class='line'>int main(int argc, char* argv[])
-</span><span class='line'>{
-</span><span class='line'>    int state;
-</span><span class='line'>    struct sockaddr_nl src_addr, dest_addr;
-</span><span class='line'>    struct nlmsghdr *nlh = NULL;
-</span><span class='line'>    struct iovec iov;
-</span><span class='line'>    struct msghdr msg;
-</span><span class='line'>    int sock_fd, retval;
-</span><span class='line'>    int state_smg = 0;
-</span><span class='line'>    
-</span><span class='line'>    // Create a socket
-</span><span class='line'>    sock_fd = socket(AF_NETLINK, SOCK_RAW, NETLINK_TEST);
-</span><span class='line'>    if(sock_fd == -1){
-</span><span class='line'>        printf("error getting socket: %s", strerror(errno));
-</span><span class='line'>        return -1;
-</span><span class='line'>    }
-</span><span class='line'>
-</span><span class='line'>    // To prepare binding
-</span><span class='line'>    memset(&msg,0,sizeof(msg));
-</span><span class='line'>    memset(&src_addr, 0, sizeof(src_addr));
-</span><span class='line'>    src_addr.nl_family = AF_NETLINK;
-</span><span class='line'>    src_addr.nl_pid = getpid(); // self pid
-</span><span class='line'>    src_addr.nl_groups = 0; // multi cast
-</span><span class='line'>
-</span><span class='line'>    retval = bind(sock_fd, (struct sockaddr*)&src_addr, sizeof(src_addr));
-</span><span class='line'>    if(retval &lt; 0){
-</span><span class='line'>        printf("bind failed: %s", strerror(errno));
-</span><span class='line'>        close(sock_fd);
-</span><span class='line'>        return -1;
-</span><span class='line'>    }
-</span><span class='line'>
-</span><span class='line'>    // To prepare recvmsg
-</span><span class='line'>    nlh = (struct nlmsghdr *)malloc(NLMSG_SPACE(MAX_PAYLOAD));
-</span><span class='line'>    if(!nlh){
-</span><span class='line'>        printf("malloc nlmsghdr error!\n");
-</span><span class='line'>        close(sock_fd);
-</span><span class='line'>        return -1;
-</span><span class='line'>    }
-</span><span class='line'>
-</span><span class='line'>    memset(&dest_addr,0,sizeof(dest_addr));
-</span><span class='line'>    dest_addr.nl_family = AF_NETLINK;
-</span><span class='line'>    dest_addr.nl_pid = 0;
-</span><span class='line'>    dest_addr.nl_groups = 0;
-</span><span class='line'>
-</span><span class='line'>    nlh-&gt;nlmsg_len = NLMSG_SPACE(MAX_PAYLOAD);
-</span><span class='line'>    nlh-&gt;nlmsg_pid = getpid();
-</span><span class='line'>    nlh-&gt;nlmsg_flags = 0;
-</span><span class='line'>    strcpy(NLMSG_DATA(nlh),"Hello you iskey!");
-</span><span class='line'>
-</span><span class='line'>    iov.iov_base = (void *)nlh;
-</span><span class='line'>    iov.iov_len = NLMSG_SPACE(MAX_PAYLOAD);
-</span><span class='line'>//    iov.iov_len = nlh-&gt;nlmsg_len;
-</span><span class='line'>
-</span><span class='line'>    memset(&msg, 0, sizeof(msg));
-</span><span class='line'>    msg.msg_name = (void *)&dest_addr;
-</span><span class='line'>    msg.msg_namelen = sizeof(dest_addr);
-</span><span class='line'>    msg.msg_iov = &iov;
-</span><span class='line'>    msg.msg_iovlen = 1;
-</span><span class='line'>
-</span><span class='line'>    state_smg = sendmsg(sock_fd,&msg,0);
-</span><span class='line'>    if(state_smg == -1)
-</span><span class='line'>    {
-</span><span class='line'>        printf("get error sendmsg = %s\n",strerror(errno));
-</span><span class='line'>    }
-</span><span class='line'>    printf("send netlink message ok.\n");
-</span><span class='line'>
-</span><span class='line'>    memset(nlh,0,NLMSG_SPACE(MAX_PAYLOAD));   
-</span><span class='line'>    // Read message from kernel
-</span><span class='line'>    while(1){
-</span><span class='line'>        printf("In while recvmsg\n");
-</span><span class='line'>        state = recvmsg(sock_fd, &msg, 0);
-</span><span class='line'>        if(state&lt;0)
-</span><span class='line'>        {
-</span><span class='line'>            printf("state&lt;1");
-</span><span class='line'>        }
-</span><span class='line'>        printf("Received message: %s\n",(char *) NLMSG_DATA(nlh));
-</span><span class='line'>    }
-</span><span class='line'>
-</span><span class='line'>    close(sock_fd);
-</span><span class='line'>
-</span><span class='line'>    return 0;
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>内核线程版本</h1>
-
-<hr />
-
-<h2>内核代码</h2>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-<span class='line-number'>63</span>
-<span class='line-number'>64</span>
-<span class='line-number'>65</span>
-<span class='line-number'>66</span>
-<span class='line-number'>67</span>
-<span class='line-number'>68</span>
-<span class='line-number'>69</span>
-<span class='line-number'>70</span>
-<span class='line-number'>71</span>
-<span class='line-number'>72</span>
-<span class='line-number'>73</span>
-<span class='line-number'>74</span>
-<span class='line-number'>75</span>
-<span class='line-number'>76</span>
-<span class='line-number'>77</span>
-<span class='line-number'>78</span>
-<span class='line-number'>79</span>
-<span class='line-number'>80</span>
-<span class='line-number'>81</span>
-<span class='line-number'>82</span>
-<span class='line-number'>83</span>
-<span class='line-number'>84</span>
-<span class='line-number'>85</span>
-<span class='line-number'>86</span>
-<span class='line-number'>87</span>
-<span class='line-number'>88</span>
-<span class='line-number'>89</span>
-<span class='line-number'>90</span>
-<span class='line-number'>91</span>
-<span class='line-number'>92</span>
-<span class='line-number'>93</span>
-<span class='line-number'>94</span>
-<span class='line-number'>95</span>
-<span class='line-number'>96</span>
-<span class='line-number'>97</span>
-<span class='line-number'>98</span>
-<span class='line-number'>99</span>
-<span class='line-number'>100</span>
-<span class='line-number'>101</span>
-<span class='line-number'>102</span>
-<span class='line-number'>103</span>
-<span class='line-number'>104</span>
-<span class='line-number'>105</span>
-<span class='line-number'>106</span>
-<span class='line-number'>107</span>
-<span class='line-number'>108</span>
-<span class='line-number'>109</span>
-<span class='line-number'>110</span>
-<span class='line-number'>111</span>
-<span class='line-number'>112</span>
-<span class='line-number'>113</span>
-<span class='line-number'>114</span>
-<span class='line-number'>115</span>
-<span class='line-number'>116</span>
-<span class='line-number'>117</span>
-<span class='line-number'>118</span>
-<span class='line-number'>119</span>
-<span class='line-number'>120</span>
-<span class='line-number'>121</span>
-<span class='line-number'>122</span>
-<span class='line-number'>123</span>
-<span class='line-number'>124</span>
-<span class='line-number'>125</span>
-<span class='line-number'>126</span>
-<span class='line-number'>127</span>
-<span class='line-number'>128</span>
-<span class='line-number'>129</span>
-<span class='line-number'>130</span>
-<span class='line-number'>131</span>
-<span class='line-number'>132</span>
-<span class='line-number'>133</span>
-<span class='line-number'>134</span>
-<span class='line-number'>135</span>
-<span class='line-number'>136</span>
-<span class='line-number'>137</span>
-<span class='line-number'>138</span>
-<span class='line-number'>139</span>
-<span class='line-number'>140</span>
-<span class='line-number'>141</span>
-<span class='line-number'>142</span>
-<span class='line-number'>143</span>
-<span class='line-number'>144</span>
-<span class='line-number'>145</span>
-<span class='line-number'>146</span>
-<span class='line-number'>147</span>
-<span class='line-number'>148</span>
-<span class='line-number'>149</span>
-<span class='line-number'>150</span>
-<span class='line-number'>151</span>
-<span class='line-number'>152</span>
-<span class='line-number'>153</span>
-<span class='line-number'>154</span>
-<span class='line-number'>155</span>
-<span class='line-number'>156</span>
-<span class='line-number'>157</span>
-<span class='line-number'>158</span>
-<span class='line-number'>159</span>
-<span class='line-number'>160</span>
-<span class='line-number'>161</span>
-<span class='line-number'>162</span>
-<span class='line-number'>163</span>
-<span class='line-number'>164</span>
-<span class='line-number'>165</span>
-<span class='line-number'>166</span>
-<span class='line-number'>167</span>
-<span class='line-number'>168</span>
-<span class='line-number'>169</span>
-<span class='line-number'>170</span>
-<span class='line-number'>171</span>
-<span class='line-number'>172</span>
-<span class='line-number'>173</span>
-<span class='line-number'>174</span>
-<span class='line-number'>175</span>
-<span class='line-number'>176</span>
-<span class='line-number'>177</span>
-<span class='line-number'>178</span>
-<span class='line-number'>179</span>
-<span class='line-number'>180</span>
-<span class='line-number'>181</span>
-<span class='line-number'>182</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>#include &lt;linux/init.h&gt;
-</span><span class='line'>#include &lt;linux/module.h&gt;
-</span><span class='line'>#include &lt;linux/timer.h&gt;
-</span><span class='line'>#include &lt;linux/time.h&gt;
-</span><span class='line'>#include &lt;linux/types.h&gt;
-</span><span class='line'>#include &lt;net/sock.h&gt;
-</span><span class='line'>#include &lt;net/netlink.h&gt;
-</span><span class='line'>#include "linux/list.h"
-</span><span class='line'>#include &lt;linux/kthread.h&gt;
-</span><span class='line'>
-</span><span class='line'>#define NETLINK_TEST 25
-</span><span class='line'>#define MAX_MSGSIZE 1024
-</span><span class='line'>int stringlength(char *s);
-</span><span class='line'>void sendnlmsg(int pid, char * message);
-</span><span class='line'>int err;
-</span><span class='line'>struct sock *nl_sk = NULL;
-</span><span class='line'>
-</span><span class='line'>struct _my_user_client_{
-</span><span class='line'>    int pid;
-</span><span class='line'>    unsigned char *msg;
-</span><span class='line'>    struct list_head list; 
-</span><span class='line'>};
-</span><span class='line'>
-</span><span class='line'>//struct list_head client_head;
-</span><span class='line'>LIST_HEAD(client_head);
-</span><span class='line'>spinlock_t g_cli_list_lock= SPIN_LOCK_UNLOCKED;
-</span><span class='line'>struct task_struct *g_thread[10];
-</span><span class='line'>
-</span><span class='line'>int client_thread(void *data)
-</span><span class='line'>{
-</span><span class='line'>    struct list_head *plist, *list_n;
-</span><span class='line'>    struct _my_user_client_ *my_client;
-</span><span class='line'>    struct completion cmpl;
-</span><span class='line'>    
-</span><span class='line'>    init_completion(&cmpl);
-</span><span class='line'>    daemonize("iskey_cli");
-</span><span class='line'>
-</span><span class='line'>    while(!kthread_should_stop())
-</span><span class='line'>    //while(1)
-</span><span class='line'>    {        
-</span><span class='line'>        spin_lock(&g_cli_list_lock);
-</span><span class='line'>        list_for_each_safe(plist, list_n, &client_head){
-</span><span class='line'>            my_client= (struct _my_user_client_ *)list_entry(plist, struct _my_user_client_, list);
-</span><span class='line'>            printk(KERN_ERR "kernel received msg:%s pid:%d.\n", my_client-&gt;msg, my_client-&gt;pid);
-</span><span class='line'>            sendnlmsg(my_client-&gt;pid, "I am from kernel!");
-</span><span class='line'>            list_del(plist);
-</span><span class='line'>            kfree(my_client);
-</span><span class='line'>        }
-</span><span class='line'>        spin_unlock(&g_cli_list_lock);
-</span><span class='line'>        schedule_timeout_interruptible(msecs_to_jiffies(1));
-</span><span class='line'>        wait_for_completion_timeout(&cmpl,3 * HZ);
-</span><span class='line'>    }
-</span><span class='line'>    printk(KERN_ERR "### thread end.\n");
-</span><span class='line'>
-</span><span class='line'>    return 0;
-</span><span class='line'>}
-</span><span class='line'>
-</span><span class='line'>void sendnlmsg(int pid, char *message)
-</span><span class='line'>{
-</span><span class='line'>    struct sk_buff *skb_1;
-</span><span class='line'>    struct nlmsghdr *nlh;
-</span><span class='line'>    int len = NLMSG_SPACE(MAX_MSGSIZE);
-</span><span class='line'>    int slen = 0;
-</span><span class='line'>    if(!message || !nl_sk)
-</span><span class='line'>    {
-</span><span class='line'>        return ;
-</span><span class='line'>    }
-</span><span class='line'>    skb_1 = alloc_skb(len,GFP_KERNEL);
-</span><span class='line'>    if(!skb_1)
-</span><span class='line'>    {
-</span><span class='line'>        printk(KERN_ERR "my_net_link:alloc_skb_1 error\n");
-</span><span class='line'>    }
-</span><span class='line'>    slen = stringlength(message);
-</span><span class='line'>    nlh = nlmsg_put(skb_1,0,0,0,MAX_MSGSIZE,0);
-</span><span class='line'>
-</span><span class='line'>    NETLINK_CB(skb_1).pid = 0;
-</span><span class='line'>    NETLINK_CB(skb_1).dst_group = 0;
-</span><span class='line'>
-</span><span class='line'>    message[slen]= '\0';
-</span><span class='line'>    memcpy(NLMSG_DATA(nlh),message,slen+1);
-</span><span class='line'>    printk("my_net_link:send message '%s' pid:%d.\n",(char *)NLMSG_DATA(nlh), pid);
-</span><span class='line'>
-</span><span class='line'>    netlink_unicast(nl_sk,skb_1,pid,MSG_DONTWAIT);
-</span><span class='line'>
-</span><span class='line'>}
-</span><span class='line'>
-</span><span class='line'>int stringlength(char *s)
-</span><span class='line'>{
-</span><span class='line'>    int slen = 0;
-</span><span class='line'>
-</span><span class='line'>    for(; *s; s++){
-</span><span class='line'>        slen++;
-</span><span class='line'>    }
-</span><span class='line'>
-</span><span class='line'>    return slen;
-</span><span class='line'>}
-</span><span class='line'>
-</span><span class='line'>void nl_data_ready(struct sk_buff *__skb)
-</span><span class='line'> {
-</span><span class='line'>    struct sk_buff *skb;
-</span><span class='line'>    struct nlmsghdr *nlh;
-</span><span class='line'>    char str[100];
-</span><span class='line'>    struct completion cmpl;
-</span><span class='line'>    int i=2;
-</span><span class='line'>    skb = skb_get(__skb);
-</span><span class='line'>    if(skb-&gt;len &gt;= NLMSG_SPACE(0))
-</span><span class='line'>    {
-</span><span class='line'>        nlh = nlmsg_hdr(skb);
-</span><span class='line'>
-</span><span class='line'>        memcpy(str, NLMSG_DATA(nlh), sizeof(str));
-</span><span class='line'>
-</span><span class='line'>        struct _my_user_client_ *client= kmalloc(sizeof(struct _my_user_client_), GFP_KERNEL);
-</span><span class='line'>        unsigned char *t_data= kmalloc(sizeof(str),GFP_KERNEL);
-</span><span class='line'>        memcpy(t_data, str, sizeof(str));
-</span><span class='line'>        client-&gt;msg= t_data;
-</span><span class='line'>        client-&gt;pid= nlh-&gt;nlmsg_pid;
-</span><span class='line'>        spin_lock(&g_cli_list_lock);
-</span><span class='line'>        list_add(&(client-&gt;list),&client_head);
-</span><span class='line'>        spin_unlock(&g_cli_list_lock);
-</span><span class='line'>        
-</span><span class='line'>        printk("Message received from pid-%d:%s\n",nlh-&gt;nlmsg_pid, str) ;
-</span><span class='line'>//        while(i--)
-</span><span class='line'>//        {
-</span><span class='line'>//            init_completion(&cmpl);
-</span><span class='line'>//            wait_for_completion_timeout(&cmpl,3 * HZ);
-</span><span class='line'>//            sendnlmsg(nlh-&gt;nlmsg_pid, "I am from kernel!");
-</span><span class='line'>//        }
-</span><span class='line'>        kfree_skb(skb);
-</span><span class='line'>    }
-</span><span class='line'>
-</span><span class='line'> }
-</span><span class='line'>
-</span><span class='line'>// Initialize netlink
-</span><span class='line'>int netlink_init(void)
-</span><span class='line'>{
-</span><span class='line'>    nl_sk = netlink_kernel_create(&init_net, NETLINK_TEST, 1,
-</span><span class='line'>                                 nl_data_ready, NULL, THIS_MODULE);
-</span><span class='line'>
-</span><span class='line'>    if(!nl_sk){
-</span><span class='line'>        printk(KERN_ERR "my_net_link: create netlink socket error.\n");
-</span><span class='line'>        return 1;
-</span><span class='line'>    }
-</span><span class='line'>
-</span><span class='line'>    int cpu=0;
-</span><span class='line'>    
-</span><span class='line'>//    for_each_present_cpu(cpu){
-</span><span class='line'>        printk(KERN_ERR "cpu id is %d.\n", cpu);
-</span><span class='line'>        g_thread[cpu]= kthread_create(client_thread, &cpu, "netlink_thread%d", cpu);
-</span><span class='line'>        if(IS_ERR(g_thread[cpu])){
-</span><span class='line'>            printk(KERN_ERR "client_thread start error.\n");
-</span><span class='line'>            return 2;
-</span><span class='line'>        }
-</span><span class='line'>
-</span><span class='line'>        printk(KERN_ERR "netlink_thread :%s\n", g_thread[0]-&gt;comm);
-</span><span class='line'>        
-</span><span class='line'>        wake_up_process(g_thread[cpu]);
-</span><span class='line'>//    }
-</span><span class='line'>    
-</span><span class='line'>    printk("my_net_link_3: create netlink socket ok.\n");
-</span><span class='line'>
-</span><span class='line'>    return 0;
-</span><span class='line'>}
-</span><span class='line'>
-</span><span class='line'>static void netlink_exit(void)
-</span><span class='line'>{
-</span><span class='line'>    if(nl_sk != NULL){
-</span><span class='line'>        sock_release(nl_sk-&gt;sk_socket);
-</span><span class='line'>    }
-</span><span class='line'>
-</span><span class='line'>    int cpu= 0;
-</span><span class='line'>//    for_each_present_cpu(cpu){
-</span><span class='line'>        kthread_stop(g_thread[cpu]);
-</span><span class='line'>//    }
-</span><span class='line'>    
-</span><span class='line'>    printk("my_net_link: self module exited\n");
-</span><span class='line'>}
-</span><span class='line'>
-</span><span class='line'>module_init(netlink_init);
-</span><span class='line'>module_exit(netlink_exit);
-</span><span class='line'>
-</span><span class='line'>MODULE_AUTHOR("frankzfz");
-</span><span class='line'>MODULE_LICENSE("GPL");</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>　用户空间代码</h2>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-<span class='line-number'>63</span>
-<span class='line-number'>64</span>
-<span class='line-number'>65</span>
-<span class='line-number'>66</span>
-<span class='line-number'>67</span>
-<span class='line-number'>68</span>
-<span class='line-number'>69</span>
-<span class='line-number'>70</span>
-<span class='line-number'>71</span>
-<span class='line-number'>72</span>
-<span class='line-number'>73</span>
-<span class='line-number'>74</span>
-<span class='line-number'>75</span>
-<span class='line-number'>76</span>
-<span class='line-number'>77</span>
-<span class='line-number'>78</span>
-<span class='line-number'>79</span>
-<span class='line-number'>80</span>
-<span class='line-number'>81</span>
-<span class='line-number'>82</span>
-<span class='line-number'>83</span>
-<span class='line-number'>84</span>
-<span class='line-number'>85</span>
-<span class='line-number'>86</span>
-<span class='line-number'>87</span>
-<span class='line-number'>88</span>
-<span class='line-number'>89</span>
-<span class='line-number'>90</span>
-<span class='line-number'>91</span>
-<span class='line-number'>92</span>
-<span class='line-number'>93</span>
-<span class='line-number'>94</span>
-<span class='line-number'>95</span>
-<span class='line-number'>96</span>
-<span class='line-number'>97</span>
-<span class='line-number'>98</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>#include &lt;sys/stat.h&gt;
-</span><span class='line'>#include &lt;unistd.h&gt;
-</span><span class='line'>#include &lt;stdio.h&gt;
-</span><span class='line'>#include &lt;stdlib.h&gt;
-</span><span class='line'>#include &lt;sys/socket.h&gt;
-</span><span class='line'>#include &lt;sys/types.h&gt;
-</span><span class='line'>#include &lt;string.h&gt;
-</span><span class='line'>#include &lt;asm/types.h&gt;
-</span><span class='line'>#include &lt;linux/netlink.h&gt;
-</span><span class='line'>#include &lt;linux/socket.h&gt;
-</span><span class='line'>#include &lt;errno.h&gt;
-</span><span class='line'>
-</span><span class='line'>#define NETLINK_TEST 25
-</span><span class='line'>#define MAX_PAYLOAD 1024 // maximum payload size
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'>int main(int argc, char* argv[])
-</span><span class='line'>{
-</span><span class='line'>    int state;
-</span><span class='line'>    struct sockaddr_nl src_addr, dest_addr;
-</span><span class='line'>    struct nlmsghdr *nlh = NULL;
-</span><span class='line'>    struct iovec iov;
-</span><span class='line'>    struct msghdr msg;
-</span><span class='line'>    int sock_fd, retval;
-</span><span class='line'>    int state_smg = 0;
-</span><span class='line'>    
-</span><span class='line'>    // Create a socket
-</span><span class='line'>    sock_fd = socket(AF_NETLINK, SOCK_RAW, NETLINK_TEST);
-</span><span class='line'>    if(sock_fd == -1){
-</span><span class='line'>        printf("error getting socket: %s", strerror(errno));
-</span><span class='line'>        return -1;
-</span><span class='line'>    }
-</span><span class='line'>
-</span><span class='line'>    // To prepare binding
-</span><span class='line'>    memset(&msg,0,sizeof(msg));
-</span><span class='line'>    memset(&src_addr, 0, sizeof(src_addr));
-</span><span class='line'>    src_addr.nl_family = AF_NETLINK;
-</span><span class='line'>    src_addr.nl_pid = getpid(); // self pid
-</span><span class='line'>    src_addr.nl_groups = 0; // multi cast
-</span><span class='line'>
-</span><span class='line'>    retval = bind(sock_fd, (struct sockaddr*)&src_addr, sizeof(src_addr));
-</span><span class='line'>    if(retval &lt; 0){
-</span><span class='line'>        printf("bind failed: %s", strerror(errno));
-</span><span class='line'>        close(sock_fd);
-</span><span class='line'>        return -1;
-</span><span class='line'>    }
-</span><span class='line'>
-</span><span class='line'>    // To prepare recvmsg
-</span><span class='line'>    nlh = (struct nlmsghdr *)malloc(NLMSG_SPACE(MAX_PAYLOAD));
-</span><span class='line'>    if(!nlh){
-</span><span class='line'>        printf("malloc nlmsghdr error!\n");
-</span><span class='line'>        close(sock_fd);
-</span><span class='line'>        return -1;
-</span><span class='line'>    }
-</span><span class='line'>
-</span><span class='line'>    memset(&dest_addr,0,sizeof(dest_addr));
-</span><span class='line'>    dest_addr.nl_family = AF_NETLINK;
-</span><span class='line'>    dest_addr.nl_pid = 0;
-</span><span class='line'>    dest_addr.nl_groups = 0;
-</span><span class='line'>
-</span><span class='line'>    nlh-&gt;nlmsg_len = NLMSG_SPACE(MAX_PAYLOAD);
-</span><span class='line'>    nlh-&gt;nlmsg_pid = getpid();
-</span><span class='line'>    nlh-&gt;nlmsg_flags = 0;
-</span><span class='line'>    strcpy(NLMSG_DATA(nlh),"Hello you iskey!");
-</span><span class='line'>
-</span><span class='line'>    iov.iov_base = (void *)nlh;
-</span><span class='line'>    iov.iov_len = NLMSG_SPACE(MAX_PAYLOAD);
-</span><span class='line'>//    iov.iov_len = nlh-&gt;nlmsg_len;
-</span><span class='line'>
-</span><span class='line'>    memset(&msg, 0, sizeof(msg));
-</span><span class='line'>    msg.msg_name = (void *)&dest_addr;
-</span><span class='line'>    msg.msg_namelen = sizeof(dest_addr);
-</span><span class='line'>    msg.msg_iov = &iov;
-</span><span class='line'>    msg.msg_iovlen = 1;
-</span><span class='line'>
-</span><span class='line'>    state_smg = sendmsg(sock_fd,&msg,0);
-</span><span class='line'>    if(state_smg == -1)
-</span><span class='line'>    {
-</span><span class='line'>        printf("[user] get error sendmsg = %s\n",strerror(errno));
-</span><span class='line'>    }
-</span><span class='line'>    printf("[user] send netlink message ok.\n");
-</span><span class='line'>
-</span><span class='line'>    memset(nlh,0,NLMSG_SPACE(MAX_PAYLOAD));   
-</span><span class='line'>    // Read message from kernel
-</span><span class='line'>    //while(1){
-</span><span class='line'>        printf("[user] receiving netlink msg...\n");
-</span><span class='line'>        state = recvmsg(sock_fd, &msg, 0);
-</span><span class='line'>        if(state&lt;0)
-</span><span class='line'>        {
-</span><span class='line'>            printf("[user] state&lt;1");
-</span><span class='line'>        }
-</span><span class='line'>        printf("[user] Received message: %s\n",(char *) NLMSG_DATA(nlh));
-</span><span class='line'>    //}
-</span><span class='line'>
-</span><span class='line'>    close(sock_fd);
-</span><span class='line'>
-</span><span class='line'>    return 0;
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/3">&larr; Older</a>
@@ -4076,6 +3072,10 @@ all：
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2019/05/30/minikube-install/">Minikube Install</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2019/05/28/xubuntu-upgrade/">Xubuntu Upgrade</a>
       </li>
     
@@ -4089,10 +3089,6 @@ all：
     
       <li class="post">
         <a href="/blog/2018/04/27/redirect-extern-request-to-localhost/">重定向外部连接到本地环回地址</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2018/04/27/linux-sysctl-dot-conf-you-hua/">Linux sysctl.conf 优化</a>
       </li>
     
   </ul>
