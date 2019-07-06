@@ -24,6 +24,8 @@ RUN gem sources -a https://gems.ruby-china.com
 RUN gem sources -l
 RUN gem install bundler
 RUN bundle install
+RUN ssh-keygen -q -N "" -f "/root/.ssh/id_rsa" && cat /root/.ssh/id_rsa.pub
+RUN git config --global user.email "iskey@outlook.com" && git config --global user.name "iskey"
 
 # set up user so that host files have correct ownership
 #RUN addgroup --gid 1000 blog
