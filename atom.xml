@@ -4,7 +4,7 @@
   <title><![CDATA[Iskey's Blog]]></title>
   <link href="http://iskey.github.io/atom.xml" rel="self"/>
   <link href="http://iskey.github.io/"/>
-  <updated>2019-05-30T22:58:41+08:00</updated>
+  <updated>2019-07-06T22:56:22+00:00</updated>
   <id>http://iskey.github.io/</id>
   <author>
     <name><![CDATA[Iskey]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[Minikube Install]]></title>
     <link href="http://iskey.github.io/blog/2019/05/30/minikube-install/"/>
-    <updated>2019-05-30T22:51:48+08:00</updated>
+    <updated>2019-05-30T14:51:48+00:00</updated>
     <id>http://iskey.github.io/blog/2019/05/30/minikube-install</id>
     <content type="html"><![CDATA[<h2>单机minikube安装</h2>
 
@@ -84,7 +84,7 @@ kube-system kubernetes-dashboard-mg5jt 1/1 Running 0 2h
   <entry>
     <title type="html"><![CDATA[Xubuntu Upgrade]]></title>
     <link href="http://iskey.github.io/blog/2019/05/28/xubuntu-upgrade/"/>
-    <updated>2019-05-28T23:37:53+08:00</updated>
+    <updated>2019-05-28T15:37:53+00:00</updated>
     <id>http://iskey.github.io/blog/2019/05/28/xubuntu-upgrade</id>
     <content type="html"><![CDATA[<hr />
 
@@ -345,9 +345,9 @@ kube-system kubernetes-dashboard-mg5jt 1/1 Running 0 2h
   
   <entry>
     <title type="html"><![CDATA[Reset-env-for-running-process]]></title>
-    <link href="http://iskey.github.io/blog/2019/05/28/reset-env-for-running-process/"/>
-    <updated>2019-05-28T00:07:38+08:00</updated>
-    <id>http://iskey.github.io/blog/2019/05/28/reset-env-for-running-process</id>
+    <link href="http://iskey.github.io/blog/2019/05/27/reset-env-for-running-process/"/>
+    <updated>2019-05-27T16:07:38+00:00</updated>
+    <id>http://iskey.github.io/blog/2019/05/27/reset-env-for-running-process</id>
     <content type="html"><![CDATA[<h3>LD_PRELOAD注入</h3>
 
 <p>linux环境变量LD_PRELOAD可以指定程序运行时优先加载的动态链接库，在该环境变量路径下的动态链接库中的符号具有最高优先级。
@@ -372,7 +372,7 @@ kube-system kubernetes-dashboard-mg5jt 1/1 Running 0 2h
   <entry>
     <title type="html"><![CDATA[Iptables时间规则匹配]]></title>
     <link href="http://iskey.github.io/blog/2018/04/27/iptables-with-time/"/>
-    <updated>2018-04-27T19:25:48+08:00</updated>
+    <updated>2018-04-27T11:25:48+00:00</updated>
     <id>http://iskey.github.io/blog/2018/04/27/iptables-with-time</id>
     <content type="html"><![CDATA[<p>1、每天固定时间段匹配</p>
 
@@ -427,7 +427,7 @@ kube-system kubernetes-dashboard-mg5jt 1/1 Running 0 2h
   <entry>
     <title type="html"><![CDATA[重定向外部连接到本地环回地址]]></title>
     <link href="http://iskey.github.io/blog/2018/04/27/redirect-extern-request-to-localhost/"/>
-    <updated>2018-04-27T17:12:37+08:00</updated>
+    <updated>2018-04-27T09:12:37+00:00</updated>
     <id>http://iskey.github.io/blog/2018/04/27/redirect-extern-request-to-localhost</id>
     <content type="html"><![CDATA[<p>背景：在本地<code>localhost</code>搭建了一个Httpserver，监听在<code>4000</code>端口，现在想通过<code>eth0</code>在不改动代码的情况下对外发布服务。</p>
 
@@ -488,7 +488,7 @@ kube-system kubernetes-dashboard-mg5jt 1/1 Running 0 2h
   <entry>
     <title type="html"><![CDATA[Linux sysctl.conf 优化]]></title>
     <link href="http://iskey.github.io/blog/2018/04/27/linux-sysctl-dot-conf-you-hua/"/>
-    <updated>2018-04-27T09:32:43+08:00</updated>
+    <updated>2018-04-27T01:32:43+00:00</updated>
     <id>http://iskey.github.io/blog/2018/04/27/linux-sysctl-dot-conf-you-hua</id>
     <content type="html"><![CDATA[<p>可以通过/etc/sysctl.conf控制和配置Linux内核及网络设置。</p>
 
@@ -689,7 +689,7 @@ kube-system kubernetes-dashboard-mg5jt 1/1 Running 0 2h
   <entry>
     <title type="html"><![CDATA[10 Tips to Push Your Git Skills to the Next Level]]></title>
     <link href="http://iskey.github.io/blog/2018/04/26/10-tips-to-push-your-git-skills-to-the-next-level/"/>
-    <updated>2018-04-26T23:38:05+08:00</updated>
+    <updated>2018-04-26T15:38:05+00:00</updated>
     <id>http://iskey.github.io/blog/2018/04/26/10-tips-to-push-your-git-skills-to-the-next-level</id>
     <content type="html"><![CDATA[<p>Recently we published a couple of tutorials to get you familiar with Git basics and using Git in a team environment. The commands that we discussed were about enough to help a developer survive in the Git world. In this post, we will try to explore how to manage your time effectively and make full use of the features that Git provides.</p>
 
@@ -924,7 +924,7 @@ Conclusion</p>
   <entry>
     <title type="html"><![CDATA[Shell文件描述符操作]]></title>
     <link href="http://iskey.github.io/blog/2018/04/24/shell-fds/"/>
-    <updated>2018-04-24T10:39:25+08:00</updated>
+    <updated>2018-04-24T02:39:25+00:00</updated>
     <id>http://iskey.github.io/blog/2018/04/24/shell-fds</id>
     <content type="html"><![CDATA[<p>shell在产生一个新进程后，新进程的前三个文件描述符都默认指向三个相关文件。
 这三个文件描述符对应的数组下标分别为<strong>0，1，2</strong>。</p>

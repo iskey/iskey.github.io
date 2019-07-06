@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Iptables | Iskey's Blog]]></title>
   <link href="http://iskey.github.io/blog/categories/iptables/atom.xml" rel="self"/>
   <link href="http://iskey.github.io/"/>
-  <updated>2019-05-30T22:58:41+08:00</updated>
+  <updated>2019-07-06T22:56:22+00:00</updated>
   <id>http://iskey.github.io/</id>
   <author>
     <name><![CDATA[Iskey]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[Iptables时间规则匹配]]></title>
     <link href="http://iskey.github.io/blog/2018/04/27/iptables-with-time/"/>
-    <updated>2018-04-27T19:25:48+08:00</updated>
+    <updated>2018-04-27T11:25:48+00:00</updated>
     <id>http://iskey.github.io/blog/2018/04/27/iptables-with-time</id>
     <content type="html"><![CDATA[<p>1、每天固定时间段匹配</p>
 

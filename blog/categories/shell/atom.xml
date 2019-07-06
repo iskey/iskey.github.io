@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Shell | Iskey's Blog]]></title>
   <link href="http://iskey.github.io/blog/categories/shell/atom.xml" rel="self"/>
   <link href="http://iskey.github.io/"/>
-  <updated>2019-05-30T22:58:41+08:00</updated>
+  <updated>2019-07-06T22:56:22+00:00</updated>
   <id>http://iskey.github.io/</id>
   <author>
     <name><![CDATA[Iskey]]></name>
@@ -16,7 +16,7 @@
   <entry>
     <title type="html"><![CDATA[Shell文件描述符操作]]></title>
     <link href="http://iskey.github.io/blog/2018/04/24/shell-fds/"/>
-    <updated>2018-04-24T10:39:25+08:00</updated>
+    <updated>2018-04-24T02:39:25+00:00</updated>
     <id>http://iskey.github.io/blog/2018/04/24/shell-fds</id>
     <content type="html"><![CDATA[<p>shell在产生一个新进程后，新进程的前三个文件描述符都默认指向三个相关文件。
 这三个文件描述符对应的数组下标分别为<strong>0，1，2</strong>。</p>

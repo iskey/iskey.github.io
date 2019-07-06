@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Linuxc | Iskey's Blog]]></title>
   <link href="http://iskey.github.io/blog/categories/linuxc/atom.xml" rel="self"/>
   <link href="http://iskey.github.io/"/>
-  <updated>2019-05-30T22:58:41+08:00</updated>
+  <updated>2019-07-06T22:56:22+00:00</updated>
   <id>http://iskey.github.io/</id>
   <author>
     <name><![CDATA[Iskey]]></name>
@@ -15,9 +15,9 @@
   
   <entry>
     <title type="html"><![CDATA[Reset-env-for-running-process]]></title>
-    <link href="http://iskey.github.io/blog/2019/05/28/reset-env-for-running-process/"/>
-    <updated>2019-05-28T00:07:38+08:00</updated>
-    <id>http://iskey.github.io/blog/2019/05/28/reset-env-for-running-process</id>
+    <link href="http://iskey.github.io/blog/2019/05/27/reset-env-for-running-process/"/>
+    <updated>2019-05-27T16:07:38+00:00</updated>
+    <id>http://iskey.github.io/blog/2019/05/27/reset-env-for-running-process</id>
     <content type="html"><![CDATA[<h3>LD_PRELOAD注入</h3>
 
 <p>linux环境变量LD_PRELOAD可以指定程序运行时优先加载的动态链接库，在该环境变量路径下的动态链接库中的符号具有最高优先级。
