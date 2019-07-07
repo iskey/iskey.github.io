@@ -27,6 +27,9 @@ RUN bundle install
 RUN ssh-keygen -q -N "" -f "/root/.ssh/id_rsa" && cat /root/.ssh/id_rsa.pub
 RUN git config --global user.email "iskey@outlook.com" && git config --global user.name "iskey"
 
+EXPOSE 4000
+EXPOSE 80
+
 # set up user so that host files have correct ownership
 #RUN addgroup --gid 1000 blog
 #RUN adduser --uid 1000 --gid 1000 blog
