@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Ansible | Iskey's Blog]]></title>
+  <link href="http://iskey.github.io/blog/categories/ansible/atom.xml" rel="self"/>
+  <link href="http://iskey.github.io/"/>
+  <updated>2019-07-07T15:34:15+00:00</updated>
+  <id>http://iskey.github.io/</id>
+  <author>
+    <name><![CDATA[Iskey]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Simple Example of Ansible]]></title>
+    <link href="http://iskey.github.io/blog/2019/07/07/simple-example-of-ansible/"/>
+    <updated>2019-07-07T15:34:11+00:00</updated>
+    <id>http://iskey.github.io/blog/2019/07/07/simple-example-of-ansible</id>
+    <content type="html"><![CDATA[<p>Ansible 是一个自动化运维工具，相似的工具还有SaltStack、Puppet、Chef、Fabric，其中Ansible、SaltStack、Fabri都是用Python实现的，现在使用Python的同学比较多，维护起来也比较顺手，而Puppet、Chef是用ruby写的，各有各的拥趸。</p>
+
+<p>各个工具的对比:</p>
+
+<table>
+<thead>
+<tr>
+<th style="text-align:center;">工具 </th>
+<th style="text-align:center;">    语言 </th>
+<th style="text-align:center;">  架构 </th>
+<th style="text-align:center;">  协议</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">Puppet </td>
+<td style="text-align:center;">    Ruby </td>
+<td style="text-align:center;">  C/S </td>
+<td style="text-align:center;">   HTTP</td>
+</tr>
+<tr>
+<td style="text-align:center;">Chef </td>
+<td style="text-align:center;">  Ruby </td>
+<td style="text-align:center;">  C/S </td>
+<td style="text-align:center;">   HTTP</td>
+</tr>
+<tr>
+<td style="text-align:center;">Ansible </td>
+<td style="text-align:center;">   Python </td>
+<td style="text-align:center;"> 无Client </td>
+<td style="text-align:center;">    SSH</td>
+</tr>
+<tr>
+<td style="text-align:center;">Saltstack </td>
+<td style="text-align:center;"> Python </td>
+<td style="text-align:center;">    C/S(可无Client) </td>
+<td style="text-align:center;"> SSH/ZMQ/RAET</td>
+</tr>
+</tbody>
+</table>
+
+
+<hr />
+
+<h3>一个简单的使用ansible的例子</h3>
+
+<p>我们的例子里，在当前目录有三个文件：<code>ansible.cfg</code>,<code>first.yml</code>,<code>hosts</code></p>
+
+<h4>ansible.cfg</h4>
+
+<p>其中<code>ansible.cfg</code>文件是我们例子的ansible命令的配置文件，这里主要修改inventory字段，指定我们需要使用当前目录的hosts文件作为主机列表配置文件</p>
+
+<pre><code class="C">[defaults]
+
+# some basic default values...
+
+inventory      = ./hosts
+#inventory      = /root/work/ansible/hosts
+#library        = /usr/share/my_modules/
+#remote_tmp     = $HOME/.ansible/tmp
+#forks          = 5
+#poll_interval  = 15
+#sudo_user      = root
+#ask_sudo_pass = True
+#ask_pass      = True
+#transport      = smart
+#remote_port    = 22
+#module_lang    = C
+</code></pre>
+
+<p>ansible命令执行的时候，会按照如下顺序搜索配置文件:</p>
+
+<ul>
+<li>ANSIBLE_CONFIG (an environment variable)</li>
+<li>ansible.cfg (in the current directory)</li>
+<li>.ansible.cfg (in the home directory)</li>
+<li>/etc/ansible/ansible.cfg</li>
+</ul>
+
+
+<h4>hosts</h4>
+
+<p>hosts文件指定了我们需要的管理的主机列表：</p>
+
+<pre><code class="C"># cat hosts
+[host_iskey]
+x.x.x.1
+x.x.x.2
+
+
+[host_iskey:vars]
+ansible_ssh_pass='xxxxxxxx'
+ansible_ssh_user='root'
+</code></pre>
+
+<h4>first.yml</h4>
+
+<p>first.yml是我们的playbook，运行了一个很简单的命令，<code>touch /iskey</code></p>
+
+<pre><code class="C  "># cat first.yml
+- hosts: host_iskey
+  gather_facts: smart
+  remote_user: root
+  tasks:
+    - name: touch_iskey
+      command: "/usr/bin/touch /iskey &amp;&amp; sleep 3"
+</code></pre>
+
+<ul>
+<li>hosts:host_iskey</li>
+</ul>
+
+
+<p>说明要对hosts文件中的host_iskey组的主机列表进行操作</p>
+
+<ul>
+<li>gater_facts:smart</li>
+</ul>
+
+
+<p>ansible执行过程中，会收集远程主机的信息，如果每次都收集的话，非常浪费时间，可以设置facts缓存为smart，这样第一次收集之后，后边就不会再收集了，如果不需要收集可以直接设置为<code>no</code>来关掉主机信息收集</p>
+
+<h4>鉴权方式</h4>
+
+<h5>密码</h5>
+
+<p>ansible可以使用密码方式进行鉴权，前提是需要安装<code>sshpass</code>工具，<code>apt install sshpass</code>, ssh命令本身不提供参数来支持密码登陆，一般都是通过<code>sshpass</code>工具来实现。</p>
+
+<p>需要在hosts文件中，添加用户的密码，如下<code>host_iskey:vars</code>字段</p>
+
+<pre><code class="C"># cat hosts
+[host_iskey]
+x.x.x.1
+x.x.x.2
+
+[host_iskey:vars]
+ansible_ssh_pass='xxxxxxxx'
+ansible_ssh_user='root'
+</code></pre>
+
+<h5>秘钥</h5>
+
+<p>如果使用秘钥的话，可以用ssh-keygen生成秘钥，在当前目录生成名为ansible的秘钥</p>
+
+<pre><code>ssh-keygen -f ansible
+</code></pre>
+
+<p>把生成的公钥，追加到host主机的<code>.ssh/authorized_keys</code>文件中去，</p>
+
+<pre><code class="C"># cat hosts
+[host_iskey]
+x.x.x.1
+x.x.x.2
+
+[host_iskey:vars]
+ansible_ssh_user='root'
+ansible_ssh_private_key_file='./ansible'
+</code></pre>
+
+<p>执行ansible-playbook，</p>
+
+<pre><code class="C"># ansible-playbook  first.yml
+
+PLAY [host_iskey] ****************************************************************************************************************************
+
+TASK [touch_iskey] ***************************************************************************************************************************
+insufficient you can add 'warn: false' to this command task or set 'command_warnings=False' in ansible.cfg to get rid of this message.
+
+changed: [x.x.x.1]
+changed: [x.x.x.2]
+
+PLAY RECAP ***********************************************************************************************************************************
+x.x.x.1              : ok=1    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+x.x.x.2               : ok=1    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+****
+</code></pre>
+
+<h4>当然，可以通过ansible命令来执行一些简单的命令</h4>
+
+<pre><code class="C">ansible -i ./hosts all -m command  -a "touch /xxxx"  --private-key=./key/ansible
+</code></pre>
+
+<p>如果密钥的权限不是700，可能会提醒如下错误</p>
+
+<pre><code class="C"># ansible -i ./ansible/hosts all -m command  -a "touch /isno"  --private-key=./ansible/ansible
+x.x.x.1 | UNREACHABLE! =&gt; {
+    "changed": false,
+    "msg": "Failed to connect to the host via ssh: @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\r\n@         WARNING: UNPROTECTED PRIVATE KEY FILE!          @\r\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\r\nPermissions 0755 for './ansible' are too open.\r\nIt is required that your private key files are NOT accessible by others.\r\nThis private key will be ignored.\r\nLoad key \"./ansible\": bad permissions\r\nPermission denied (publickey,password).",
+    "unreachable": true
+}
+x.x.x.2 | UNREACHABLE! =&gt; {
+    "changed": false,
+    "msg": "Failed to connect to the host via ssh: @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\r\n@         WARNING: UNPROTECTED PRIVATE KEY FILE!          @\r\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\r\nPermissions 0755 for './ansible' are too open.\r\nIt is required that your private key files are NOT accessible by others.\r\nThis private key will be ignored.\r\nLoad key \"./ansible\": bad permissions\r\nPermission denied (publickey,password).",
+    "unreachable": true
+}
+</code></pre>
+
+<p>当然，如果不想用密钥的方式，也可以把密码直接写在hosts文件里。</p>
+]]></content>
+  </entry>
+  
+</feed>

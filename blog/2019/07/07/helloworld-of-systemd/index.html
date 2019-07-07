@@ -1,0 +1,363 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Helloworld_of_systemd - Iskey's Blog</title>
+  <meta name="author" content="Iskey">
+
+  
+  <meta name="description" content="init系统. linux操作系统首先从BIOS启动开始，接下来进入bootloader（桌面系统现在一般用Grub），bootloader载入内核并进行初始化。内核初始化的最好一步就是启动PID为1的init进程。init进程是以守护进程的方式存在，是所有其他进程的祖先。 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://iskey.github.io/blog/2019/07/07/helloworld-of-systemd/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Iskey's Blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Iskey's Blog</a></h1>
+  
+    <h2>A free place to write something down.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="iskey.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Helloworld_of_systemd</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2019-07-07T15:31:20+00:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>7</span><span class='date-suffix'>th</span>, <span class='date-year'>2019</span></span> <span class='time'>3:31 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h2>init系统.</h2>
+
+<p>linux操作系统首先从BIOS启动开始，接下来进入bootloader（桌面系统现在一般用Grub），bootloader载入内核并进行初始化。内核初始化的最好一步就是启动PID为1的init进程。init进程是以守护进程的方式存在，是所有其他进程的祖先。</p>
+
+<p>init系统的演进路线经历了sysvinit->upstart->systemd。</p>
+
+<h2>systemd系统简介</h2>
+
+<p>借用一下帮助文档里的关系图(man bootup)</p>
+
+<pre><code>       local-fs-pre.target
+                |
+                v
+       (various mounts and   (various swap   (various cryptsetup
+        fsck services...)     devices...)        devices...)       (various low-level   (various low-level
+                |                  |                  |             services: udevd,     API VFS mounts:
+                v                  v                  v             tmpfiles, random     mqueue, configfs,
+         local-fs.target      swap.target     cryptsetup.target    seed, sysctl, ...)      debugfs, ...)
+                |                  |                  |                    |                    |
+                \__________________|_________________ | ___________________|____________________/
+                                                     \|/
+                                                      v
+                                               sysinit.target
+                                                      |
+                 ____________________________________/|\________________________________________
+                /                  |                  |                    |                    \
+                |                  |                  |                    |                    |
+                v                  v                  |                    v                    v
+            (various           (various               |                (various          rescue.service
+           timers...)          paths...)              |               sockets...)               |
+                |                  |                  |                    |                    v
+                v                  v                  |                    v              rescue.target
+          timers.target      paths.target             |             sockets.target
+                |                  |                  |                    |
+                \__________________|_________________ | ___________________/
+                                                     \|/
+                                                      v
+                                                basic.target
+                                                      |
+                 ____________________________________/|                                 emergency.service
+                /                  |                  |                                         |
+                |                  |                  |                                         v
+                v                  v                  v                                 emergency.target
+            display-        (various system    (various system
+        manager.service         services           services)
+                |             required for            |
+                |            graphical UIs)           v
+                |                  |           multi-user.target
+                |                  |                  |
+                \_________________ | _________________/
+                                  \|/
+                                   v
+                         graphical.target
+</code></pre>
+
+<h2>systemd 使用</h2>
+
+<ul>
+<li>显示某个服务的实时日志</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">journalctl</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">pager</span> <span class="o">-</span><span class="n">f</span> <span class="o">-</span><span class="n">u</span> <span class="n">hello</span><span class="o">.</span><span class="na">service</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>编写服务配置文件</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="err">#</span> <span class="n">cat</span> <span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="n">hello</span>
+</span><span class='line'><span class="n">NAME</span><span class="o">=</span><span class="n">xxxxyyyyzzz</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>编写服务脚本</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="err">#</span> <span class="n">cat</span> <span class="o">/</span><span class="n">usr</span><span class="c1">//local/bin/hello.sh</span>
+</span><span class='line'><span class="err">#</span><span class="o">!/</span><span class="n">bin</span><span class="o">/</span><span class="n">bash</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">name</span><span class="o">=</span><span class="n">$1</span>
+</span><span class='line'><span class="k">while</span> <span class="kc">true</span>
+</span><span class='line'><span class="k">do</span>
+</span><span class='line'>    <span class="n">echo</span> <span class="n">Hello</span> <span class="n">World</span> <span class="n">$name</span>
+</span><span class='line'>    <span class="n">echo</span> <span class="s">&quot;*&quot;</span> <span class="o">&gt;&gt;</span> <span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="n">hello</span><span class="o">.</span><span class="na">log</span>
+</span><span class='line'>    <span class="n">sleep</span> <span class="mi">1</span>
+</span><span class='line'><span class="n">done</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>编写服务的systemd配置文件
+可以放到<code>/lib/systemd/system</code>目录，也可以放到<code>/etc/systemd/system</code>目录下，<code>/etc/systemd/system</code>的优先级更高</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="o">[</span><span class="n">Unit</span><span class="o">]</span>
+</span><span class='line'><span class="n">Description</span><span class="o">=</span><span class="n">Hello</span> <span class="n">world</span> <span class="n">Service</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">[</span><span class="n">Service</span><span class="o">]</span>
+</span><span class='line'><span class="n">EnvironmentFile</span><span class="o">=/</span><span class="n">root</span><span class="o">/</span><span class="n">hello</span>
+</span><span class='line'><span class="n">ExecStartPre</span><span class="o">=-/</span><span class="n">usr</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">touch</span> <span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="n">hello</span><span class="o">.</span><span class="na">start</span>
+</span><span class='line'><span class="n">ExecStartPre</span><span class="o">=-/</span><span class="n">usr</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">pkill</span> <span class="n">hello</span><span class="o">.</span><span class="na">sh</span>
+</span><span class='line'><span class="n">ExecStart</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">hello</span><span class="o">.</span><span class="na">sh</span> <span class="n">$</span><span class="o">{</span><span class="n">NAME</span><span class="o">}</span>
+</span><span class='line'><span class="err">#</span><span class="n">Type</span><span class="o">=</span><span class="n">forking</span>
+</span><span class='line'><span class="n">Restart</span><span class="o">=</span><span class="n">on</span><span class="o">-</span><span class="n">success</span>
+</span><span class='line'><span class="n">RestartSec</span><span class="o">=</span><span class="mi">5</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>设置服务的cgroups参数</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">systemctl</span> <span class="n">set</span><span class="o">-</span><span class="n">property</span> <span class="n">hello</span> <span class="n">CPUShares</span><span class="o">=</span><span class="mi">1600</span> <span class="n">MemoryLimit</span><span class="o">=</span><span class="mi">600</span><span class="n">M</span> <span class="o">--</span><span class="n">runtime</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>systemd-run examples</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">systemd</span><span class="o">-</span><span class="n">run</span> <span class="o">--</span><span class="n">user</span> <span class="o">--</span><span class="n">on</span><span class="o">-</span><span class="n">calendar</span> <span class="err">&#39;</span><span class="mi">2017</span><span class="o">-</span><span class="mi">08</span><span class="o">-</span><span class="mi">12</span> <span class="mi">14</span><span class="o">:</span><span class="mi">46</span><span class="err">&#39;</span> <span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">bash</span> <span class="o">-</span><span class="n">c</span> <span class="err">&#39;</span><span class="n">echo</span> <span class="n">done</span> <span class="o">&gt;/</span><span class="n">tmp</span><span class="o">/</span><span class="n">done</span><span class="err">&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>service/socket example</h2>
+
+<ul>
+<li>with golang <a href="https://github.com/coreos/go-systemd/tree/v14/examples/activation/httpserver">Httpserver</a></li>
+<li>with python <a href="https://gist.github.com/drmalex07/333d8a88c4918954e8e4">Httpserver</a></li>
+</ul>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Iskey</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2019-07-07T15:31:20+00:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>7</span><span class='date-suffix'>th</span>, <span class='date-year'>2019</span></span> <span class='time'>3:31 pm</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/systemd/'>systemd</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2019/07/07/use-lvm-to-expend-root-partition/" title="Previous Post: use lvm to expend root partition">&laquo; use lvm to expend root partition</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2019/07/07/simpe-example-of-kubernetes/" title="Next Post: simpe_example_of_kubernetes">simpe_example_of_kubernetes &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2019/07/07/simpe-example-of-kubernetes/">Simpe_example_of_kubernetes</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2019/07/07/helloworld-of-systemd/">Helloworld_of_systemd</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2019/07/07/use-lvm-to-expend-root-partition/">Use Lvm to Expend Root Partition</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2019/07/07/install-octopress-on-windows/">Install Octopress on Windows</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2019/05/30/minikube-install/">Minikube Install</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+  <h1>Categories</h1>
+    <ul id="category-list"><li><a href='/blog/categories/iptables/'>iptables (1)</a></li><li><a href='/blog/categories/kernel/'>kernel (5)</a></li><li><a href='/blog/categories/linuxc/'>linuxc (1)</a></li><li><a href='/blog/categories/linuxbian-cheng/'>linux编程 (1)</a></li><li><a href='/blog/categories/lvm/'>lvm (1)</a></li><li><a href='/blog/categories/makefile/'>makefile (2)</a></li><li><a href='/blog/categories/netfilter/'>netfilter (1)</a></li><li><a href='/blog/categories/ocp/'>ocp (2)</a></li><li><a href='/blog/categories/octopress/'>octopress (1)</a></li><li><a href='/blog/categories/python/'>python (1)</a></li><li><a href='/blog/categories/regax/'>regax (1)</a></li><li><a href='/blog/categories/shell/'>shell (3)</a></li><li><a href='/blog/categories/sourceinsight/'>sourceinsight (1)</a></li><li><a href='/blog/categories/sysctl/'>sysctl (1)</a></li><li><a href='/blog/categories/systemd/'>systemd (1)</a></li><li><a href='/blog/categories/todo/'>todo (1)</a></li><li><a href='/blog/categories/ubuntu/'>ubuntu (1)</a></li><li><a href='/blog/categories/vim/'>vim (1)</a></li><li><a href='/blog/categories/chuan-kou/'>串口 (1)</a></li><li><a href='/blog/categories/gong-ju/'>工具 (2)</a></li><li><a href='/blog/categories/wang-luo/'>网络 (3)</a></li><li><a href='/blog/categories/she-ji-mo-shi/'>设计模式 (1)</a></li></ul>
+</section>
+<section>
+  <h1>Tag Cloud</h1>
+    <span id="tag-cloud"><a href='/blog/categories/iptables' style='font-size: 112.0%'>iptables(1)</a> <a href='/blog/categories/kernel' style='font-size: 160.0%'>kernel(5)</a> <a href='/blog/categories/linuxc' style='font-size: 112.0%'>linuxc(1)</a> <a href='/blog/categories/linuxbian-cheng' style='font-size: 112.0%'>linux编程(1)</a> <a href='/blog/categories/lvm' style='font-size: 112.0%'>lvm(1)</a> <a href='/blog/categories/makefile' style='font-size: 124.0%'>makefile(2)</a> <a href='/blog/categories/netfilter' style='font-size: 112.0%'>netfilter(1)</a> <a href='/blog/categories/ocp' style='font-size: 124.0%'>ocp(2)</a> <a href='/blog/categories/octopress' style='font-size: 112.0%'>octopress(1)</a> <a href='/blog/categories/python' style='font-size: 112.0%'>python(1)</a> <a href='/blog/categories/regax' style='font-size: 112.0%'>regax(1)</a> <a href='/blog/categories/shell' style='font-size: 136.0%'>shell(3)</a> <a href='/blog/categories/sourceinsight' style='font-size: 112.0%'>sourceinsight(1)</a> <a href='/blog/categories/sysctl' style='font-size: 112.0%'>sysctl(1)</a> <a href='/blog/categories/systemd' style='font-size: 112.0%'>systemd(1)</a> <a href='/blog/categories/todo' style='font-size: 112.0%'>todo(1)</a> <a href='/blog/categories/ubuntu' style='font-size: 112.0%'>ubuntu(1)</a> <a href='/blog/categories/vim' style='font-size: 112.0%'>vim(1)</a> <a href='/blog/categories/chuan-kou' style='font-size: 112.0%'>串口(1)</a> <a href='/blog/categories/gong-ju' style='font-size: 124.0%'>工具(2)</a> <a href='/blog/categories/wang-luo' style='font-size: 136.0%'>网络(3)</a> <a href='/blog/categories/she-ji-mo-shi' style='font-size: 112.0%'>设计模式(1)</a> </span>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2019 - Iskey -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

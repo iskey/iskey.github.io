@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Octopress | Iskey's Blog]]></title>
+  <link href="http://iskey.github.io/blog/categories/octopress/atom.xml" rel="self"/>
+  <link href="http://iskey.github.io/"/>
+  <updated>2019-07-07T15:34:15+00:00</updated>
+  <id>http://iskey.github.io/</id>
+  <author>
+    <name><![CDATA[Iskey]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Install Octopress on Windows]]></title>
+    <link href="http://iskey.github.io/blog/2019/07/07/install-octopress-on-windows/"/>
+    <updated>2019-07-07T00:45:05+00:00</updated>
+    <id>http://iskey.github.io/blog/2019/07/07/install-octopress-on-windows</id>
+    <content type="html"><![CDATA[<p>最近在windows上安装了octopress（在linux的步骤差不多），简单记录一下，防止以后自己忘了</p>
+
+<h2>安装git</h2>
+
+<p>因为我们需要用github来存放我们生成的pages</p>
+
+<h2>安装ruby</h2>
+
+<ul>
+<li>下载安装包</li>
+</ul>
+
+
+<p>这里要注意一下octopress要求的ruby版本，我自己fork的octpress分支的readme.markdown里有如下字样</p>
+
+<pre><code>Note: Octopress requires a minimum Ruby version of 1.9.3-p0
+</code></pre>
+
+<p>到ruby的官方网站下载最接近的ruby版本就可以了，<a href="https://rubyinstaller.org/downloads/">Ruby</a>,
+我选用的是<a href="https://dl.bintray.com/oneclick/rubyinstaller/rubyinstaller-2.2.6-x64.exe">Ruby 2.2.6(x64)</a>.</p>
+
+<p>对应的Developmenet Kit是<a href="DevKit-mingw64-64-4.7.2-20130224-1432-sfx.exe">DevKit-mingw64-64-4.7.2-20130224-1432-sfx.exe</a>
+(<code>注:Developmenet Kit是Ruby的开发工具集，安装octopress过程中，有些库需要编译</code>)</p>
+
+<ul>
+<li><p>安装Ruby（运行安装包，把Ruby安装到<code>D:/Ruby23-64</code>目录）</p></li>
+<li><p>安装DevKit</p></li>
+</ul>
+
+
+<p>解压安装包到<code>D:/DevKit</code>，命令行进到<code>D:/DevKit</code>目录，执行</p>
+
+<pre><code>ruby dk.rb init
+</code></pre>
+
+<p>执行完成后，打开<code>D:/DevKit</code>目录下的<code>config.yml</code>,查看里边有没有<code>- D:\Ruby23-64</code>字样，如果没有需要手动加上，继续执行命令</p>
+
+<pre><code>ruby dk.rb install
+</code></pre>
+
+<p>另外记得把ruby的bin目录添加到系统环境变量</p>
+
+<h3>安装Python</h3>
+
+<p>安装Python2.7,不要用Python3</p>
+
+<h3>安装octopress</h3>
+
+<ul>
+<li>下载octopress，我这里用自己的fork的repo，<a href="https://github.com/iskey/iskey.github.io">My octopres</a></li>
+</ul>
+
+
+<p>新建一个目录，<code>D:/octopress</code>,在该目录下用git</p>
+
+<pre><code>git clone https://github.com/iskey/iskey.github.io
+</code></pre>
+
+<p>切换到<code>D:/octopress</code>，然后执行如下命令，切换一下gem的源（国内访问国外的源比较慢）</p>
+
+<pre><code>gem sources -a https://ruby.taobao.org/
+gem sources -r http://rubygems.org/
+gem sources -l
+</code></pre>
+
+<p>然后，执行如下命令，安装gem库</p>
+
+<pre><code>gem install bundler
+bundle install
+</code></pre>
+
+<p>安装Octopress主题</p>
+
+<pre><code>rake install
+</code></pre>
+
+<h2>octopress使用</h2>
+
+<ul>
+<li><p>编写新文章</p>
+
+<p>  rake new_post</p></li>
+</ul>
+
+
+<p>根据提示输入标题，或者直接使用如下命令</p>
+
+<pre><code>rake new_post['welcome']
+</code></pre>
+
+<ul>
+<li>发布、预览</li>
+</ul>
+
+
+<p>运行命令，设置github的pages地址</p>
+
+<pre><code>rake setup_Github_pages 
+</code></pre>
+
+<p>发布文章到Github</p>
+
+<pre><code>rake generate 
+rake deploy
+</code></pre>
+
+<p>本地预览</p>
+
+<pre><code>rake preview
+</code></pre>
+]]></content>
+  </entry>
+  
+</feed>

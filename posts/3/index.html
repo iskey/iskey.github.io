@@ -9,8 +9,55 @@
   <meta name="author" content="Iskey">
 
   
-  <meta name="description" content="最近需要使用netlink来完成内核层和用户层的通讯，搜集了一个网上的例子，暂时摘抄在此，并计划再接下来再补充一些东西： ToDoList: [x] 重写netlink内核实现，把处理函数放在内核线程里。
-[ ] 使用net_namespace机制下的general netlink接口写一个列子 &hellip;">
+  <meta name="description" content="调试串口转应用串口 1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+31
+32
+33
+34
+35
+36
+37
+38
+39
+40
+41
+42
+43
+44
+45
+46
+47
+48
+49 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -64,6 +111,2264 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2016/04/22/debug-serial-to-general/">调试串口转应用串口</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2016-04-22T20:36:00+00:00'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>22</span><span class='date-suffix'>nd</span>, <span class='date-year'>2016</span></span> <span class='time'>8:36 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>调试串口转应用串口</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#include "stdio.h"
+</span><span class='line'>#include "sys/ioctl.h"
+</span><span class='line'>#include "fcntl.h"
+</span><span class='line'>
+</span><span class='line'>#include "termios.h"
+</span><span class='line'>#include "unistd.h"
+</span><span class='line'>
+</span><span class='line'>#define ECHOFLAGS (ECHO | ECHOE | ECHOK | ECHONL)
+</span><span class='line'>
+</span><span class='line'>int main()
+</span><span class='line'>{
+</span><span class='line'>    int fd;
+</span><span class='line'>    int ret;
+</span><span class='line'>    char buf[100];
+</span><span class='line'>    struct termios term;
+</span><span class='line'>    
+</span><span class='line'>    fd= open("/dev/pts/0",O_RDONLY);
+</span><span class='line'>    if(fd&lt;=0){
+</span><span class='line'>        printf("Error. open /dev/pts/0.\n");
+</span><span class='line'>        goto err;
+</span><span class='line'>    }
+</span><span class='line'>    ioctl(fd, TIOCCONS);
+</span><span class='line'>    close(fd);
+</span><span class='line'>
+</span><span class='line'>    fd= open("/dev/ttyS0",O_RDONLY);
+</span><span class='line'>    if(fd&lt;=0){
+</span><span class='line'>    fd= open("/dev/ttyS0",O_RDONLY);
+</span><span class='line'>    if(fd&lt;=0){
+</span><span class='line'>        printf("Error. open /dev/console.\n");
+</span><span class='line'>        goto err;
+</span><span class='line'>    }
+</span><span class='line'>
+</span><span class='line'>    ret= tcgetattr(fd, &term);
+</span><span class='line'>    if(-1== ret){
+</span><span class='line'>        printf("tcgetattr error.\n");
+</span><span class='line'>        goto err;
+</span><span class='line'>    }
+</span><span class='line'>    cfmakeraw(&term);
+</span><span class='line'>    term.c_lflag&= ~ECHOFLAGS;
+</span><span class='line'>    tcsetattr(fd, TCSAFLUSH, &term);
+</span><span class='line'>    tcsetattr(fd, TCSANOW, &term);
+</span><span class='line'>    if(-1== ret){
+</span><span class='line'>        printf("tcsetattr error.\n");
+</span><span class='line'>        goto err;
+</span><span class='line'>    }
+</span><span class='line'>
+</span><span class='line'>    ret= read(fd, buf, 1);
+</span><span class='line'>    if(ret== -1){
+</span><span class='line'>        perror("read error.\n");    
+</span><span class='line'>        goto err;
+</span><span class='line'>    }
+</span><span class='line'>    
+</span><span class='line'>    while(*buf!='\n')
+</span><span class='line'>    {
+</span><span class='line'>        ret= read(fd, buf, 1);
+</span><span class='line'>        if(ret== -1){
+</span><span class='line'>            perror("read error1.\n");
+</span><span class='line'>            goto err;
+</span><span class='line'>        }
+</span><span class='line'>        printf("%02x\n",*buf);
+</span><span class='line'>    }
+</span><span class='line'>    ioctl(fd, TIOCCONS);
+</span><span class='line'>    close(fd);
+</span><span class='line'>
+</span><span class='line'>    return 0;
+</span><span class='line'>err:
+</span><span class='line'>    return -1;
+</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2016/04/20/Fix-ip-for-two-netmask/">跨网段修改ip地址</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2016-04-20T22:36:00+00:00'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>20</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>10:36 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>最近有个需求，需要在windows客户端下，远程修改linux服务器的ip地址，而且要求能够跨网段修改，首先相当的，当然是组播了，下边是实际的源码。</p>
+
+<p>windows端，在visual studio 2013上编译通过，使用方法，send [ip] [netmask],该程序会在windows上的所有网卡上发送组播报文。</p>
+
+<p>Linux客户端，使用方法recv  [eth].</p>
+
+<p>recv.c</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+<span class='line-number'>99</span>
+<span class='line-number'>100</span>
+<span class='line-number'>101</span>
+<span class='line-number'>102</span>
+<span class='line-number'>103</span>
+<span class='line-number'>104</span>
+<span class='line-number'>105</span>
+<span class='line-number'>106</span>
+<span class='line-number'>107</span>
+<span class='line-number'>108</span>
+<span class='line-number'>109</span>
+<span class='line-number'>110</span>
+<span class='line-number'>111</span>
+<span class='line-number'>112</span>
+<span class='line-number'>113</span>
+<span class='line-number'>114</span>
+<span class='line-number'>115</span>
+<span class='line-number'>116</span>
+<span class='line-number'>117</span>
+<span class='line-number'>118</span>
+<span class='line-number'>119</span>
+<span class='line-number'>120</span>
+<span class='line-number'>121</span>
+<span class='line-number'>122</span>
+<span class='line-number'>123</span>
+<span class='line-number'>124</span>
+<span class='line-number'>125</span>
+<span class='line-number'>126</span>
+<span class='line-number'>127</span>
+<span class='line-number'>128</span>
+<span class='line-number'>129</span>
+<span class='line-number'>130</span>
+<span class='line-number'>131</span>
+<span class='line-number'>132</span>
+<span class='line-number'>133</span>
+<span class='line-number'>134</span>
+<span class='line-number'>135</span>
+<span class='line-number'>136</span>
+<span class='line-number'>137</span>
+<span class='line-number'>138</span>
+<span class='line-number'>139</span>
+<span class='line-number'>140</span>
+<span class='line-number'>141</span>
+<span class='line-number'>142</span>
+<span class='line-number'>143</span>
+<span class='line-number'>144</span>
+<span class='line-number'>145</span>
+<span class='line-number'>146</span>
+<span class='line-number'>147</span>
+<span class='line-number'>148</span>
+<span class='line-number'>149</span>
+<span class='line-number'>150</span>
+<span class='line-number'>151</span>
+<span class='line-number'>152</span>
+<span class='line-number'>153</span>
+<span class='line-number'>154</span>
+<span class='line-number'>155</span>
+<span class='line-number'>156</span>
+<span class='line-number'>157</span>
+<span class='line-number'>158</span>
+<span class='line-number'>159</span>
+<span class='line-number'>160</span>
+<span class='line-number'>161</span>
+<span class='line-number'>162</span>
+<span class='line-number'>163</span>
+<span class='line-number'>164</span>
+<span class='line-number'>165</span>
+<span class='line-number'>166</span>
+<span class='line-number'>167</span>
+<span class='line-number'>168</span>
+<span class='line-number'>169</span>
+<span class='line-number'>170</span>
+<span class='line-number'>171</span>
+<span class='line-number'>172</span>
+<span class='line-number'>173</span>
+<span class='line-number'>174</span>
+<span class='line-number'>175</span>
+<span class='line-number'>176</span>
+<span class='line-number'>177</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="cp">#include &lt;stdlib.h&gt;  </span>
+</span><span class='line'><span class="cp">#include &lt;sys/types.h&gt;  </span>
+</span><span class='line'><span class="cp">#include &lt;sys/socket.h&gt;  </span>
+</span><span class='line'><span class="cp">#include &lt;netinet/in.h&gt;  </span>
+</span><span class='line'><span class="cp">#include &lt;arpa/inet.h&gt;  </span>
+</span><span class='line'><span class="cp">#include &lt;time.h&gt;  </span>
+</span><span class='line'><span class="cp">#include &lt;string.h&gt;  </span>
+</span><span class='line'><span class="cp">#include &lt;stdio.h&gt;  </span>
+</span><span class='line'><span class="cp">#include &lt;unistd.h&gt;  </span>
+</span><span class='line'>
+</span><span class='line'><span class="cp">#define MAX_LEN  1024    </span><span class="cm">/* maximum string size to send */</span><span class="cp"></span>
+</span><span class='line'><span class="cp">#define MIN_PORT 1024    </span><span class="cm">/* minimum port allowed */</span><span class="cp"></span>
+</span><span class='line'><span class="cp">#define MAX_PORT 65535   </span><span class="cm">/* maximum port allowed */</span><span class="cp"></span>
+</span><span class='line'>
+</span><span class='line'><span class="cp">#define HELLO_PORT 12345</span>
+</span><span class='line'><span class="cp">#define HELLO_GROUP &quot;225.0.0.37&quot;</span>
+</span><span class='line'><span class="cp">#define MSGBUFSIZE 256  </span>
+</span><span class='line'><span class="cp">#define RAW_DATA_LEN 250</span>
+</span><span class='line'><span class="cp">#define CMD_HEAD 0x57579090</span>
+</span><span class='line'><span class="cp">#define CMD_MAX_SIZE 250</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="k">typedef</span> <span class="k">struct</span> <span class="n">_BROADCAST_CMD_</span><span class="p">{</span>
+</span><span class='line'>  <span class="kt">uint32_t</span>    <span class="n">head</span><span class="p">;</span>
+</span><span class='line'>  <span class="kt">uint8_t</span>     <span class="n">cmd</span><span class="p">;</span>
+</span><span class='line'>  <span class="kt">uint16_t</span>    <span class="n">data_len</span><span class="p">;</span>
+</span><span class='line'>  <span class="kt">uint8_t</span>     <span class="n">raw_data</span><span class="p">[</span><span class="n">RAW_DATA_LEN</span><span class="p">];</span>
+</span><span class='line'>  <span class="kt">uint16_t</span>    <span class="n">crc</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span><span class="n">BROADCAST_CMD</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">enum</span><span class="p">{</span>
+</span><span class='line'>  <span class="n">CMD_SET_IP</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+</span><span class='line'>  <span class="n">CMD_SET_NETMASK</span><span class="p">,</span>
+</span><span class='line'>  <span class="n">CMD_SET_IP_NETMASK</span><span class="p">,</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">struct</span> <span class="n">__IP_MASK__</span><span class="p">{</span>
+</span><span class='line'>  <span class="kt">uint32_t</span> <span class="n">ip</span><span class="p">;</span>
+</span><span class='line'>  <span class="kt">uint32_t</span> <span class="n">netmask</span><span class="p">;</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="cp">#define INVERT_TO_BIG_ENDIAN16(val) (((uint16_t)val&amp; (uint16_t)0xff00) &gt;&gt;8 | \</span>
+</span><span class='line'><span class="cp">                                     ((uint16_t)val&amp; (uint16_t)0x00ff)&lt;&lt; 8)</span>
+</span><span class='line'>
+</span><span class='line'><span class="cp">#define INVERT_TO_BIG_ENDIAIN32(val) (((uint32_t)val&amp; (uint32_t)0xff000000)&gt;&gt; 24       | \</span>
+</span><span class='line'><span class="cp">                                     ((uint32_t)val&amp; (uint32_t)0x00ff0000)&gt;&gt; 8 | \</span>
+</span><span class='line'><span class="cp">                                     ((uint32_t)val&amp; (uint32_t)0x0000ff00)&lt;&lt; 8 | \</span>
+</span><span class='line'><span class="cp">                                     ((uint32_t)val&amp; (uint32_t)0x000000ff)&lt;&lt; 24)</span>
+</span><span class='line'>
+</span><span class='line'><span class="cp">#define INVERT_TO_BIG_ENDIAN64(val) (((uint64_t) (val) &amp; (uint64_t)(0x00000000000000ffU)) &lt;&lt; 56) | \</span>
+</span><span class='line'><span class="cp">                                     (((uint64_t)(val)&amp; (uint64_t)(0x000000000000ff00U)) &lt;&lt; 40) | \</span>
+</span><span class='line'><span class="cp">                                     (((uint64_t)(val)&amp; (uint64_t)(0x0000000000ff0000U)) &lt;&lt; 24) | \</span>
+</span><span class='line'><span class="cp">                                     (((uint64_t)(val)&amp; (uint64_t)(0x00000000ff000000U)) &lt;&lt; 8) | \</span>
+</span><span class='line'><span class="cp">                                     (((uint64_t)(val)&amp; (uint64_t)(0x000000ff00000000U)) &gt;&gt; 8) | \</span>
+</span><span class='line'><span class="cp">                                     (((uint64_t)(val)&amp; (uint64_t)(0x0000ff0000000000U)) &gt;&gt; 24) | \</span>
+</span><span class='line'><span class="cp">                                     (((uint64_t)(val)&amp; (uint64_t)(0x00ff000000000000U)) &gt;&gt; 40) | \</span>
+</span><span class='line'><span class="cp">                                     (((uint64_t)(val)&amp; (uint64_t)(0xff00000000000000U)) &gt;&gt; 56)))</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="cp">#define TO_NET16(val) INVERT_TO_BIG_ENDIAN16(val)</span>
+</span><span class='line'><span class="cp">#define TO_NET32(val) INVERT_TO_BIG_ENDIAIN32(val)</span>
+</span><span class='line'><span class="cp">#define TO_NET64(val) INVERT_TO_BIG_ENDIAN64(val)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="nf">isBigEndian</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="k">union</span> <span class="n">MyUnion</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>      <span class="kt">uint8_t</span> <span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+</span><span class='line'>      <span class="kt">uint16_t</span> <span class="n">b</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">union</span> <span class="n">MyUnion</span> <span class="n">test</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">test</span><span class="p">.</span><span class="n">b</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">return</span> <span class="n">test</span><span class="p">.</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">argv</span><span class="p">[])</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="k">struct</span> <span class="n">sockaddr_in</span> <span class="n">addr</span><span class="p">;</span>
+</span><span class='line'>  <span class="kt">int</span> <span class="n">fd</span><span class="p">,</span> <span class="n">nbytes</span><span class="p">,</span><span class="n">addrlen</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">struct</span> <span class="n">ip_mreq</span> <span class="n">mreq</span><span class="p">;</span>
+</span><span class='line'>  <span class="kt">char</span> <span class="n">msgbuf</span><span class="p">[</span><span class="n">MSGBUFSIZE</span><span class="p">];</span>
+</span><span class='line'>  <span class="kt">char</span> <span class="n">str_cmd</span><span class="p">[</span><span class="n">CMD_MAX_SIZE</span><span class="p">];</span>
+</span><span class='line'>  <span class="kt">char</span> <span class="n">ip</span><span class="p">[</span><span class="mi">50</span><span class="p">];</span>
+</span><span class='line'>  <span class="kt">char</span> <span class="n">netmask</span><span class="p">[</span><span class="mi">50</span><span class="p">];</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">u_int</span> <span class="n">yes</span><span class="o">=</span><span class="mi">1</span><span class="p">;</span> <span class="cm">/*** MODIFICATION TO ORIGINAL */</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">if</span><span class="p">(</span><span class="n">argc</span><span class="o">!=</span><span class="mi">2</span><span class="p">){</span>
+</span><span class='line'>      <span class="n">printf</span><span class="p">(</span><span class="s">&quot;Usage: %s [eth_name]</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+</span><span class='line'>      <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">snprintf</span><span class="p">(</span><span class="n">str_cmd</span><span class="p">,</span> <span class="n">CMD_MAX_SIZE</span><span class="p">,</span> <span class="s">&quot;route add -net 0.0.0.0 %s&quot;</span><span class="p">,</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">]);</span>
+</span><span class='line'>    <span class="n">system</span><span class="p">(</span><span class="n">str_cmd</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="cm">/* create what looks like an ordinary UDP socket */</span>
+</span><span class='line'>  <span class="k">if</span> <span class="p">((</span><span class="n">fd</span><span class="o">=</span><span class="n">socket</span><span class="p">(</span><span class="n">AF_INET</span><span class="p">,</span><span class="n">SOCK_DGRAM</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>      <span class="n">perror</span><span class="p">(</span><span class="s">&quot;socket&quot;</span><span class="p">);</span>
+</span><span class='line'>      <span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="cm">/**** MODIFICATION TO ORIGINAL */</span>
+</span><span class='line'>  <span class="cm">/* allow multiple sockets to use the same PORT number */</span>
+</span><span class='line'>  <span class="k">if</span> <span class="p">(</span><span class="n">setsockopt</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span><span class="n">SOL_SOCKET</span><span class="p">,</span><span class="n">SO_REUSEADDR</span><span class="p">,</span><span class="o">&amp;</span><span class="n">yes</span><span class="p">,</span><span class="k">sizeof</span><span class="p">(</span><span class="n">yes</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>      <span class="n">perror</span><span class="p">(</span><span class="s">&quot;Reusing ADDR failed&quot;</span><span class="p">);</span>
+</span><span class='line'>      <span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="cm">/*** END OF MODIFICATION TO ORIGINAL */</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="cm">/* set up destination address */</span>
+</span><span class='line'>  <span class="n">memset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">addr</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="k">sizeof</span><span class="p">(</span><span class="n">addr</span><span class="p">));</span>
+</span><span class='line'>  <span class="n">addr</span><span class="p">.</span><span class="n">sin_family</span><span class="o">=</span><span class="n">AF_INET</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">addr</span><span class="p">.</span><span class="n">sin_addr</span><span class="p">.</span><span class="n">s_addr</span><span class="o">=</span><span class="n">htonl</span><span class="p">(</span><span class="n">INADDR_ANY</span><span class="p">);</span> <span class="cm">/* N.B.: differs from sender */</span>
+</span><span class='line'>  <span class="n">addr</span><span class="p">.</span><span class="n">sin_port</span><span class="o">=</span><span class="n">htons</span><span class="p">(</span><span class="n">HELLO_PORT</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="cm">/* bind to receive address */</span>
+</span><span class='line'>  <span class="k">if</span> <span class="p">(</span><span class="n">bind</span><span class="p">(</span><span class="n">fd</span><span class="p">,(</span><span class="k">struct</span> <span class="n">sockaddr</span> <span class="o">*</span><span class="p">)</span> <span class="o">&amp;</span><span class="n">addr</span><span class="p">,</span><span class="k">sizeof</span><span class="p">(</span><span class="n">addr</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>      <span class="n">perror</span><span class="p">(</span><span class="s">&quot;bind&quot;</span><span class="p">);</span>
+</span><span class='line'>      <span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="cm">/* use setsockopt() to request that the kernel join a multicast group */</span>
+</span><span class='line'>  <span class="n">mreq</span><span class="p">.</span><span class="n">imr_multiaddr</span><span class="p">.</span><span class="n">s_addr</span><span class="o">=</span><span class="n">inet_addr</span><span class="p">(</span><span class="n">HELLO_GROUP</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">mreq</span><span class="p">.</span><span class="n">imr_interface</span><span class="p">.</span><span class="n">s_addr</span><span class="o">=</span><span class="n">htonl</span><span class="p">(</span><span class="n">INADDR_ANY</span><span class="p">);</span>
+</span><span class='line'>  <span class="k">if</span> <span class="p">(</span><span class="n">setsockopt</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span><span class="n">IPPROTO_IP</span><span class="p">,</span><span class="n">IP_ADD_MEMBERSHIP</span><span class="p">,</span><span class="o">&amp;</span><span class="n">mreq</span><span class="p">,</span><span class="k">sizeof</span><span class="p">(</span><span class="n">mreq</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>      <span class="n">perror</span><span class="p">(</span><span class="s">&quot;setsockopt&quot;</span><span class="p">);</span>
+</span><span class='line'>      <span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="cm">/* now just enter a read-print loop */</span>
+</span><span class='line'>  <span class="k">while</span> <span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>      <span class="n">addrlen</span><span class="o">=</span><span class="k">sizeof</span><span class="p">(</span><span class="n">addr</span><span class="p">);</span>
+</span><span class='line'>      <span class="k">if</span> <span class="p">((</span><span class="n">nbytes</span><span class="o">=</span><span class="n">recvfrom</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span><span class="n">msgbuf</span><span class="p">,</span><span class="n">MSGBUFSIZE</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="k">struct</span> <span class="n">sockaddr</span> <span class="o">*</span><span class="p">)</span> <span class="o">&amp;</span><span class="n">addr</span><span class="p">,(</span><span class="kt">socklen_t</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">addrlen</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
+</span><span class='line'>      <span class="p">{</span>
+</span><span class='line'>          <span class="n">perror</span><span class="p">(</span><span class="s">&quot;recvfrom&quot;</span><span class="p">);</span>
+</span><span class='line'>          <span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="n">BROADCAST_CMD</span> <span class="n">cmd</span><span class="p">,</span> <span class="o">*</span><span class="n">p_cmd</span> <span class="o">=</span> <span class="p">(</span><span class="n">BROADCAST_CMD</span> <span class="o">*</span><span class="p">)</span><span class="n">msgbuf</span><span class="p">;</span>
+</span><span class='line'>      <span class="k">struct</span> <span class="n">__IP_MASK__</span> <span class="n">ip_mask</span><span class="p">,</span> <span class="o">*</span><span class="n">p_ip_mask</span><span class="o">=</span>  <span class="p">(</span><span class="k">struct</span> <span class="n">__IP_MASK__</span><span class="o">*</span><span class="p">)(</span><span class="n">p_cmd</span><span class="o">-&gt;</span><span class="n">raw_data</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="n">ip_mask</span><span class="p">.</span><span class="n">ip</span> <span class="o">=</span> <span class="n">p_ip_mask</span><span class="o">-&gt;</span><span class="n">ip</span><span class="p">;</span>
+</span><span class='line'>      <span class="n">ip_mask</span><span class="p">.</span><span class="n">netmask</span> <span class="o">=</span> <span class="n">p_ip_mask</span><span class="o">-&gt;</span><span class="n">netmask</span><span class="p">;</span>
+</span><span class='line'>      <span class="k">if</span> <span class="p">(</span><span class="n">isBigEndian</span><span class="p">()){</span>
+</span><span class='line'>          <span class="n">cmd</span><span class="p">.</span><span class="n">head</span> <span class="o">=</span> <span class="n">p_cmd</span><span class="o">-&gt;</span><span class="n">head</span><span class="p">;</span>
+</span><span class='line'>          <span class="n">cmd</span><span class="p">.</span><span class="n">cmd</span> <span class="o">=</span> <span class="n">p_cmd</span><span class="o">-&gt;</span><span class="n">cmd</span><span class="p">;</span>
+</span><span class='line'>          <span class="n">cmd</span><span class="p">.</span><span class="n">data_len</span> <span class="o">=</span> <span class="n">p_cmd</span><span class="o">-&gt;</span><span class="n">data_len</span><span class="p">;</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>      <span class="k">else</span>
+</span><span class='line'>      <span class="p">{</span>
+</span><span class='line'>          <span class="n">cmd</span><span class="p">.</span><span class="n">head</span> <span class="o">=</span> <span class="n">TO_NET32</span><span class="p">(</span><span class="n">p_cmd</span><span class="o">-&gt;</span><span class="n">head</span><span class="p">);</span>
+</span><span class='line'>          <span class="n">cmd</span><span class="p">.</span><span class="n">cmd</span> <span class="o">=</span> <span class="n">p_cmd</span><span class="o">-&gt;</span><span class="n">cmd</span><span class="p">;</span>
+</span><span class='line'>          <span class="n">cmd</span><span class="p">.</span><span class="n">data_len</span> <span class="o">=</span> <span class="n">TO_NET16</span><span class="p">(</span><span class="n">p_cmd</span><span class="o">-&gt;</span><span class="n">data_len</span><span class="p">);</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="k">if</span> <span class="p">(</span><span class="n">cmd</span><span class="p">.</span><span class="n">head</span> <span class="o">==</span> <span class="n">CMD_HEAD</span><span class="p">){</span>
+</span><span class='line'>          <span class="n">printf</span><span class="p">(</span><span class="s">&quot;cmd head is 0x%08x.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">cmd</span><span class="p">.</span><span class="n">head</span><span class="p">);</span>
+</span><span class='line'>          <span class="n">printf</span><span class="p">(</span><span class="s">&quot;cmd.cmd is 0x%02x</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">cmd</span><span class="p">.</span><span class="n">cmd</span><span class="p">);</span>
+</span><span class='line'>          <span class="n">snprintf</span><span class="p">(</span><span class="n">ip</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">ip</span><span class="p">),</span> <span class="s">&quot;%s&quot;</span><span class="p">,</span> <span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)(</span><span class="n">inet_ntoa</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="k">struct</span> <span class="n">in_addr</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">ip_mask</span><span class="p">.</span><span class="n">ip</span><span class="p">)));</span>
+</span><span class='line'>          <span class="n">snprintf</span><span class="p">(</span><span class="n">netmask</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">netmask</span><span class="p">),</span> <span class="s">&quot;%s&quot;</span><span class="p">,</span> <span class="p">(</span><span class="kt">char</span><span class="o">*</span><span class="p">)(</span><span class="n">inet_ntoa</span><span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="k">struct</span> <span class="n">in_addr</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">ip_mask</span><span class="p">.</span><span class="n">netmask</span><span class="p">)));</span>
+</span><span class='line'>          <span class="n">printf</span><span class="p">(</span><span class="s">&quot;ip is %s.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">ip</span><span class="p">);</span>
+</span><span class='line'>          <span class="n">printf</span><span class="p">(</span><span class="s">&quot;netmask is %s.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">netmask</span><span class="p">);</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="n">snprintf</span><span class="p">(</span><span class="n">str_cmd</span><span class="p">,</span> <span class="n">CMD_MAX_SIZE</span><span class="p">,</span> <span class="s">&quot;ifconfig %s %s netmask %s&quot;</span><span class="p">,</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">ip</span><span class="p">,</span> <span class="n">netmask</span><span class="p">);</span>
+</span><span class='line'>      <span class="n">printf</span><span class="p">(</span><span class="s">&quot;cmd is %s.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">str_cmd</span><span class="p">);</span>
+</span><span class='line'>      <span class="n">system</span><span class="p">(</span><span class="n">str_cmd</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>send.c</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+<span class='line-number'>99</span>
+<span class='line-number'>100</span>
+<span class='line-number'>101</span>
+<span class='line-number'>102</span>
+<span class='line-number'>103</span>
+<span class='line-number'>104</span>
+<span class='line-number'>105</span>
+<span class='line-number'>106</span>
+<span class='line-number'>107</span>
+<span class='line-number'>108</span>
+<span class='line-number'>109</span>
+<span class='line-number'>110</span>
+<span class='line-number'>111</span>
+<span class='line-number'>112</span>
+<span class='line-number'>113</span>
+<span class='line-number'>114</span>
+<span class='line-number'>115</span>
+<span class='line-number'>116</span>
+<span class='line-number'>117</span>
+<span class='line-number'>118</span>
+<span class='line-number'>119</span>
+<span class='line-number'>120</span>
+<span class='line-number'>121</span>
+<span class='line-number'>122</span>
+<span class='line-number'>123</span>
+<span class='line-number'>124</span>
+<span class='line-number'>125</span>
+<span class='line-number'>126</span>
+<span class='line-number'>127</span>
+<span class='line-number'>128</span>
+<span class='line-number'>129</span>
+<span class='line-number'>130</span>
+<span class='line-number'>131</span>
+<span class='line-number'>132</span>
+<span class='line-number'>133</span>
+<span class='line-number'>134</span>
+<span class='line-number'>135</span>
+<span class='line-number'>136</span>
+<span class='line-number'>137</span>
+<span class='line-number'>138</span>
+<span class='line-number'>139</span>
+<span class='line-number'>140</span>
+<span class='line-number'>141</span>
+<span class='line-number'>142</span>
+<span class='line-number'>143</span>
+<span class='line-number'>144</span>
+<span class='line-number'>145</span>
+<span class='line-number'>146</span>
+<span class='line-number'>147</span>
+<span class='line-number'>148</span>
+<span class='line-number'>149</span>
+<span class='line-number'>150</span>
+<span class='line-number'>151</span>
+<span class='line-number'>152</span>
+<span class='line-number'>153</span>
+<span class='line-number'>154</span>
+<span class='line-number'>155</span>
+<span class='line-number'>156</span>
+<span class='line-number'>157</span>
+<span class='line-number'>158</span>
+<span class='line-number'>159</span>
+<span class='line-number'>160</span>
+<span class='line-number'>161</span>
+<span class='line-number'>162</span>
+<span class='line-number'>163</span>
+<span class='line-number'>164</span>
+<span class='line-number'>165</span>
+<span class='line-number'>166</span>
+<span class='line-number'>167</span>
+<span class='line-number'>168</span>
+<span class='line-number'>169</span>
+<span class='line-number'>170</span>
+<span class='line-number'>171</span>
+<span class='line-number'>172</span>
+<span class='line-number'>173</span>
+<span class='line-number'>174</span>
+<span class='line-number'>175</span>
+<span class='line-number'>176</span>
+<span class='line-number'>177</span>
+<span class='line-number'>178</span>
+<span class='line-number'>179</span>
+<span class='line-number'>180</span>
+<span class='line-number'>181</span>
+<span class='line-number'>182</span>
+<span class='line-number'>183</span>
+<span class='line-number'>184</span>
+<span class='line-number'>185</span>
+<span class='line-number'>186</span>
+<span class='line-number'>187</span>
+<span class='line-number'>188</span>
+<span class='line-number'>189</span>
+<span class='line-number'>190</span>
+<span class='line-number'>191</span>
+<span class='line-number'>192</span>
+<span class='line-number'>193</span>
+<span class='line-number'>194</span>
+<span class='line-number'>195</span>
+<span class='line-number'>196</span>
+<span class='line-number'>197</span>
+<span class='line-number'>198</span>
+</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="cp">#include &lt;sys/types.h&gt;   </span><span class="cm">/* for type definitions */</span><span class="cp"></span>
+</span><span class='line'><span class="cp">#include &lt;winsock2.h&gt;    </span><span class="cm">/* for win socket API calls */</span><span class="cp"></span>
+</span><span class='line'><span class="cp">#include &lt;ws2tcpip.h&gt;    </span><span class="cm">/* for win socket structs */</span><span class="cp"></span>
+</span><span class='line'><span class="cp">#include &lt;stdio.h&gt;       </span><span class="cm">/* for printf() */</span><span class="cp"></span>
+</span><span class='line'><span class="cp">#include &lt;stdlib.h&gt;      </span><span class="cm">/* for atoi() */</span><span class="cp"></span>
+</span><span class='line'><span class="cp">#include &lt;string.h&gt;      </span><span class="cm">/* for strlen() */</span><span class="cp"></span>
+</span><span class='line'>
+</span><span class='line'><span class="cp">#include &quot;inttypes.h&quot;</span>
+</span><span class='line'><span class="cp">#include &quot;stdint.h&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="cp">#define MAX_LEN  1024    </span><span class="cm">/* maximum string size to send */</span><span class="cp"></span>
+</span><span class='line'><span class="cp">#define MIN_PORT 1024    </span><span class="cm">/* minimum port allowed */</span><span class="cp"></span>
+</span><span class='line'><span class="cp">#define MAX_PORT 65535   </span><span class="cm">/* maximum port allowed */</span><span class="cp"></span>
+</span><span class='line'>
+</span><span class='line'><span class="cp">#define HELLO_PORT 12345</span>
+</span><span class='line'><span class="cp">#define HELLO_GROUP &quot;225.0.0.37&quot;</span>
+</span><span class='line'><span class="cp">#define RAW_DATA_LEN 250</span>
+</span><span class='line'><span class="cp">#define CMD_HEAD 0x57579090</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">typedef</span> <span class="k">struct</span> <span class="n">_BROADCAST_CMD_</span><span class="p">{</span>
+</span><span class='line'>    <span class="kt">uint32_t</span>  <span class="n">head</span><span class="p">;</span>
+</span><span class='line'>    <span class="kt">uint8_t</span>   <span class="n">cmd</span><span class="p">;</span>
+</span><span class='line'>    <span class="kt">uint16_t</span>  <span class="n">data_len</span><span class="p">;</span>
+</span><span class='line'>    <span class="kt">uint8_t</span>   <span class="n">raw_data</span><span class="p">[</span><span class="n">RAW_DATA_LEN</span><span class="p">];</span>
+</span><span class='line'>    <span class="kt">uint16_t</span>  <span class="n">crc</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span><span class="n">BROADCAST_CMD</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">enum</span><span class="p">{</span>
+</span><span class='line'>    <span class="n">CMD_SET_IP</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+</span><span class='line'>    <span class="n">CMD_SET_NETMASK</span><span class="p">,</span>
+</span><span class='line'>    <span class="n">CMD_SET_IP_NETMASK</span><span class="p">,</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">struct</span> <span class="n">__IP_MASK__</span><span class="p">{</span>
+</span><span class='line'>    <span class="kt">uint32_t</span> <span class="n">ip</span><span class="p">;</span>
+</span><span class='line'>    <span class="kt">uint32_t</span> <span class="n">netmask</span><span class="p">;</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'><span class="cp">#define INVERT_TO_BIG_ENDIAN16(val) (((uint16_t)val&amp; (uint16_t)0xff00) &gt;&gt;8 | \</span>
+</span><span class='line'><span class="cp">    ((uint16_t)val&amp; (uint16_t)0x00ff) &lt;&lt; 8)</span>
+</span><span class='line'>
+</span><span class='line'><span class="cp">#define INVERT_TO_BIG_ENDIAIN32(val) (((uint32_t)val&amp; (uint32_t)0xff000000)&gt;&gt; 24       | \</span>
+</span><span class='line'><span class="cp">    ((uint32_t)val&amp; (uint32_t)0x00ff0000) &gt;&gt; 8 | \</span>
+</span><span class='line'><span class="cp">    ((uint32_t)val&amp; (uint32_t)0x0000ff00) &lt;&lt; 8 | \</span>
+</span><span class='line'><span class="cp">    ((uint32_t)val&amp; (uint32_t)0x000000ff) &lt;&lt; 24)</span>
+</span><span class='line'>
+</span><span class='line'><span class="cp">#define INVERT_TO_BIG_ENDIAN64(val) (((uint64_t) (val) &amp; (uint64_t)(0x00000000000000ffU)) &lt;&lt; 56) | \</span>
+</span><span class='line'><span class="cp">    (((uint64_t)(val)&amp; (uint64_t)(0x000000000000ff00U)) &lt;&lt; 40) | \</span>
+</span><span class='line'><span class="cp">    (((uint64_t)(val)&amp; (uint64_t)(0x0000000000ff0000U)) &lt;&lt; 24) | \</span>
+</span><span class='line'><span class="cp">    (((uint64_t)(val)&amp; (uint64_t)(0x00000000ff000000U)) &lt;&lt; 8) | \</span>
+</span><span class='line'><span class="cp">    (((uint64_t)(val)&amp; (uint64_t)(0x000000ff00000000U)) &gt;&gt; 8) | \</span>
+</span><span class='line'><span class="cp">    (((uint64_t)(val)&amp; (uint64_t)(0x0000ff0000000000U)) &gt;&gt; 24) | \</span>
+</span><span class='line'><span class="cp">    (((uint64_t)(val)&amp; (uint64_t)(0x00ff000000000000U)) &gt;&gt; 40) | \</span>
+</span><span class='line'><span class="cp">    (((uint64_t)(val)&amp; (uint64_t)(0xff00000000000000U)) &gt;&gt; 56)))</span>
+</span><span class='line'>
+</span><span class='line'><span class="cp">#define TO_NET16(val) INVERT_TO_BIG_ENDIAN16(val)</span>
+</span><span class='line'><span class="cp">#define TO_NET32(val) INVERT_TO_BIG_ENDIAIN32(val)</span>
+</span><span class='line'><span class="cp">#define TO_NET64(val) INVERT_TO_BIG_ENDIAN64(val)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="nf">isBigEndian</span><span class="p">()</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="k">union</span> <span class="n">MyUnion</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>      <span class="kt">uint8_t</span> <span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">];</span>
+</span><span class='line'>      <span class="kt">uint16_t</span> <span class="n">b</span><span class="p">;</span>
+</span><span class='line'>    <span class="p">};</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">union</span> <span class="n">MyUnion</span> <span class="n">test</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">test</span><span class="p">.</span><span class="n">b</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>
+</span><span class='line'>    <span class="k">return</span> <span class="n">test</span><span class="p">.</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">];</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">void</span> <span class="nf">usage</span><span class="p">(</span><span class="kt">char</span> <span class="o">*</span><span class="n">cmd</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="n">printf</span><span class="p">(</span><span class="s">&quot;Usage:</span><span class="se">\&quot;</span><span class="s">%s [ip] [netmask]</span><span class="se">\&quot;\n</span><span class="s"> </span><span class="se">\t</span><span class="s"> e.g.: %s eth0 1.1.1.1 255.255.255.0</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">cmd</span><span class="p">,</span> <span class="n">cmd</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="cp">#pragma comment(lib,&quot;Ws2_32.lib&quot;) </span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="nf">send_ip_set_cmd</span><span class="p">(</span><span class="kt">char</span><span class="o">*</span> <span class="n">local_ip</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">remote_ip</span><span class="p">,</span> <span class="kt">char</span><span class="o">*</span> <span class="n">remote_netmask</span><span class="p">)</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="kt">int</span> <span class="n">sock</span><span class="p">;</span>                   <span class="cm">/* socket descriptor */</span>
+</span><span class='line'>    <span class="k">struct</span> <span class="n">sockaddr_in</span> <span class="n">mc_addr</span><span class="p">;</span> <span class="cm">/* socket address structure */</span>
+</span><span class='line'>    <span class="c1">//char* mc_addr_str;          /* multicast IP address */</span>
+</span><span class='line'>    <span class="c1">//unsigned short mc_port;     /* multicast port */</span>
+</span><span class='line'>    <span class="kt">unsigned</span> <span class="kt">char</span> <span class="n">mc_ttl</span> <span class="o">=</span> <span class="mi">1</span><span class="p">;</span>     <span class="cm">/* time to live (hop count) */</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">struct</span> <span class="n">__IP_MASK__</span> <span class="n">ip_mask</span><span class="p">;</span>
+</span><span class='line'>    <span class="n">BROADCAST_CMD</span> <span class="n">cmd</span><span class="p">;</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="n">ip_mask</span><span class="p">.</span><span class="n">ip</span> <span class="o">=</span> <span class="n">inet_addr</span><span class="p">(</span><span class="n">remote_ip</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">ip_mask</span><span class="p">.</span><span class="n">netmask</span> <span class="o">=</span> <span class="n">inet_addr</span><span class="p">(</span><span class="n">remote_netmask</span><span class="p">);</span>
+</span><span class='line'>   <span class="k">if</span> <span class="p">(</span><span class="n">isBigEndian</span><span class="p">()){</span>
+</span><span class='line'>      <span class="n">cmd</span><span class="p">.</span><span class="n">head</span> <span class="o">=</span> <span class="n">CMD_HEAD</span><span class="p">;</span>
+</span><span class='line'>      <span class="n">cmd</span><span class="p">.</span><span class="n">cmd</span> <span class="o">=</span> <span class="n">CMD_SET_IP</span><span class="p">;</span>
+</span><span class='line'>      <span class="n">cmd</span><span class="p">.</span><span class="n">data_len</span> <span class="o">=</span> <span class="k">sizeof</span><span class="p">(</span><span class="k">struct</span> <span class="n">__IP_MASK__</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="k">else</span><span class="p">{</span>
+</span><span class='line'>      <span class="n">cmd</span><span class="p">.</span><span class="n">head</span> <span class="o">=</span> <span class="n">TO_NET32</span><span class="p">(</span><span class="n">CMD_HEAD</span><span class="p">);</span>
+</span><span class='line'>      <span class="n">cmd</span><span class="p">.</span><span class="n">cmd</span> <span class="o">=</span> <span class="n">CMD_SET_IP</span><span class="p">;</span>
+</span><span class='line'>      <span class="n">cmd</span><span class="p">.</span><span class="n">data_len</span> <span class="o">=</span> <span class="n">TO_NET16</span><span class="p">(</span><span class="k">sizeof</span><span class="p">(</span><span class="k">struct</span> <span class="n">__IP_MASK__</span><span class="p">));</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>  
+</span><span class='line'>    <span class="n">memcpy</span><span class="p">(</span><span class="n">cmd</span><span class="p">.</span><span class="n">raw_data</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">ip_mask</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">ip_mask</span><span class="p">));</span>
+</span><span class='line'>  
+</span><span class='line'>  
+</span><span class='line'>  <span class="cm">/* create a socket for sending to the multicast address */</span>
+</span><span class='line'>  <span class="k">if</span> <span class="p">((</span><span class="n">sock</span> <span class="o">=</span> <span class="n">socket</span><span class="p">(</span><span class="n">PF_INET</span><span class="p">,</span> <span class="n">SOCK_DGRAM</span><span class="p">,</span> <span class="n">IPPROTO_UDP</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="n">perror</span><span class="p">(</span><span class="s">&quot;socket() failed&quot;</span><span class="p">);</span>
+</span><span class='line'>      <span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="n">SOCKADDR_IN</span> <span class="n">local_addr</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">local_addr</span><span class="p">.</span><span class="n">sin_addr</span><span class="p">.</span><span class="n">S_un</span><span class="p">.</span><span class="n">S_addr</span><span class="o">=</span><span class="n">inet_addr</span><span class="p">(</span><span class="n">local_ip</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">local_addr</span><span class="p">.</span><span class="n">sin_family</span><span class="o">=</span><span class="n">PF_INET</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">local_addr</span><span class="p">.</span><span class="n">sin_port</span><span class="o">=</span><span class="n">htons</span><span class="p">(</span><span class="mi">15501</span><span class="p">);</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="k">if</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="o">==</span> <span class="n">bind</span><span class="p">(</span><span class="n">sock</span><span class="p">,</span> <span class="p">(</span><span class="n">SOCKADDR</span> <span class="o">*</span><span class="p">)</span><span class="o">&amp;</span> <span class="n">local_addr</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">SOCKADDR</span><span class="p">))){</span>
+</span><span class='line'>      <span class="n">printf</span><span class="p">(</span><span class="s">&quot;bind error.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="cm">/* set the TTL (time to live/hop count) for the send */</span>
+</span><span class='line'>  <span class="k">if</span> <span class="p">((</span><span class="n">setsockopt</span><span class="p">(</span><span class="n">sock</span><span class="p">,</span> <span class="n">IPPROTO_IP</span><span class="p">,</span> <span class="n">IP_MULTICAST_TTL</span><span class="p">,</span>
+</span><span class='line'>      <span class="p">(</span><span class="k">const</span> <span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">mc_ttl</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">mc_ttl</span><span class="p">)))</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="n">perror</span><span class="p">(</span><span class="s">&quot;setsockopt() failed&quot;</span><span class="p">);</span>
+</span><span class='line'>      <span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="cm">/* construct a multicast address structure */</span>
+</span><span class='line'>  <span class="n">memset</span><span class="p">(</span><span class="o">&amp;</span><span class="n">mc_addr</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">mc_addr</span><span class="p">));</span>
+</span><span class='line'>  <span class="n">mc_addr</span><span class="p">.</span><span class="n">sin_family</span> <span class="o">=</span> <span class="n">AF_INET</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">mc_addr</span><span class="p">.</span><span class="n">sin_addr</span><span class="p">.</span><span class="n">s_addr</span> <span class="o">=</span> <span class="n">inet_addr</span><span class="p">(</span><span class="n">HELLO_GROUP</span><span class="p">);</span>
+</span><span class='line'>  <span class="n">mc_addr</span><span class="p">.</span><span class="n">sin_port</span> <span class="o">=</span> <span class="n">htons</span><span class="p">(</span><span class="n">HELLO_PORT</span><span class="p">);</span>
+</span><span class='line'>  
+</span><span class='line'>  
+</span><span class='line'>  <span class="k">if</span> <span class="p">(</span><span class="n">sendto</span><span class="p">(</span><span class="n">sock</span><span class="p">,</span> <span class="p">(</span><span class="k">const</span> <span class="kt">char</span><span class="o">*</span><span class="p">)</span><span class="o">&amp;</span><span class="n">cmd</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">BROADCAST_CMD</span><span class="p">),</span> <span class="mi">0</span><span class="p">,</span> <span class="p">(</span><span class="k">struct</span> <span class="n">sockaddr</span> <span class="o">*</span><span class="p">)</span> <span class="o">&amp;</span><span class="n">mc_addr</span><span class="p">,</span> <span class="k">sizeof</span><span class="p">(</span><span class="n">mc_addr</span><span class="p">))</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>      <span class="n">perror</span><span class="p">(</span><span class="s">&quot;sendto error.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">);</span>
+</span><span class='line'>      <span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  
+</span><span class='line'>
+</span><span class='line'>  <span class="n">printf</span><span class="p">(</span><span class="s">&quot;command send ok. ip addr is %s, netmask is %s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">remote_ip</span><span class="p">,</span> <span class="n">remote_netmask</span><span class="p">);</span>
+</span><span class='line'>  
+</span><span class='line'>  
+</span><span class='line'>  <span class="n">closesocket</span><span class="p">(</span><span class="n">sock</span><span class="p">);</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kt">int</span> <span class="nf">main</span><span class="p">(</span><span class="kt">int</span> <span class="n">argc</span><span class="p">,</span> <span class="kt">char</span> <span class="o">*</span><span class="n">argv</span><span class="p">[])</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kt">char</span> <span class="n">szHostName</span><span class="p">[</span><span class="mi">128</span><span class="p">];</span>
+</span><span class='line'>  <span class="n">WSADATA</span> <span class="n">wsaData</span><span class="p">;</span>            <span class="cm">/* Windows socket DLL structure */</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="cm">/* validate number of arguments */</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">(</span><span class="n">argc</span> <span class="o">!=</span> <span class="mi">3</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="n">usage</span><span class="p">(</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]);</span>
+</span><span class='line'>      <span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">printf</span><span class="p">(</span><span class="s">&quot;ip addr is %s, netmask is %s</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">]);</span>
+</span><span class='line'>    <span class="c1">//mc_addr_str = argv[1];       /* arg 1: multicast IP address */</span>
+</span><span class='line'>    <span class="c1">//mc_port = atoi(argv[2]); /* arg 2: multicast port number */</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="cm">/* validate the port range */</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">((</span><span class="n">HELLO_PORT</span> <span class="o">&lt;</span> <span class="n">MIN_PORT</span><span class="p">)</span> <span class="o">||</span> <span class="p">(</span><span class="n">HELLO_PORT</span> <span class="o">&gt;</span> <span class="n">MAX_PORT</span><span class="p">))</span> <span class="p">{</span>
+</span><span class='line'>      <span class="n">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span> <span class="s">&quot;Invalid port number argument %d.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span>
+</span><span class='line'>          <span class="n">HELLO_PORT</span><span class="p">);</span>
+</span><span class='line'>      <span class="n">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span> <span class="s">&quot;Valid range is between %d and %d.</span><span class="se">\n</span><span class="s">&quot;</span><span class="p">,</span>
+</span><span class='line'>          <span class="n">MIN_PORT</span><span class="p">,</span> <span class="n">MAX_PORT</span><span class="p">);</span>
+</span><span class='line'>      <span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="cm">/* Load Winsock 2.0 DLL */</span>
+</span><span class='line'>  <span class="k">if</span> <span class="p">(</span><span class="n">WSAStartup</span><span class="p">(</span><span class="n">MAKEWORD</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span> <span class="o">&amp;</span><span class="n">wsaData</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="n">fprintf</span><span class="p">(</span><span class="n">stderr</span><span class="p">,</span> <span class="s">&quot;WSAStartup() failed&quot;</span><span class="p">);</span>
+</span><span class='line'>      <span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">if</span><span class="p">(</span> <span class="n">gethostname</span><span class="p">(</span><span class="n">szHostName</span><span class="p">,</span> <span class="mi">128</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>        <span class="c1">// Get host adresses</span>
+</span><span class='line'>        <span class="k">struct</span> <span class="n">hostent</span> <span class="o">*</span> <span class="n">pHost</span><span class="p">;</span>
+</span><span class='line'>        <span class="kt">int</span> <span class="n">i</span><span class="p">;</span>
+</span><span class='line'>        <span class="n">pHost</span> <span class="o">=</span> <span class="n">gethostbyname</span><span class="p">(</span><span class="n">szHostName</span><span class="p">);</span>
+</span><span class='line'>        <span class="k">for</span><span class="p">(</span> <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="n">pHost</span><span class="o">!=</span> <span class="nb">NULL</span> <span class="o">&amp;&amp;</span> <span class="n">pHost</span><span class="o">-&gt;</span><span class="n">h_addr_list</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">!=</span> <span class="nb">NULL</span><span class="p">;</span> <span class="n">i</span><span class="o">++</span> <span class="p">)</span>
+</span><span class='line'>        <span class="p">{</span>
+</span><span class='line'>          <span class="kt">char</span> <span class="o">*</span> <span class="n">eth_name</span><span class="o">=</span><span class="n">inet_ntoa</span> <span class="p">(</span><span class="o">*</span><span class="p">(</span><span class="k">struct</span> <span class="n">in_addr</span> <span class="o">*</span><span class="p">)</span><span class="n">pHost</span><span class="o">-&gt;</span><span class="n">h_addr_list</span><span class="p">[</span><span class="n">i</span><span class="p">]);</span>
+</span><span class='line'>          <span class="n">send_ip_set_cmd</span><span class="p">(</span><span class="n">eth_name</span><span class="p">,</span> <span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">argv</span><span class="p">[</span><span class="mi">2</span><span class="p">]);</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">WSACleanup</span><span class="p">();</span>  <span class="cm">/* Cleanup Winsock */</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2016/04/13/makefile-debug/">Makefile调试方法</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2016-04-13T09:38:00+00:00'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>13</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>9:38 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>[TOC]</p>
+
+<p>最近在分析一个写的比较大、混乱的makefile工程，引入包含关系比较随意，内核、进程不相干的动作杂糅在一起，难以洞察，所以网搜了一篇makefile的调试文件，觉得有些技巧，在这里整理记录一下。</p>
+
+<h2>一些说明</h2>
+
+<p>makefile 的调试有点像魔法。可惜，并不存在makefile 调试器之类的东西可用来查看特定规则是如何被求值的，或某个变量是如何被扩展的。相反，大部分的调试过程只是在执行输出的动作以及查看makefile。事实上，GNU make 提供了若干可以协助调试的内置函数以及命令行选项。</p>
+
+<p>用来调试makefile 的一个最好方法就是加入调试挂钩以及使用具保护的编程技术，让你能够在事情出错时恢复原状。我将会介绍若干基本的调试技术以及我所发现的最有用的具保护能力的编码习惯。</p>
+
+<h2>make 的调试功能</h2>
+
+<p>warning函数非常适合用来调试难以捉摸的makefile。因为warning函数会被扩展成空字符串，所以它可以放在makefile 中的任何地方：开始的位置、工作目标或必要条件列表中以及命令脚本中。这让你能够在最方便查看变量的地方输出变量的值。例如：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$(warning A top-level warning)
+</span><span class='line'>
+</span><span class='line'>FOO := $(warning Right-hand side of a simple variable)bar
+</span><span class='line'>BAZ = $(warning Right-hand side of a recursive variable)boo
+</span><span class='line'>
+</span><span class='line'>$(warning A target)target: $(warning In a prerequisite list)makefile
+</span><span class='line'>$(BAZ)
+</span><span class='line'>$(warning In a command script)
+</span><span class='line'>ls
+</span><span class='line'>$(BAZ):</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这会产生如下的输出：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ make
+</span><span class='line'>makefile:1: A top-level warning
+</span><span class='line'>makefile:2: Right-hand side of a simple variable
+</span><span class='line'>makefile:5: A target
+</span><span class='line'>makefile:5: In a prerequisite list
+</span><span class='line'>makefile:5: Right-hand side of a recursive variable
+</span><span class='line'>makefile:8: Right-hand side of a recursive variable
+</span><span class='line'>makefile:6: In a command script
+</span><span class='line'>ls
+</span><span class='line'>makefile</span></code></pre></td></tr></table></div></figure>
+
+
+<p>请注意，warning函数的求值方式是按照make标准的立即和延后求值算法。虽然对BAZ的赋值动作中包含了一个warning函数，但是直到BAZ在必要条件列表中被求值后，这个信息才会被输出来。</p>
+
+<p>“可以在任何地方安插warning调用”的这个特性，让它能够成为一个基本的调试工具。</p>
+
+<h2>命令行选项</h2>
+
+<p>我找到了三个最适合用来调试的命令行选项：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>--just-print（-n）
+</span><span class='line'>--print-database（-p）
+</span><span class='line'>--warn-undefined-variables。</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>&ndash;just-print</h3>
+
+<p>在一个新的makefile 工作目标上，我所做的第一个测试就是以&ndash;just-print（-n）选项来调用make。这会使得make读进makefile并且输出它更新工作目标时将会执行的命令，但是不会真的执行它们。GNU make 有一个方便的功能，就是允许你为将被输出的命令标上安静模式修饰符（@）。</p>
+
+<p>这个选项被假设可以抑制所有命令的执行动作，然而这只在特定的状况下为真。实际上，你必须小心以对。尽管make不会运行命令脚本，但是在立即的语境之中，它会对shell函数调用进行求值动作。例如：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>REQUIRED_DIRS = ...
+</span><span class='line'>_MKDIRS := $(shell for d in $(REQUIRED_DIRS); \
+</span><span class='line'>             do \
+</span><span class='line'>                 [[ -d $$d ]] || mkdir -p $$d; \
+</span><span class='line'>             done)
+</span><span class='line'>
+</span><span class='line'>$(objects) : $(sources)</span></code></pre></td></tr></table></div></figure>
+
+
+<p>正如我们之前所见，_MKDIRS 简单变量的目的是触发必要目录的创建动作。如果这个makefile 是以&ndash;just-print 选项的方式运行的，那么当make 读进makefile 时，shell命令将会一如往常般被执行。然后，make 将会输出（但不会执行）更新$(objects)文件列表所需要进行的每个编译命令。</p>
+
+<h3>&ndash;print-data-base</h3>
+
+<p>&ndash;print-data-base（-p）是另一个你常会用到的选项。它会运行makefile，显示GNU版权信息以及make 所运行的命令，然后输出它的内部数据库。数据库里的数据将会依种类划分</p>
+
+<p>成以下几个组：variables、directories、implicit rules、pattern-specific variables、files（explicit rules）以及vpath earch path。如下所示：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># GNU Make 3.80
+</span><span class='line'># Copyright (C) 2002 Free Software Foundation, Inc.
+</span><span class='line'># This is free software; see the source for copying conditions.
+</span><span class='line'># There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A
+</span><span class='line'># PARTICULAR PURPOSE.</span></code></pre></td></tr></table></div></figure>
+
+
+<p>正常的命令将会在此处执行</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># Make data base, printed on Thu Apr 29 20:58:13 2004
+</span><span class='line'># Variables
+</span><span class='line'>...
+</span><span class='line'># Directories
+</span><span class='line'>...
+</span><span class='line'># Implicit Rules
+</span><span class='line'>...
+</span><span class='line'># Pattern-specific variable values
+</span><span class='line'>...
+</span><span class='line'># Files
+</span><span class='line'>...
+</span><span class='line'># VPATH Search Paths</span></code></pre></td></tr></table></div></figure>
+
+
+<p>让我们更详细地查看以上这几个区段。
+变量区段（variable）将会列出每个变量以及具描述性的注释：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># automatic
+</span><span class='line'># environment
+</span><span class='line'>EMACS_DIR = C:/usr/emacs-21.3.50.7
+</span><span class='line'># default
+</span><span class='line'>CWEAVE = cweave
+</span><span class='line'># makefile (from `../mp3_player/makefile', line 35)
+</span><span class='line'>CPPFLAGS = $(addprefix -I ,$(include_dirs))
+</span><span class='line'># makefile (from `../ch07-separate-binaries/makefile', line 44)
+</span><span class='line'>RM := rm -f
+</span><span class='line'># makefile (from `../mp3_player/makefile', line 14)
+</span><span class='line'>define make-library
+</span><span class='line'>    libraries += $1
+</span><span class='line'>    sources += $2
+</span><span class='line'>
+</span><span class='line'>    $1: $(call source-to-object,$2)
+</span><span class='line'>$(AR) $(ARFLAGS) $$@ $$^
+</span><span class='line'>endef</span></code></pre></td></tr></table></div></figure>
+
+
+<p>自动变量不会被显示出来，但是通过它们可以方便变量的获得，像$()在一个文件中，则会在注释中指出其文件名以及该定义所在的行号。简单变量和递归变量的差别在于赋值运算符。简单变量的值将会被显示成右边部分被求值的形式。</p>
+
+<p>下一个区段标示为Directories，它对make 开发人员比对make 用户有用。它列出了将会被make 检查的目录，包括可能会存在的SCCS 和RCS 子目录，但它们通常不存在。对每个目录来说，make会显示实现细节，比如设备编号、inode 以及文件名模式匹配的统计数据。</p>
+
+<p>接着是Implicit Rules 区段。这个区段包含了make 数据库中所有的内置的和用户自定义的模式规则。此外，对于那些定义在文件中的规则，它们的注释将会指出文件名以及行号</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>：
+</span><span class='line'>
+</span><span class='line'>%.c %.h: %.y
+</span><span class='line'># commands to execute (from `../mp3_player/makefile', line 73):
+</span><span class='line'>$(YACC.y) --defines $&lt;
+</span><span class='line'>$(MV) y.tab.c $*.c
+</span><span class='line'>$(MV) y.tab.h $*.h
+</span><span class='line'>
+</span><span class='line'>%: %.c
+</span><span class='line'># commands to execute (built-in):
+</span><span class='line'>$(LINK.c) $^ $(LOADLIBES) $(LDLIBS) -o $@
+</span><span class='line'>
+</span><span class='line'>%.o: %.c
+</span><span class='line'># commands to execute (built-in):
+</span><span class='line'>$(COMPILE.c) $(OUTPUT_OPTION) $&lt;
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>查看这个区段，是让你能够熟悉make 内置规则的变化和结构的最佳方法。当然，并非所有的内置规则都会被实现成模式规则。如果你没有找到你想要的规则，可以查看Files区段，旧式后缀规则就列在该处。</p>
+
+<p>下一个区段被标示为Pattern-specific variables，此处所列出的是定义在makefile 里的模式专属变量。所谓模式专属变量，就是变量定义的有效范围被限定在相关的模式规则执行的时候。例如，模式变量YYLEXFLAG 被定义成：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>%.c %.h: YYLEXFLAG := -d
+</span><span class='line'>%.c %.h: %.y
+</span><span class='line'>$(YACC.y) --defines $&lt;
+</span><span class='line'>$(MV) y.tab.c $*.c
+</span><span class='line'>$(MV) y.tab.h $*.h</span></code></pre></td></tr></table></div></figure>
+
+
+<p>将会被显示成：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># Pattern-specific variable values
+</span><span class='line'>%.c :
+</span><span class='line'># makefile (from `Makefile', line 1)
+</span><span class='line'># YYLEXFLAG := -d
+</span><span class='line'># variable set hash-table stats:
+</span><span class='line'># Load=1/16=6%, Rehash=0, Collisions=0/1=0%
+</span><span class='line'>%.h :
+</span><span class='line'># makefile (from `Makefile', line 1)
+</span><span class='line'># YYLEXFLAG := -d
+</span><span class='line'># variable set hash-table stats:
+</span><span class='line'># Load=1/16=6%, Rehash=0, Collisions=0/1=0%
+</span><span class='line'># 2 pattern-specific variable values</span></code></pre></td></tr></table></div></figure>
+
+
+<p>接着是Files 区段，此处所列出的都是与特定文件有关的自定义和后缀规则：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># Not a target:
+</span><span class='line'>.p.o:
+</span><span class='line'># Implicit rule search has not been done.
+</span><span class='line'># Modification time never checked.
+</span><span class='line'># File has not been updated.
+</span><span class='line'># commands to execute (built-in):
+</span><span class='line'>$(COMPILE.p) $(OUTPUT_OPTION) $&lt;
+</span><span class='line'>
+</span><span class='line'>lib/ui/libui.a: lib/ui/ui.o
+</span><span class='line'># Implicit rule search has not been done.
+</span><span class='line'># Last modified 2004-04-01 22:04:09.515625
+</span><span class='line'># File has been updated.
+</span><span class='line'># Successfully updated.
+</span><span class='line'># commands to execute (from `../mp3_player/lib/ui/module.mk', line 3):
+</span><span class='line'>ar rv $@ $^
+</span><span class='line'>
+</span><span class='line'>lib/codec/codec.o: ../mp3_player/lib/codec/codec.c ../mp3_player/lib/codec/codec.c ../mp3_player/include/codec/codec.h
+</span><span class='line'># Implicit rule search has been done.
+</span><span class='line'># Implicit/static pattern stem: `lib/codec/codec'
+</span><span class='line'># Last modified 2004-04-01 22:04:08.40625
+</span><span class='line'># File has been updated.
+</span><span class='line'># Successfully updated.
+</span><span class='line'># commands to execute (built-in):
+</span><span class='line'>$(COMPILE.c) $(OUTPUT_OPTION) $&lt;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>中间文件与后缀规则会被标示为Notatarget，其余是工作目标。每个文件将会包含注释，用以指出make是如何处理此规则的。被找到的文件在被显示的时候将会通过标准的vpath 搜索来找出其路径。</p>
+
+<p>最后一个区段被标示为VPATH Search Paths，列出了VPATH 的值以及所有的vpath模式。</p>
+
+<p>对于大规模使用eval 以及用户自定义函数来建立复杂的变量和规则的makefile 来说，查看它们的输出结果通常是确认宏是否已被扩展成预期值的唯一方法。</p>
+
+<h3>&ndash;warn-undefined-variables</h3>
+
+<p>这个选项会使得make在未定义的变量被扩展时显示警告信息。因为未定义的变量会被扩展成空字符串，这常见于变量名称打错而且很长一段时间未被发现到。这个选项有个问题，这也是为什么我很少使用这个选项的原因，那就是许多内置规则都会包含未定义的变量以作为用户自定义值的挂钩。所以使用这个选项来运行make必然会产生许多不是错误的警告信息，而且对用户的makefile 没有什么用处。例如：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ make --warn-undefined-variables -n
+</span><span class='line'>makefile:35: warning: undefined variable MAKECMDGOALS
+</span><span class='line'>makefile:45: warning: undefined variable CFLAGS
+</span><span class='line'>makefile:45: warning: undefined variable TARGET_ARCH
+</span><span class='line'>...
+</span><span class='line'>makefile:35: warning: undefined variable MAKECMDGOALS
+</span><span class='line'>make: warning: undefined variable CFLAGS
+</span><span class='line'>make: warning: undefined variable TARGET_ARCH
+</span><span class='line'>make: warning: undefined variable CFLAGS
+</span><span class='line'>make: warning: undefined variable TARGET_ARCH
+</span><span class='line'>...
+</span><span class='line'>make: warning: undefined variable LDFLAGS
+</span><span class='line'>make: warning: undefined variable TARGET_ARCH
+</span><span class='line'>make: warning: undefined variable LOADLIBES
+</span><span class='line'>make: warning: undefined variable LDLIBS</span></code></pre></td></tr></table></div></figure>
+
+
+<p>不过，此命令在需要捕获此类错误的某些场合上可能非常有用。</p>
+
+<h3>&ndash;debug 选项</h3>
+
+<p>当你需要知道make 如何分析你的依存图时，可以使用&ndash;debug 选项。除了运行调试器，这个选项是让你获得最详细信息的另一个方法。你有五个调试选项以及一个修饰符可用，分别是：basic、verbose、implicit、jobs、all 以及makefile。</p>
+
+<p>如果调试选项被指定成&ndash;debug，就是在进行basic调试；如果调试选项被指定成-d，就是在进行all调试；如果要使用选项的其他组合，则可以使用&ndash;debug=option1,option2 这个以逗号为分隔符的列表，此处的选项可以是下面任何一个单词（实际上，make 只会查看第一个字母）：</p>
+
+<h3>basic</h3>
+
+<p>这是所提供的信息最不详细的基本调试功能。启用时，make会输出被发现尚未更新的工作目标并更新动作的状态。它的输出会像下面这样：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>File all does not exist.
+</span><span class='line'>File app/player/play_mp3 does not exist.
+</span><span class='line'>File app/player/play_mp3.o does not exist.
+</span><span class='line'>Must remake target app/player/play_mp3.o.
+</span><span class='line'>gcc ... ../mp3_player/app/player/play_mp3.c
+</span><span class='line'>Successfully remade target file app/player/play_mp3.o.</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>verbose</h3>
+
+<p>这个选项会设定basic选项，以及提供关于“哪些文件被分析、哪些必要条件不需要重建等”的额外信息：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>File all does not exist.
+</span><span class='line'>Considering target file app/player/play_mp3.
+</span><span class='line'>File app/player/play_mp3 does not exist.
+</span><span class='line'>Considering target file app/player/play_mp3.o.
+</span><span class='line'>File app/player/play_mp3.o does not exist.
+</span><span class='line'>Pruning file ../mp3_player/app/player/play_mp3.c.
+</span><span class='line'>Pruning file ../mp3_player/app/player/play_mp3.c.
+</span><span class='line'>Pruning file ../mp3_player/include/player/play_mp3.h.
+</span><span class='line'>Finished prerequisites of target file app/player/play_mp3.o.
+</span><span class='line'>Must remake target app/player/play_mp3.o.
+</span><span class='line'>gcc ... ../mp3_player/app/player/play_mp3.c
+</span><span class='line'>Successfully remade target file app/player/play_mp3.o.
+</span><span class='line'>Pruning file app/player/play_mp3.o.
+</span><span class='line'>
+</span><span class='line'>3.3 implicit
+</span><span class='line'>这个选项会设定basic 选项，以及提供关于“为每个工作目标搜索隐含规则”的额外信息：
+</span><span class='line'>
+</span><span class='line'>File all does not exist.
+</span><span class='line'>File app/player/play_mp3 does not exist.
+</span><span class='line'>Looking for an implicit rule for app/player/play_mp3.
+</span><span class='line'>Trying pattern rule with stem play_mp3.
+</span><span class='line'>Trying implicit prerequisite app/player/play_mp3.o.
+</span><span class='line'>Found an implicit rule for app/player/play_mp3.
+</span><span class='line'>File app/player/play_mp3.o does not exist.
+</span><span class='line'>Looking for an implicit rule for app/player/play_mp3.o.
+</span><span class='line'>Trying pattern rule with stem play_mp3.
+</span><span class='line'>Trying implicit prerequisite app/player/play_mp3.c.
+</span><span class='line'>Found prerequisite app/player/play_mp3.c as VPATH ../mp3_player/app/
+</span><span class='line'>player/play_mp3.c
+</span><span class='line'>Found an implicit rule for app/player/play_mp3.o.
+</span><span class='line'>Must remake target app/player/play_mp3.o.
+</span><span class='line'>gcc ... ../mp3_player/app/player/play_mp3.c
+</span><span class='line'>Successfully remade target file app/player/play_mp3.o.</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>jobs</h3>
+
+<p>这个选项会输出被make 调用的子进程的细节，它不会启用basic 选项的功能。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Got a SIGCHLD; 1 unreaped children.
+</span><span class='line'>gcc ... ../mp3_player/app/player/play_mp3.c
+</span><span class='line'>Putting child 0x10033800 (app/player/play_mp3.o) PID 576 on the chain.
+</span><span class='line'>Live child 0x10033800 (app/player/play_mp3.o) PID 576
+</span><span class='line'>Got a SIGCHLD; 1 unreaped children.
+</span><span class='line'>Reaping winning child 0x10033800 PID 576
+</span><span class='line'>Removing child 0x10033800 PID 576 from chain.</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>all</h3>
+
+<p>这会启用前面的所有选项，当你使用-d 选项时，默认会启用此功能。</p>
+
+<h3>makefile</h3>
+
+<p>它不会启用调试信息，直到makefile 被更新—— 这包括更新任何的引入文件。如果使用此修饰符，make 会在重编译makefile 以及引入文件的时候，输出被选择的信息。这个选项会启用basic 选项，all 选项也会启用此选项。</p>
+
+<h2>编写用于调试的代码</h2>
+
+<p>如你所见，并没有太多的工具可用来调试makefile，你只有几个方法可以输出若干可能有用的信息。当这些方法都不管用时，你就得将makefile编写成可以尽量减少错误发生的机会，或是可以为自己提供一个舞台来协助你进行调试。</p>
+
+<p>这一节所提供的建议被我（有点随意地）分类成：良好的编码习惯、具保护功能的编码以及调试技术等部分。然而一些特殊的项目，像是检查命令的结束状态，可能会被放在良好的编码习惯中或是具保护功能的编码中，做这样的分类适当地反映出了趋势所在。将焦点好好地放在makefile上，尽量避免简单行事。采用具保护的编码以避免makefile被非预期的事件和环境状态所影响。最后，当缺陷出现时，使用你可以找到的用来压制它们的每个诀窍。</p>
+
+<p>“简洁就是美”<code>（Keep It Simple）</code>的原则<code>（http://www.catb.org/~esr/jargon/html/K/KISSPrinciple.html）</code>是所有良好设计的核心所在。正如你在前面几章所看到的，makefile 马上就会变得很复杂——即使是一般的工作，比如依存关系的产生。要对抗“在你的编译系统中加入越来越多的功能”的潮流，你将会失败，但如果你只是不经思索地加入你所发现的每个功能，失败并不会比你这么做的后果还糟。</p>
+
+<h3>良好的编码习惯</h3>
+
+<p>以我的经验来说，大部分的程序员都不会把makefile作为程序来写，因此，他们不会像编写C++或Java时那样细心。事实上，make语言是一个完整的非程序语言。如果可靠性和可维护性对你的编译系统来说很重要，那么请小心编写你的makefile，并且尽量遵守良好的编码习惯。</p>
+
+<p>编码健全的makefile的重点之一就是检查命令的返回状态。当然，make将会自动检查简单的命令，但是makefile 通常会使用可能不会处理失败状态的复合命令：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>do:
+</span><span class='line'>cd i-dont-exist; \
+</span><span class='line'>echo *.c</span></code></pre></td></tr></table></div></figure>
+
+
+<p>运行时，此makefile并不会因为有错误发生而终止运行，尽管这是一个必然会发生的错误：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ make
+</span><span class='line'>cd i-dont-exist; \
+</span><span class='line'>echo *.c
+</span><span class='line'>/bin/sh: line 1: cd: i-dont-exist: No such file or directory
+</span><span class='line'>*.c</span></code></pre></td></tr></table></div></figure>
+
+
+<p>此外，当文件名匹配表达式（globbingexpression）找不到任何的.c文件时，它会不动声色地返回文件名匹配表达式。一个比较好的做法，就是在你编码此命令脚本时，使用shell 的功能来检查以及防止错误：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>SHELL = /bin/bash
+</span><span class='line'>do:
+</span><span class='line'>cd i-dont-exist && \
+</span><span class='line'>shopt -s nullglob &&
+</span><span class='line'>echo *.c</span></code></pre></td></tr></table></div></figure>
+
+
+<p>现在cd 的错误会被正确传送到make，所以echo 命令不会被执行，而且make 会因为有错误发生而终止运行。此外，设定bash的nullglob选项，将会使得文件名匹配模式在找不到文件时返回空字符串。（当然，你的应用程序可能比较喜欢文件名匹配模式。）</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ make
+</span><span class='line'>cd i-dont-exist && \
+</span><span class='line'>echo *.c
+</span><span class='line'>/bin/sh: line 1: cd: i-dont-exist: No such file or directory
+</span><span class='line'>make: *** [do] Error 1</span></code></pre></td></tr></table></div></figure>
+
+
+<p>另一个良好的编码习惯，就是将你的代码编排成最具可读性的形式。我所看过的makefile，多半编排得很差，这必然会造成难以阅读的情况。下面这两段代码哪一个比较容易阅读</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>？
+</span><span class='line'>
+</span><span class='line'>_MKDIRS := $(shell for d in $(REQUIRED_DIRS); do [[ -d $$d \
+</span><span class='line'>]] || mkdir -p $$d; done)
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>或：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>_MKDIRS := $(shell                             \
+</span><span class='line'>             for d in $(REQUIRED_DIRS);        \
+</span><span class='line'>             do                                \
+</span><span class='line'>                 [[ -d $$d ]] || mkdir -p $$d; \
+</span><span class='line'>             done)
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果你像大部分人那样，你将会觉得第一段代码比较难分析，不容易找到分号，很难计算有几句语句。这些都是必须注意到的地方。在命令脚本中，你会遇到的语法错误，多半是由于漏掉了分号、反斜线或是其他的分隔符，比如管道（pipe）和逻辑运算符。</p>
+
+<p>此外请注意，并非任何分隔符被漏掉都会产生错误。例如，下面的错误都不会产生shell的语法错误：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>TAGS:
+</span><span class='line'>cd src \
+</span><span class='line'>ctags --recurse
+</span><span class='line'>
+</span><span class='line'>disk_free:
+</span><span class='line'>echo "Checking free disk space..." \
+</span><span class='line'>df . | awk '{ print $$4 }'</span></code></pre></td></tr></table></div></figure>
+
+
+<p>把命令编排得具有可读性，将会让以上所提到的错误很容易被发现。编排用户自定义函数的时候可以采用内缩的做法。有时候，宏扩展后的结果中，额外的空格将会造成问题。如果是这样，你可以将它的编排结果封装在strip 函数的调用中。编排一长串值时，你可以让每个值自成一行。在每个工作目标的前面加上注释，可以提供简介以及说明参数列表。</p>
+
+<p>下一个良好的编码习惯就是大量使用变量来保存常用的值。如同在程序中一样，过度使用文字值将会造成重复的程序代码，以及导致维护困难与缺陷。变量的另一个优点是在执行期间，你可以基于调试的目的，让make把它们给显示出来。稍后你将会在“调试技术”一节中看到一个不错的命令行界面。</p>
+
+<h3>具保护功能的编码</h3>
+
+<p>具保护功能的代码，就是如果你的假设或预计有一个是错误的（if 测试结果永远为假、assert 函数决不会失败或追踪代码）才会执行的代码，这让你能够查看make 内部工作的状态。</p>
+
+<p>事实上，你已经在本书其他地方看到过此类代码，不过为了方便起见，此处会重复加以描述。</p>
+
+<p>确认检查就是具保护功能代码的最佳范例。如下的代码范例可用来确认当前所运行的make 版本是否为3.80：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>NEED_VERSION := 3.80
+</span><span class='line'>$(if $(filter $(NEED_VERSION),$(MAKE_VERSION)),, \
+</span><span class='line'>$(error You must be running make version $(NEED_VERSION).))</span></code></pre></td></tr></table></div></figure>
+
+
+<p>对Java 应用程序来说，它可用来检查CLASSPATH 中的文件。</p>
+
+<p>进行确认的代码还可以用来确认某个东西是否为真，比如前一节用来创建目录的代码就是这样。</p>
+
+<p>另一个重要的具保护功能的编码技术，就是使用“流程控制”一节所定义的assert 函数。下面是其中的若干版本：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># $(call assert,condition,message)
+</span><span class='line'>define assert
+</span><span class='line'>    $(if $1,,$(error Assertion failed: $2))
+</span><span class='line'>endef
+</span><span class='line'>
+</span><span class='line'># $(call assert-file-exists,wildcard-pattern)
+</span><span class='line'>define assert-file-exists
+</span><span class='line'>    $(call assert,$(wildcard $1),$1 does not exist)
+</span><span class='line'>endef
+</span><span class='line'>
+</span><span class='line'># $(call assert-not-null,make-variable)
+</span><span class='line'>define assert-not-null
+</span><span class='line'>    $(call assert,$($1),The variable "$1" is null)
+</span><span class='line'>endef</span></code></pre></td></tr></table></div></figure>
+
+
+<p>我发现在makefile 中到处声明assert的调用，是找出漏掉和打错的参数以及违反其他假定的既便宜又有效的方法。</p>
+
+<p>我曾在第四章中编写了一对可用来追踪用户自定义函数扩展过程的函数：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># $(debug-enter)
+</span><span class='line'>debug-enter = $(if $(debug_trace),\
+</span><span class='line'>              $(warning Entering $0($(echo-args))))
+</span><span class='line'>
+</span><span class='line'># $(debug-leave)
+</span><span class='line'>debug-leave = $(if $(debug_trace),$(warning Leaving $0))
+</span><span class='line'>
+</span><span class='line'>comma := ,
+</span><span class='line'>echo-args = $(subst ' ','$(comma) ',\
+</span><span class='line'>            $(foreach a,1 2 3 4 5 6 7 8 9,'$($a)'))</span></code></pre></td></tr></table></div></figure>
+
+
+<p>你可以把这些宏调用到自己的函数里，并让它们处在停用状态，直到你需要进行调试。要启用它们时，请将debug_trace 设定成任何非空值：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ make debug_trace=1</span></code></pre></td></tr></table></div></figure>
+
+
+<p>正如第四章所说，这些追踪宏本身存在一些问题，不过仍然可用来追踪缺陷。</p>
+
+<p>最后要介绍的具保护功能的编码技术，就是通过make变量让@命令修饰符的禁用更容易进行：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>QUIET := @
+</span><span class='line'>...
+</span><span class='line'>target:
+</span><span class='line'>$(QUIET) some command</span></code></pre></td></tr></table></div></figure>
+
+
+<p>使用此技术时，如果想看到安静模式命令的执行，你可以在命令行上以如下的方式重新定义QUIET：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ make QUIET=</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>调试技术</h2>
+
+<p>这一节将会探讨一般的调试技术与相关主题。最后你会觉得，调试就好像是一个装了各种你需要的东西的幸运袋。这些技术对我来说都很实用，即使是最简单的makefile问题，我也是靠着它们来进行调试的，或许它们也能协助你。</p>
+
+<p>3.80版中一个非常恼人的缺陷是，当make汇报makefile中的问题时还会包含一个行号，我发现那个行号通常是错的。我并未调查出是否此问题是由于引入文件、多行变量赋值或用户自定义宏的关系，但是它的确是存在的。make 所汇报的行号通常会比实际的行号还大，在复杂的makefile 中，我发现行号差了20 行之多。</p>
+
+<p>通常，查看make 变量值的最简单方法，就是在工作目标的执行期间输出它。尽管使用warning加入输出语句很简单，而为了在长期运行中节省时间你会想要加入通用的debug工作目标，但是必须多费一番工夫。下面是一个简单的debug 工作目标：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>debug:
+</span><span class='line'>$(for v,$(V), \
+</span><span class='line'>$(warning $v = $($v)))</span></code></pre></td></tr></table></div></figure>
+
+
+<p>要使用此功能，只需要在命令行上将一份需要输出的变量的列表赋值给变量V以及指定debug 工作目标：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ make V="USERNAME SHELL" debug
+</span><span class='line'>makefile:2: USERNAME = Owner
+</span><span class='line'>makefile:2: SHELL = /bin/sh.exe
+</span><span class='line'>make: debug is up to date.</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果你觉得这样很麻烦，只要使用MAKECMDGOALS就可以避免对变量V进行赋值的动作：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>debug:
+</span><span class='line'>$(for v,$(V) $(MAKECMDGOALS), \
+</span><span class='line'>$(if $(filter debug,$v),,$(warning $v = $($v))))</span></code></pre></td></tr></table></div></figure>
+
+
+<p>现在，你只需要在命令行上直接指定需要输出的变量即可。但是我并不建议使用这个技术，因为当make的警告信息指出它不知道如何更新变量时（因为它们是以工作目标的形式出现在命令行上的），你可能会产生混淆：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ make debug PATH SHELL
+</span><span class='line'>makefile:2: USERNAME = Owner
+</span><span class='line'>makefile:2: SHELL = /bin/sh.exe
+</span><span class='line'>make: debug is up to date.
+</span><span class='line'>make: *** No rule to make target USERNAME. Stop.</span></code></pre></td></tr></table></div></figure>
+
+
+<p>我在第十章曾简单提到过，使用开启调试功能的shell可协助我们了解make在后台所进行的活动。尽管make在执行命令之前会输出命令脚本中的命令，但是它并不会输出shell函数中所执行的命令。通常这些命令是既微妙且复杂的，尤其是因为它们可能会被立即执行或是延后执行（如果它们出现在递归变量中）。查看这些命令如何执行的一个方法，就是要求subshell 启用调试的功能：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>DATE := $(shell date +%F)
+</span><span class='line'>OUTPUT_DIR = out-$(DATE)
+</span><span class='line'>
+</span><span class='line'>make-directories := $(shell [ -d $(OUTPUT_DIR) ] || mkdir -p
+</span><span class='line'>$(OUTPUT_DIR))
+</span><span class='line'>
+</span><span class='line'>all: ;</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果运行时指定了sh 的调试选项，我们将会看到：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ make SHELL="sh -x"
+</span><span class='line'>+ date +%F
+</span><span class='line'>+ '[' -d out-2004-05-11 ']'
+</span><span class='line'>+ mkdir -p out-2004-05-11</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这么做，你不仅可以看到make的警告信息，也可以看到额外的调试信息，因为开启调试功能的shell 还会显示变量和表达式的值。</p>
+
+<p>本书所举过的许多范例都用到了嵌套层极深的表达式，比如下面这个用来在Windows/Cygwin 系统上检查PATH 变量的表达式：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$(if $(findstring /bin/,                             \
+</span><span class='line'>     $(firstword                                     \
+</span><span class='line'>     $(wildcard                                      \
+</span><span class='line'>     $(addsuffix /sort$(if $(COMSPEC),.exe),         \
+</span><span class='line'>     $(subst :, ,$(PATH)))))),,                      \
+</span><span class='line'>$(error Your PATH is wrong, c:/usr/cygwin/bin should \
+</span><span class='line'>  precede c:/WINDOWS/system32))</span></code></pre></td></tr></table></div></figure>
+
+
+<p>要对这些表达式进行调试并没有什么好办法。一个可行的办法就是将它们拆开，输出每个子表达式（subexpression）：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$(warning $(subst :, ,$(PATH)))
+</span><span class='line'>$(warning /sort$(if $(COMSPEC),.exe))
+</span><span class='line'>$(warning $(addsuffix /sort$(if $(COMSPEC),.exe), \
+</span><span class='line'>          $(subst :, ,$(PATH))))
+</span><span class='line'>
+</span><span class='line'>$(warning $(wildcard \
+</span><span class='line'>$(addsuffix /sort$(if $(COMSPEC),.exe), \
+</span><span class='line'>                 $(subst :, ,$(PATH)))))</span></code></pre></td></tr></table></div></figure>
+
+
+<p>尽管这有点烦人，但是在没有调试器可用的状况下，这或许是确定各个子表达式值的最好办法（有时是唯一的办法）。</p>
+
+<h2>常见的错误信息</h2>
+
+<p>3.81 版的GNU make 在线使用手册列有make的错误信息以及它们产生的原因。我们在此只会介绍若干最常见的错误。此处所提到的问题中的部分并非完全是make 的错误，比如命令脚本中的语法错误，但是它们仍然是开发人员常会遇到的问题。至于完整的make 错误列表，请参考make 在线使用手册。</p>
+
+<p>make 所输出的错误信息具有如下的标准格式：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>makefile:n: *** message. Stop.</span></code></pre></td></tr></table></div></figure>
+
+
+<p>或：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>make:n: *** message. Stop.</span></code></pre></td></tr></table></div></figure>
+
+
+<p>makefile 部分是发生错误的makefile或引入文件的名称，下一个部分是发生错误的行号，接着是三个星号，最后是错误信息。</p>
+
+<p>请注意，make的工作就是运行其他的程序，如果发生错误，即使问题出在你的makefile上，也非常可能会让人觉得错误是来自其他程序。例如，shell发生错误有可能是命令脚本</p>
+
+<p>形式不正确的结果，编译器发生错误有可能是因为命令行参数不正确。找出错误信息产生自哪个程序，是你解决此问题时所必须进行的第一项工作。幸好，make 的错误信息相当具有说明性。</p>
+
+<h3>语法错误</h3>
+
+<p>这些通常是打字上的错误：漏掉圆括号、以空格代替跳格等。</p>
+
+<p>make 的新用户最常会遇到的一个错误，就是漏掉变量名称的圆括号：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>foo:
+</span><span class='line'>for f in $SOURCES; \
+</span><span class='line'>do \
+</span><span class='line'>     ... \
+</span><span class='line'>done</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这可能会使得make 把$S 扩展成空无一物，而且shell 只会以值为OURCES 的f 执行循环一次。你可能会看到如下适当的shell 错误信息：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>OURCES: No such file or directory</span></code></pre></td></tr></table></div></figure>
+
+
+<p>不过也可能看不到任何信息，这取决于你处理f的方式。所以，别忘了为你的make 变量加上圆括号。</p>
+
+<h4>missing separator</h4>
+
+<p>如下的错误信息：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>makefile:2:missing separator. Stop.</span></code></pre></td></tr></table></div></figure>
+
+
+<p>或：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>makefile:2:missing separator (did you mean TAB instead of 8 spaces?). Stop.</span></code></pre></td></tr></table></div></figure>
+
+
+<p>通常代表你的命令脚本以空格代替了跳格。以文字来解释的话，就是make想要查找一个make分隔符，比如:、=或一个跳格符，但是找不到。它所找到的是它不了解的东西。</p>
+
+<h4>commands commence before first target</h4>
+
+<p>跳格符的问题又出现了！</p>
+
+<p>此信息首次出现在“分析命令”一节中。当命令脚本之外的文本行以一个跳格符开头时，此错误似乎通常会出现在makefile的中间。make将会尽可能消除此模糊不清的状态，但如果该文本行无法被确定为变量赋值、条件表达式或多行宏定义，make 就会认为这代表命令放错地方了。</p>
+
+<h4>unterminated variable reference</h4>
+
+<p>这是一个简单但常见的错误，代表你没有为变量引用或函数调用加上适当数目的右圆括号。当函数调用和变量引用嵌套很多层时，make 文件看起来很像Lisp！使用能够检查圆括号是否完整的编辑器，比如Emacs，是避免此类错误最可靠的方法。</p>
+
+<h3>命令脚本中的错误</h3>
+
+<p>脚本中有三种常见的错误：在多行命令中漏掉一个分号，一个不完整或不正确的路径变量，或是一个“执行时会遇到问题的”命令。</p>
+
+<p>我们已经在“良好的编码习惯”一节中探讨过漏掉分号的问题，所以此处不再做进一步的说明。</p>
+
+<p>当shell 无法找到foo 命令时，将会显示如下的典型错误信息：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>bash: foo: command not found</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这表示shell 已经搜索过PATH变量中的每个变量，但是找不到相符的可执行文件。要修正此错误，你必须更新你的PATH变量，它通常被放在你的.profile 文件（Bourne shell）、.bashrc 文件（bash）或.cshrc 文件（C shell）中。当然，它也有可能设定在makefile文件中的PATH变量里，并且从make 导出PATH 变量。</p>
+
+<p>最后，当shell命令执行失败的时候，它会以非零的结束状态终止执行。在此状况下，make将会以如下的信息汇报此错误：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ make
+</span><span class='line'>touch /foo/bar
+</span><span class='line'>touch: creating /foo/bar: No such file or directory
+</span><span class='line'>make: *** [all] Error 1</span></code></pre></td></tr></table></div></figure>
+
+
+<p>此处执行失败的命令是touch，它会输出自己的错误信息以说明此状态。下一行是make的错误摘要。执行失败的makefile工作目标会被显示在中括号里，后面还会跟着运行失败的程序的结束值。如果程序结束运行是因为信号的缘故，make 将会输出比较详细的信息，而不会只显示非零的结束状态。</p>
+
+<p>并请注意，因为@ 修饰符而安静执行的命令也会执行失败。在此状况下，所显示的错误信息好像到处都是。</p>
+
+<p>不管是以上哪种状况，错误信息皆来自make 所运行的程序，而不是make 本身。</p>
+
+<h4>No Rule to Make Target</h4>
+
+<p>此信息有两种形式：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>make: *** No rule to make target XXX. Stop.</span></code></pre></td></tr></table></div></figure>
+
+
+<p>以及：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>make: *** No rule to make target XXX, needed by YYY. Stop.</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这代表make 判断文件XXX需要更新，但是make找不到执行此工作的任何规则。在放弃和输出此信息之前，make 将会在它的数据库中搜索所有的隐含和具体规则。</p>
+
+<p>此项错误的理由可能有三个：</p>
+
+<ul>
+<li>你的makefile 漏掉了更新此文件所需要的一个规则。在此状况下，你必须加入描述如何建立此工作目标的规则。</li>
+<li>在makefile 中打错了字。不是make找错了文件，就是更新此文件的规则指定了错误的文件。因为make变量的使用，你很难在makefile中发现打错字的问题。有时候，要确定复杂文件名的值是否正确唯有将它输出：你可以直接输出变量，或是查看make 的内部数据库。</li>
+<li>这个文件应该存在，但是make就是找不到它，可能是因为把它漏掉了，或是因为make不知道要到哪里找它。当然，有时make是绝对正确的，文件缺失的原因或许是你忘了将它从CVS调出。较常见的状况是，make找不到源文件只是因为文件放错地方了。有时是因为源文件放在独立的源文件树中，或是文件产生自另一个程序且所产生的文件放在二进制文件树中。</li>
+</ul>
+
+
+<h4>Overriding Commands for Target</h4>
+
+<p>make只允许一个工作目标拥有一个命令脚本（双冒号规则除外，但是很少使用）。如果一个工作目标被指定了一个以上的命令脚本，make将会输出如下的警告信息：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>makefile:5: warning: overriding commands for target foo</span></code></pre></td></tr></table></div></figure>
+
+
+<p>它也可能会显示如下的警告信息：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>makefile:2: warning: ignoring old commands for target foo</span></code></pre></td></tr></table></div></figure>
+
+
+<p>第一个警告信息指出，make在第5行找到了第二个命令脚本；第二个警告信息指出，位于第2 行的最初命令脚本被覆盖掉了。</p>
+
+<p>在复杂的makefile 中，一个工作目标通常会被定义许多次，每一次都会加入它自己的必要条件。这些工作目标中通常会有一个被指定命令脚本，但是在开发或调试期间，你很容易会加入另一个命令脚本而忘记这么做会覆盖掉现有的命令脚本。</p>
+
+<p>例如，我们可能会在一个引入文件中定义一个通用的工作目标：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># 建立一个jar 文件。
+</span><span class='line'>$(jar_file):
+</span><span class='line'>$(JAR) $(JARFLAGS) -f $@ $^</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这使得其他的makefile可以加入自己的必要条件。然后我们可能会在某个makefile 文件中这么做：</p>
+
+<p><strong>为jar 的建立设定工作目标并且加入必要条件</strong></p>
+
+<pre><code>jar_file = parser.jar
+$(jar_file): $(class_files)
+</code></pre>
+
+<p>如果我们不小心将一个命令脚本加入此makefile，make可能会产生overriding的警告信</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2016/04/12/Makefile-Functions/">Makefile常用函数</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2016-04-12T10:10:00+00:00'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>12</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>10:10 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>[TOC]</p>
+
+<h1>Makefile常用函数</h1>
+
+<hr />
+
+<h2>字符串处理函数</h2>
+
+<h3>字符串替换函数-subst</h3>
+
+<ul>
+<li>cmd：<code>$(subst &lt;from&gt;,&lt;to&gt;,&lt;text&gt;)</code></li>
+<li>功能：把<code>&lt;text&gt;</code>中的<code>&lt;from&gt;</code>替换为<code>&lt;to&gt;</code></li>
+</ul>
+
+
+<h3>模式字符串替换函数-patsubst</h3>
+
+<ul>
+<li>cmd：<code>$(patsubst &lt;pattern&gt;,&lt;replacement&gt;,&lt;text&gt;)</code></li>
+<li>例子：<code>$(patsubst %.c,%.o,c.c a.c)</code></li>
+<li>说明：与<code>$(var:&lt;pattern&gt;=&lt;replacement&gt;)</code>相同</li>
+</ul>
+
+
+<h3>去空格格函数-strip</h3>
+
+<ul>
+<li>cmd：<code>$(strip &lt;string&gt;)</code></li>
+<li>例子：<code>$(strip a b c)</code></li>
+</ul>
+
+
+<h3>查找字符串函数-findstring</h3>
+
+<ul>
+<li>cmd：<code>$(findstring &lt;find&gt;,&lt;in&gt;)</code></li>
+<li>功能：在字符串<code>&lt;in&gt;</code>中查找<code>&lt;find&gt;</code></li>
+<li>返回：如果找到则返回<code>&lt;find&gt;</code>,否则返回空字符串</li>
+</ul>
+
+
+<h3>过滤函数-filter</h3>
+
+<ul>
+<li>cmd：<code>$(filter &lt;pattern...&gt;,&lt;text&gt;)</code></li>
+<li>功能：以<code>&lt;pattern&gt;</code>模式过滤<code>&lt;text&gt;</code>字符串中的单词，保留符合<code>&lt;pattern&gt;</code>的单词，可以有多个模式</li>
+<li>返回：返回符合模式<code>&lt;pattern&gt;</code>的字符串</li>
+<li>例子：
+      sources:=foo.c bar.c baz.s ugh.h
+      foo:$(sources)
+      cc $(filter %.c %.s,$(sources)) -o foo</li>
+</ul>
+
+
+<h3>反过滤函数-filter-out</h3>
+
+<ul>
+<li>cmd：<code>$(filter-out &lt;pattern...&gt;,&lt;text&gt;)</code></li>
+<li>功能：以<code>&lt;pattern&gt;</code>模式过滤<code>&lt;text&gt;</code>字符串的单词，去除符合模式<code>&lt;pattern&gt;</code>的单词，可以有多个模式</li>
+<li>返回：返回不符合模式<code>&lt;pattern&gt;</code>的字符串</li>
+<li><p>示例：
+      objects= main1.o main2.o foo.o bar.o
+      mains= main1.o main2.o</p>
+
+<pre><code>  $(filter-out $(mains),$(objects))
+</code></pre></li>
+</ul>
+
+
+<h3>排序函数-sort</h3>
+
+<ul>
+<li>cmd：<code>$(sort &lt;list&gt;)</code></li>
+<li>功能：给字符串<code>&lt;list&gt;</code>中的单词排序（升序）</li>
+<li>返回：返回排序后的字符串</li>
+<li>示例：<code>$(sort foo bar lose)</code></li>
+<li>备注：sort函数会去除<code>&lt;list&gt;</code>中相同的单词</li>
+</ul>
+
+
+<h3>取单词函数-word</h3>
+
+<ul>
+<li>cmd：<code>$(word &lt;n&gt;,&lt;text&gt;)</code></li>
+<li>功能：取字符串<code>&lt;text&gt;</code>中的第<code>&lt;n&gt;</code>个单词</li>
+<li>返回：返回第<code>&lt;n&gt;</code>个字符串，如果<code>&lt;n&gt;</code>比<code>&lt;text&gt;</code>的单词个数大，则返回空字符串</li>
+</ul>
+
+
+<h3>取单词串函数-wordlist</h3>
+
+<ul>
+<li>cmd：<code>$(wordlist &lt;s&gt;,&lt;e&gt;,&lt;text&gt;)</code></li>
+<li>功能：从<code>&lt;text&gt;</code>中取从<code>&lt;s&gt;</code>到<code>&lt;e&gt;</code>的单词串，<code>&lt;s&gt;</code>和<code>&lt;e&gt;</code>是一个数字</li>
+<li>返回：如果<code>&lt;s&gt;</code>大于<code>&lt;text&gt;</code>的长度，则返回空字符串</li>
+<li>示例：<code>$(worllist 2,3,foo bar baz)</code></li>
+</ul>
+
+
+<h3>单词个数统计函数-words</h3>
+
+<ul>
+<li>cmd：<code>$(words &lt;text&gt;)</code></li>
+<li>功能：统计<code>&lt;text&gt;</code>中字符串中的单词个数</li>
+</ul>
+
+
+<h2>文件名操作函数</h2>
+
+<h3>取目录函数-dir</h3>
+
+<ul>
+<li>cmd：<code>$(dir &lt;names...&gt;)</code></li>
+<li>功能：从文件名序列<code>&lt;names&gt;</code>中取出目录部分</li>
+</ul>
+
+
+<h3>取文件函数-notdir</h3>
+
+<ul>
+<li>cmd：<code>$(notdir &lt;names...&gt;)</code></li>
+<li>功能：从文件名序列<code>&lt;names&gt;</code>中取出文件名部分</li>
+</ul>
+
+
+<h3>取后缀函数-suffix</h3>
+
+<ul>
+<li>cmd：<code>$(suffix &lt;names&gt;)</code></li>
+<li>功能：从文件名序列<code>&lt;names...&gt;</code>中取出各个文件名的后缀</li>
+</ul>
+
+
+<h3>取前缀函数-basename</h3>
+
+<ul>
+<li>cmd：<code>$(basename &lt;names&gt;)</code></li>
+<li>功能：从文件名序列<code>&lt;names...&gt;</code>中取出各个文件名的前缀</li>
+<li>返回：返回各个文件前缀，如果文件没有前缀，则返回空字符串</li>
+</ul>
+
+
+<h3>加后缀函数-addsuffix</h3>
+
+<ul>
+<li>cmd：<code>$(addsuffix &lt;suffix&gt;,&lt;names...&gt;)</code></li>
+<li>功能：把后缀<code>&lt;suffix&gt;</code>加到<code>&lt;names&gt;</code>中的每个单词后面</li>
+</ul>
+
+
+<h3>加前缀函数-addprefrix</h3>
+
+<ul>
+<li>cmd：<code>$(addprefix &lt;prefix&gt;,&lt;names...&gt;)</code></li>
+<li>功能：把前缀<code>&lt;prefix&gt;</code>加到<code>&lt;names&gt;</code>中的每个单词前面</li>
+</ul>
+
+
+<h3>连接函数-join</h3>
+
+<ul>
+<li>cmd：<code>$(join &lt;list1&gt;,&lt;list2&gt;)</code></li>
+<li>功能：把<code>&lt;list1&gt;</code>中的单词对应的加到<code>&lt;list2&gt;</code>的单词后面</li>
+</ul>
+
+
+<h3>取目录文件函数-wildcard</h3>
+
+<ul>
+<li>cmd：<code>$(wildcard &lt;pattern&gt;)</code></li>
+<li>功能：取目录下所有匹配<code>&lt;pattern&gt;</code>的文件，生成一个以空格间隔的文件名列表</li>
+<li>示例：<code>$(wildcard *.c ./foo/*.c)</code></li>
+</ul>
+
+
+<h2>foreach函数</h2>
+
+<ul>
+<li>cmd：<code>$(foreach &lt;var&gt;,&lt;list&gt;,&lt;text&gt;)</code></li>
+<li>功能：把参数<code>&lt;list&gt;</code>中的单词逐一取出放到参数<code>&lt;var&gt;</code>所指定的变量中，然后再执行<code>&lt;text&gt;</code>所包含的表达式</li>
+<li>示例：
+      names=a b c d
+      files:=$(foreach iskey,$(names),$(iskey).o)</li>
+</ul>
+
+
+<h2>if函数</h2>
+
+<ul>
+<li>cmd：<code>$(if &lt;condition&gt;,&lt;then-part&gt;,&lt;else-part&gt;)</code></li>
+<li>功能：与GNU的make所支持的条件语句ifeq相似</li>
+<li>返回：如果<code>&lt;condition&gt;</code>为真，则返回<code>&lt;then-part&gt;</code>部分，否则返回<code>&lt;else-part&gt;</code>部分</li>
+</ul>
+
+
+<h2>call函数</h2>
+
+<ul>
+<li>cmd：<code>$(call &lt;expression&gt;,&lt;parm1&gt;,&lt;parm2&gt;,&lt;parm3&gt;...)</code></li>
+<li>功能：当make执行这个函数时，<code>$(1),$(2),$(3)</code>等，会被参数<code>$(parm1),$(parm2),$(parm3)</code>替换</li>
+<li>示例：
+      reverse=$(1) $(2)
+      foo= $(call reverse,a,b)</li>
+</ul>
+
+
+<h2>origin函数</h2>
+
+<ul>
+<li>cmd：<code>$(origin &lt;variable&gt;)</code></li>
+<li>功能：检查变量是在哪里定义的</li>
+</ul>
+
+
+<h2>shell函数</h2>
+
+<ul>
+<li>cmd：<code>$(Shell cat a.txt)</code></li>
+<li>功能：执行shell命令</li>
+</ul>
+
+
+<h2>makefile自定义函数</h2>
+
+<pre><code>define make_target_dirs
+    @mkdir -p　$(dir $2)
+endef
+
+all：
+    $(call make_target_dirs,a,b,c)
+</code></pre>
+
+<h2>使用shell命令</h2>
+
+<ul>
+<li>shell脚本在target中才有效，其它地方都被忽略掉了</li>
+<li>make把每一行shell脚本当做一个独立的单元，他们在单独的进程中运行</li>
+<li>make在调用shell之前先进行预处理，会展开所有的Makefile变量和函数，这些变量和函数都以$开头</li>
+<li>make预处理时，所有以$开头的，它都不会放过，要想使用shell自己的变量，应该以$$开头，另外需要注意，shell自己的变量不需要括号</li>
+</ul>
+
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1936,806 +4241,6 @@
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/01/23/OCP-open-switch-ONIE/">OCP开源交换机之ONIE杂记</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2016-01-23T03:46:31+00:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>23</span><span class='date-suffix'>rd</span>, <span class='date-year'>2016</span></span> <span class='time'>3:46 am</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>OCP全称是Open Computer Project，是Facebook发起并主导的一个硬件开源组织。该组织主要关注数据中心产品的开源及共享，标准化产品的硬件设计，以期打破数据中心产品提供商的硬件壁垒，从而降低成本，提高效率。</p>
-
-<p>目前该组织关注的产品包括，存储设备、服务器主板、服务器机柜、虚拟I/O、硬件驱动管理、数据中心基础架构设计、三层交换机等。</p>
-
-<p>ONIE软件相当于一个集成众多工具包的微型Linux系统，通过这个微型Linux环境，可以安装和启动符合要求的交换机软件系统。
-如此依赖，交换机被分割为两个独立的部分，OCP组织负责指定硬件设计规范，代工厂商，如天弘等根据规范生产硬件。软件厂商适配自己的交换机系统到OCP硬件上，这样组合起来的交换机就是白牌交换机。</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/10/06/svn-snapshot/">Svn源码树快照生成工具</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2015-10-06T01:49:12+00:00'><span class='date'><span class='date-month'>Oct</span> <span class='date-day'>6</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>1:49 am</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>项目的源码管理工具使用的是SVN，由于涉及的项目组众多，源码库功能模块分散在众多小的源码库中，最终的项目源码发布需要从各个源码库中抓取分支，然后版本发布。</p>
-
-<p>这就给版本管理员带来了麻烦，发布版本的时候，需要从各个源码库抓取源码，然后进行编译，调试过程中出现问题，就在需要更新出问题的源码分支，甚至有可能会临时的修改源码中的某一些文件。</p>
-
-<p>开发人员如果想要使用某一个版本的源码，一般把版本管理员发布的源码包下载下来，然后在进行Bug定位和跟踪，由于源码量比较大，所以造成了很大的不方便。</p>
-
-<p>所以编写了下边的源码快照工具，有以下功能：</p>
-
-<ul>
-<li>遍历所有的源码库，获取并记录所有的源码库当前版本号</li>
-<li>记录当前源码库中，新修改提交的文件版本号。（svn 只更新提交了的个别文件）</li>
-<li>记录当前临时修改，但没有提交的代码，并生成patch文件放到patches/目录。</li>
-<li>对于无法生成patch的二进制文件，则拷贝到patches/目录。</li>
-<li>生成snapshot.sh脚本，这个脚本包含了当前svn源码树的快照信息。</li>
-</ul>
-
-
-<p>在任意的项目SVN源码树，把前边输出的snapshot.sh和patches/目录放到这个源码树的根目录，执行snapshot.就可以恢复到相应的快照状态。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-<span class='line-number'>63</span>
-<span class='line-number'>64</span>
-<span class='line-number'>65</span>
-<span class='line-number'>66</span>
-<span class='line-number'>67</span>
-<span class='line-number'>68</span>
-<span class='line-number'>69</span>
-<span class='line-number'>70</span>
-<span class='line-number'>71</span>
-<span class='line-number'>72</span>
-<span class='line-number'>73</span>
-<span class='line-number'>74</span>
-<span class='line-number'>75</span>
-<span class='line-number'>76</span>
-<span class='line-number'>77</span>
-<span class='line-number'>78</span>
-<span class='line-number'>79</span>
-<span class='line-number'>80</span>
-<span class='line-number'>81</span>
-<span class='line-number'>82</span>
-<span class='line-number'>83</span>
-<span class='line-number'>84</span>
-<span class='line-number'>85</span>
-<span class='line-number'>86</span>
-<span class='line-number'>87</span>
-<span class='line-number'>88</span>
-<span class='line-number'>89</span>
-<span class='line-number'>90</span>
-<span class='line-number'>91</span>
-<span class='line-number'>92</span>
-<span class='line-number'>93</span>
-<span class='line-number'>94</span>
-<span class='line-number'>95</span>
-<span class='line-number'>96</span>
-<span class='line-number'>97</span>
-<span class='line-number'>98</span>
-<span class='line-number'>99</span>
-<span class='line-number'>100</span>
-<span class='line-number'>101</span>
-<span class='line-number'>102</span>
-<span class='line-number'>103</span>
-<span class='line-number'>104</span>
-<span class='line-number'>105</span>
-<span class='line-number'>106</span>
-<span class='line-number'>107</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>#/bin/sh
-</span><span class='line'>
-</span><span class='line'>### exec this scripts in root directory.
-</span><span class='line'>### the snapshot of the work copy will be saved to $OUT.
-</span><span class='line'>
-</span><span class='line'>OUT=$(pwd)/snapshot.sh
-</span><span class='line'>PATCH_DIR=$(pwd)/patches
-</span><span class='line'>EAT=$(pwd)/eat
-</span><span class='line'>patch_idx=0
-</span><span class='line'>mime_file_idx=0
-</span><span class='line'>
-</span><span class='line'>echo "### V3.02.20 svn snapshot scripts ###" &gt;$OUT
-</span><span class='line'>echo "PATCH_DIR=\$(pwd)/patches" &gt;&gt;$OUT
-</span><span class='line'>
-</span><span class='line'>echo -e "\ncheck_svn_tree()
-</span><span class='line'>{
-</span><span class='line'>f_temp=\$1
-</span><span class='line'>f_temp=\${f_temp%/*}
-</span><span class='line'>if ! test -d \$f_temp
-</span><span class='line'>then
-</span><span class='line'>  while( ! test -d  \${f_temp%/*})
-</span><span class='line'>  do
-</span><span class='line'>      f_last=\$f_temp
-</span><span class='line'>      f_temp=\${f_temp%/*}
-</span><span class='line'>      if [ \"\$f_last\" = \"\$f_temp\" ]
-</span><span class='line'>      then
-</span><span class='line'>          break
-</span><span class='line'>      fi
-</span><span class='line'>  done
-</span><span class='line'>  echo \"will update \$f_temp\"
-</span><span class='line'>  svn update \$f_temp
-</span><span class='line'>fi
-</span><span class='line'>}\n" &gt;&gt;$OUT
-</span><span class='line'>
-</span><span class='line'>#Prepare eat program for svn diff.
-</span><span class='line'>touch $EAT
-</span><span class='line'>chmod a+x $EAT
-</span><span class='line'>
-</span><span class='line'>rm $PATCH_DIR -fr
-</span><span class='line'>mkdir -p $PATCH_DIR
-</span><span class='line'>
-</span><span class='line'>#Find svn repositories.
-</span><span class='line'>#svn_repos=$(find ./ -name '*.svn' -type d -print)
-</span><span class='line'>svn_repos="./ "
-</span><span class='line'>svn_repos+=$(svn status | grep ^Perf | cut -d\' -f 2)
-</span><span class='line'>for svn_repo in $svn_repos
-</span><span class='line'>do
-</span><span class='line'>  #svn_dir=${svn_repo%/*}
-</span><span class='line'>  svn_dir=$svn_repo
-</span><span class='line'>  cd $svn_dir
-</span><span class='line'>  #Get svn local copy's revision.
-</span><span class='line'>  REV=$(svn info . | sed -n '/Revision:/p' | awk '{print $2}')
-</span><span class='line'>  echo "cd $svn_dir"
-</span><span class='line'>  echo "cd $svn_dir" &gt;&gt;$OUT
-</span><span class='line'>  echo "echo Cleaning: $svn_dir" &gt;&gt;$OUT
-</span><span class='line'>  echo "svn st | grep '^?' | awk '{print $2}' | xargs -I{} rm -rf '{}'" &gt;&gt;$OUT
-</span><span class='line'>  echo "svn st --no-ignore | grep '^I' | awk '{print $2}' | xargs -I{} rm -rf '{}'" &gt;&gt;$OUT
-</span><span class='line'>  echo "echo Reverting: $svn_dir" &gt;&gt;$OUT
-</span><span class='line'>  echo "svn cleanup" &gt;&gt;$OUT
-</span><span class='line'>  echo "svn revert . -R" &gt;&gt;$OUT
-</span><span class='line'>  echo "svn update . -r $REV" &gt;&gt;$OUT
-</span><span class='line'>  echo "svn revert . -R" &gt;&gt;$OUT
-</span><span class='line'>  
-</span><span class='line'>  #Get svn local copy's changed files.
-</span><span class='line'>  M_LIST=$(svn diff -r BASE:COMMITTED --diff-cmd $EAT | sed -n '/Index:/p' | awk '{print $2}')
-</span><span class='line'>  for svn_file in $M_LIST
-</span><span class='line'>  do
-</span><span class='line'>      echo "  Changed File: "$svn_file
-</span><span class='line'>      #Get changed file's revision.
-</span><span class='line'>      file_rev=$(svn info $svn_file | sed -n '/Last Changed Rev:/p' | awk '{print $4}')
-</span><span class='line'>      echo "#----------" &gt;&gt;$OUT
-</span><span class='line'>      echo "svn revert $svn_file &gt;/dev/null 2&gt;&1" &gt;&gt;$OUT
-</span><span class='line'>      echo "check_svn_tree $svn_file" &gt;&gt;$OUT
-</span><span class='line'>      echo "svn update -r $file_rev $svn_file" &gt;&gt;$OUT
-</span><span class='line'>      echo "svn revert $svn_file" &gt;&gt;$OUT
-</span><span class='line'>  done
-</span><span class='line'>  
-</span><span class='line'>  #Clean again after revert.
-</span><span class='line'>  echo "svn st | grep '^?' | awk '{print $2}' | xargs -I{} rm -rf '{}'" &gt;&gt;$OUT
-</span><span class='line'>  echo "svn st --no-ignore | grep '^I' | awk '{print $2}' | xargs -I{} rm -rf '{}'" &gt;&gt;$OUT
-</span><span class='line'>  
-</span><span class='line'>  #Get temporary patches
-</span><span class='line'>  PATCH_FILES=$(svn diff . --diff-cmd $EAT | sed -n '/Index:/p' | awk '{print $2}')
-</span><span class='line'>  if [ ""x != "$PATCH_FILES"x ];then
-</span><span class='line'>      let patch_idx+=1
-</span><span class='line'>      echo "#==========" &gt;&gt;$OUT
-</span><span class='line'>      svn diff . &gt;$PATCH_DIR/$patch_idx.patch
-</span><span class='line'>      echo "patch -p0 &lt;\$PATCH_DIR/$patch_idx.patch" &gt;&gt;$OUT
-</span><span class='line'>  fi
-</span><span class='line'>  
-</span><span class='line'>  for mime_file in $PATCH_FILES
-</span><span class='line'>  do
-</span><span class='line'>      mime_type=$(svn pl $mime_file | sed -n '/svn:mime-type/p')
-</span><span class='line'>      if [ ""x != "$mime_type"x ];then
-</span><span class='line'>          let mime_file_idx+=1
-</span><span class='line'>          cp $mime_file $PATCH_DIR/${mime_file_idx}_${mime_file##*/} -fr
-</span><span class='line'>          echo "#==========" &gt;&gt;$OUT
-</span><span class='line'>          echo "cp \$PATCH_DIR/${mime_file_idx}_${mime_file##*/} $mime_file -f" &gt;&gt;$OUT
-</span><span class='line'>      fi
-</span><span class='line'>  done
-</span><span class='line'>  
-</span><span class='line'>  echo "cd -&gt;/dev/null" &gt;&gt; $OUT
-</span><span class='line'>  echo "" &gt;&gt;$OUT
-</span><span class='line'>  echo "###############"&gt;&gt; $OUT
-</span><span class='line'>  echo "" &gt;&gt;$OUT
-</span><span class='line'>  cd - &gt; /dev/null
-</span><span class='line'>done</span></code></pre></td></tr></table></div></figure>
-
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/09/13/python-get-current-line-number/">Python获取当前行号</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2015-09-13T23:44:00+00:00'><span class='date'><span class='date-month'>Sep</span> <span class='date-day'>13</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>11:44 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>对于python，这几天一直有两个问题在困扰我:
-- <strong>python中没办法直接取得当前的行号和函数名?</strong>,
-这是有人在论坛里提出的问题，底下一群人只是在猜测python为什么不像<strong>file</strong>一样提供<strong>line</strong>和<strong>func</strong>，但是却最终也没有找到解决方案。
-- <strong>如果一个函数在不知道自己名字的情况下，怎么才能递归调用自己</strong>。
-这是我一个同事问我的，其实也是获取函数名，但是当时也是回答不出来。</p>
-
-<p>但是今晚！所有的问题都有了答案。
-一切还要从我用python的logging模块说起，logging中的format中是有如下选项的:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>%(name)s            Name of the logger (logging channel)
-</span><span class='line'>%(levelno)s         Numeric logging level for the message (DEBUG, INFO,
-</span><span class='line'>                    WARNING, ERROR, CRITICAL)
-</span><span class='line'>%(levelname)s       Text logging level for the message ("DEBUG", "INFO",
-</span><span class='line'>                    "WARNING", "ERROR", "CRITICAL")
-</span><span class='line'>%(pathname)s        Full pathname of the source file where the logging
-</span><span class='line'>                    call was issued (if available)
-</span><span class='line'>%(filename)s        Filename portion of pathname
-</span><span class='line'>%(module)s          Module (name portion of filename)
-</span><span class='line'>%(lineno)d          Source line number where the logging call was issued
-</span><span class='line'>                    (if available)
-</span><span class='line'>%(funcName)s        Function name
-</span><span class='line'>%(created)f         Time when the LogRecord was created (time.time()
-</span><span class='line'>                    return value)
-</span><span class='line'>%(asctime)s         Textual time when the LogRecord was created
-</span><span class='line'>%(msecs)d           Millisecond portion of the creation time
-</span><span class='line'>%(relativeCreated)d Time in milliseconds when the LogRecord was created,
-</span><span class='line'>                    relative to the time the logging module was loaded
-</span><span class='line'>                    (typically at application startup time)
-</span><span class='line'>%(thread)d          Thread ID (if available)
-</span><span class='line'>%(threadName)s      Thread name (if available)
-</span><span class='line'>%(process)d         Process ID (if available)
-</span><span class='line'>%(message)s         The result of record.getMessage(), computed just as
-</span><span class='line'>                    the record is emitted</span></code></pre></td></tr></table></div></figure>
-
-
-<p>也就是说，logging是能够获取到调用者的行号和函数名的，那会不会也可以获取到自己的行号和函数名呢？
-我们来看一下源码，主要部分如下:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>def currentframe():
-</span><span class='line'>    """Return the frame object for the caller's stack frame."""
-</span><span class='line'>    try:
-</span><span class='line'>        raise Exception
-</span><span class='line'>    except:
-</span><span class='line'>        return sys.exc_info()[2].tb_frame.f_back
-</span><span class='line'>def findCaller(self):
-</span><span class='line'>    """
-</span><span class='line'>    Find the stack frame of the caller so that we can note the source
-</span><span class='line'>    file name, line number and function name.
-</span><span class='line'>    """
-</span><span class='line'>    f = currentframe()
-</span><span class='line'>    #On some versions of IronPython, currentframe() returns None if
-</span><span class='line'>    #IronPython isn't run with -X:Frames.
-</span><span class='line'>    if f is not None:
-</span><span class='line'>        f = f.f_back
-</span><span class='line'>    rv = "(unknown file)", 0, "(unknown function)"
-</span><span class='line'>    while hasattr(f, "f_code"):
-</span><span class='line'>        co = f.f_code
-</span><span class='line'>        filename = os.path.normcase(co.co_filename)
-</span><span class='line'>        if filename == _srcfile:
-</span><span class='line'>            f = f.f_back
-</span><span class='line'>            continue
-</span><span class='line'>        rv = (co.co_filename, f.f_lineno, co.co_name)
-</span><span class='line'>        break
-</span><span class='line'>    return rv
-</span><span class='line'>def _log(self, level, msg, args, exc_info=None, extra=None):
-</span><span class='line'>    """
-</span><span class='line'>    Low-level logging routine which creates a LogRecord and then calls
-</span><span class='line'>    all the handlers of this logger to handle the record.
-</span><span class='line'>    """
-</span><span class='line'>    if _srcfile:
-</span><span class='line'>        #IronPython doesn't track Python frames, so findCaller throws an
-</span><span class='line'>        #exception on some versions of IronPython. We trap it here so that
-</span><span class='line'>        #IronPython can use logging.
-</span><span class='line'>        try:
-</span><span class='line'>            fn, lno, func = self.findCaller()
-</span><span class='line'>        except ValueError:
-</span><span class='line'>            fn, lno, func = "(unknown file)", 0, "(unknown function)"
-</span><span class='line'>    else:
-</span><span class='line'>        fn, lno, func = "(unknown file)", 0, "(unknown function)"
-</span><span class='line'>    if exc_info:
-</span><span class='line'>        if not isinstance(exc_info, tuple):
-</span><span class='line'>            exc_info = sys.exc_info()
-</span><span class='line'>    record = self.makeRecord(self.name, level, fn, lno, msg, args, exc_info, func, extra)
-</span><span class='line'>    self.handle(record)</span></code></pre></td></tr></table></div></figure>
-
-
-<p>我简单解释一下，实际上是通过在currentframe函数中抛出一个异常，然后通过向上查找的方式，找到调用的信息。其中</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>rv = (co.co_filename, f.f_lineno, co.co_name)</span></code></pre></td></tr></table></div></figure>
-
-
-<p>的三个值分别为文件名，行号，函数名。(可以去<a href="http://docs.python.org/library/sys.html">http://docs.python.org/library/sys.html</a> 来看一下代码中几个系统函数的说明)
-OK，如果已经看懂了源码，那获取当前位置的行号和函数名相信也非常清楚了，代码如下:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>#!/usr/bin/python
-</span><span class='line'># -*- coding: utf-8 -*-
-</span><span class='line'>'''
-</span><span class='line'>#=============================================================================
-</span><span class='line'>#  Author:          dantezhu - http://www.vimer.cn
-</span><span class='line'>#  Email:           zny2008@gmail.com
-</span><span class='line'>#  FileName:        xf.py
-</span><span class='line'>#  Description:     获取当前位置的行号和函数名
-</span><span class='line'>#  Version:         1.0
-</span><span class='line'>#  LastChange:      2010-12-17 01:19:19
-</span><span class='line'>#  History:         
-</span><span class='line'>#=============================================================================
-</span><span class='line'>'''
-</span><span class='line'>import sys
-</span><span class='line'>def get_cur_info():
-</span><span class='line'>    """Return the frame object for the caller's stack frame."""
-</span><span class='line'>    try:
-</span><span class='line'>        raise Exception
-</span><span class='line'>    except:
-</span><span class='line'>        f = sys.exc_info()[2].tb_frame.f_back
-</span><span class='line'>    return (f.f_code.co_name, f.f_lineno)
-</span><span class='line'>
-</span><span class='line'>def callfunc():
-</span><span class='line'>    print get_cur_info()
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'>if __name__ == '__main__':
-</span><span class='line'>    callfunc()</span></code></pre></td></tr></table></div></figure>
-
-
-<p>输出结果是：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>('callfunc', 24)</span></code></pre></td></tr></table></div></figure>
-
-
-<p>后来发现，其实也可以有更简单的方法，如下:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>import sys
-</span><span class='line'>def get_cur_info():
-</span><span class='line'>    print sys._getframe().f_code.co_name
-</span><span class='line'>    print sys._getframe().f_back.f_code.co_name
-</span><span class='line'>get_cur_info()</span></code></pre></td></tr></table></div></figure>
-
-
-<p>调用结果是:</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>get_cur_info
-</span><span class='line'>&lt;module&gt;</span></code></pre></td></tr></table></div></figure>
-
-
-<p><a href="http://www.vimer.cn/2010/12/%E5%9C%A8python%E4%B8%AD%E8%8E%B7%E5%8F%96%E5%BD%93%E5%89%8D%E4%BD%8D%E7%BD%AE%E6%89%80%E5%9C%A8%E7%9A%84%E8%A1%8C%E5%8F%B7%E5%92%8C%E5%87%BD%E6%95%B0%E5%90%8D.html">转载地址</a></p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2015/06/18/linux-self-extract/">Linux自解压文件</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2015-06-18T08:44:00+00:00'><span class='date'><span class='date-month'>Jun</span> <span class='date-day'>18</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>8:44 am</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>经常从网络上下载.run格式的安装包，直接运行就能够执行程序安装了，很简单方便，一直也没有仔细研究过，前段时间学习开源交换机ONIE的NOS安装镜像，需要自己制作一个NOS的安装镜像，于是就学习了一下。</p>
-
-<h3>网上最常用的一种方式是通过tail命令+tar命令来实现：</h3>
-
-<ul>
-<li>首先把想要安装的文件通过tar命令进行打包，当然也可用zip、gunzip等命令</li>
-</ul>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ls
-</span><span class='line'>target
-</span><span class='line'>
-</span><span class='line'>$tar -cvf target.tar target/
-</span><span class='line'>target/
-</span><span class='line'>target/t.sh
-</span><span class='line'>target/System.map
-</span><span class='line'>
-</span><span class='line'>$ls
-</span><span class='line'>target.tar</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>新建自解压脚本，本例取名self_extract.sh,可以自己修改这个脚本，添加自己的安装过程。</li>
-</ul>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$cat self_extract.sh                                                                      
-</span><span class='line'>#/bin/sh
-</span><span class='line'>
-</span><span class='line'>lines=%%SELF_EXTRACT_LINES%%
-</span><span class='line'>target_file=$(readlink -f $0)
-</span><span class='line'>
-</span><span class='line'>tail $lines $target_file | tar xf -
-</span><span class='line'>
-</span><span class='line'>#添加你自己的安装过程
-</span><span class='line'>
-</span><span class='line'>exit 0</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>修改这个self_extract.sh文件中的<code>%%SELF_EXTRACT_LINES%%</code>变量。</li>
-</ul>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$LINE=$(wc -l self_extract.sh | awk -F" " '{print $1+1}')| echo $LINE | sed -i -e "s/%%SELF_EXTRACT_LINES%%/$LINE/" self_extract.sh</span></code></pre></td></tr></table></div></figure>
-
-
-<p>修改后的脚本文件为：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>#/bin/sh
-</span><span class='line'>
-</span><span class='line'>lines=10
-</span><span class='line'>
-</span><span class='line'>target_file=$(readlink -f $0)
-</span><span class='line'>
-</span><span class='line'>tail -n +$lines $target_file | tar xf -
-</span><span class='line'>
-</span><span class='line'>exit 0
-</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>把第一步生成的target.tar文件追加到slef_extract.sh脚本。</li>
-</ul>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$cat target.tar &gt;&gt; self_extract.sh</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>执行最终生成的self_extract.sh后，目录下就会最终生成target目录了。</li>
-</ul>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$./self_extract.sh 
-</span><span class='line'>$ls
-</span><span class='line'>self_extract.sh  target</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>ONIE的做法</h3>
-
-<ul>
-<li>ONIE的做法更加简洁：</li>
-</ul>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$cat self_extract.sh 
-</span><span class='line'>#/bin/sh
-</span><span class='line'>
-</span><span class='line'>target_file=$(readlink -f $0)
-</span><span class='line'>
-</span><span class='line'>sed -e '1,/^__exit_marker__$/d' $target_file | tar xf -
-</span><span class='line'>
-</span><span class='line'>exit 0
-</span><span class='line'>
-</span><span class='line'>__exit_marker__</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>追加target.tar到self_extrac.sh文件。</li>
-</ul>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$cat target.tar &gt;&gt; self_extract.sh</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>执行self_extract.sh就可以了</li>
-</ul>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$./self_extract.sh 
-</span><span class='line'>$ls
-</span><span class='line'>self_extract.sh  target</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>ONIE格式的安装包加入校验</h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>sha1=$(sed -e '1,/^__exit_marker__$/d' "$0" | sha1sum | awk '{ print $1 }')
-</span><span class='line'>
-</span><span class='line'>payload_sha1=%%IMAGE_SHA1%%
-</span><span class='line'>
-</span><span class='line'>if [ "$sha1" != "$payload_sha1" ] ; then
-</span><span class='line'>    echo
-</span><span class='line'>    echo "ERROR: Unable to verify archive checksum"
-</span><span class='line'>    echo "Expected: $payload_sha1"
-</span><span class='line'>    echo "Found   : $sha1"
-</span><span class='line'>    exit 1
-</span><span class='line'>fi</span></code></pre></td></tr></table></div></figure>
-
-
-<p>需要在把target.tar文件追加到self_extract.sh之前，先替换<code>%%IMAGS_SHA1%%</code>变量。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$SHASUM=$(sha1sum target.tar | awk '{print $1}') | sed -i -e 's/%%IMAGE_SHA1%%/$SHASUM' self_extrac.sh</span></code></pre></td></tr></table></div></figure>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/4">&larr; Older</a>
@@ -2753,34 +4258,34 @@ OK，如果已经看懂了源码，那获取当前位置的行号和函数名相
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2019/07/07/simpe-example-of-kubernetes/">Simpe_example_of_kubernetes</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2019/07/07/helloworld-of-systemd/">Helloworld_of_systemd</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2019/07/07/use-lvm-to-expend-root-partition/">Use Lvm to Expend Root Partition</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2019/07/07/install-octopress-on-windows/">Install Octopress on Windows</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2019/05/30/minikube-install/">Minikube Install</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2019/05/28/xubuntu-upgrade/">Xubuntu Upgrade</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2019/05/27/reset-env-for-running-process/">Reset-env-for-running-process</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2018/04/27/iptables-with-time/">Iptables时间规则匹配</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2018/04/27/redirect-extern-request-to-localhost/">重定向外部连接到本地环回地址</a>
       </li>
     
   </ul>
 </section>
 <section>
   <h1>Categories</h1>
-    <ul id="category-list"><li><a href='/blog/categories/iptables/'>iptables (1)</a></li><li><a href='/blog/categories/kernel/'>kernel (5)</a></li><li><a href='/blog/categories/linuxc/'>linuxc (1)</a></li><li><a href='/blog/categories/linuxbian-cheng/'>linux编程 (1)</a></li><li><a href='/blog/categories/makefile/'>makefile (2)</a></li><li><a href='/blog/categories/netfilter/'>netfilter (1)</a></li><li><a href='/blog/categories/ocp/'>ocp (2)</a></li><li><a href='/blog/categories/python/'>python (1)</a></li><li><a href='/blog/categories/regax/'>regax (1)</a></li><li><a href='/blog/categories/shell/'>shell (3)</a></li><li><a href='/blog/categories/sourceinsight/'>sourceinsight (1)</a></li><li><a href='/blog/categories/sysctl/'>sysctl (1)</a></li><li><a href='/blog/categories/todo/'>todo (1)</a></li><li><a href='/blog/categories/ubuntu/'>ubuntu (1)</a></li><li><a href='/blog/categories/vim/'>vim (1)</a></li><li><a href='/blog/categories/chuan-kou/'>串口 (1)</a></li><li><a href='/blog/categories/gong-ju/'>工具 (2)</a></li><li><a href='/blog/categories/wang-luo/'>网络 (3)</a></li><li><a href='/blog/categories/she-ji-mo-shi/'>设计模式 (1)</a></li></ul>
+    <ul id="category-list"><li><a href='/blog/categories/iptables/'>iptables (1)</a></li><li><a href='/blog/categories/kernel/'>kernel (5)</a></li><li><a href='/blog/categories/linuxc/'>linuxc (1)</a></li><li><a href='/blog/categories/linuxbian-cheng/'>linux编程 (1)</a></li><li><a href='/blog/categories/lvm/'>lvm (1)</a></li><li><a href='/blog/categories/makefile/'>makefile (2)</a></li><li><a href='/blog/categories/netfilter/'>netfilter (1)</a></li><li><a href='/blog/categories/ocp/'>ocp (2)</a></li><li><a href='/blog/categories/octopress/'>octopress (1)</a></li><li><a href='/blog/categories/python/'>python (1)</a></li><li><a href='/blog/categories/regax/'>regax (1)</a></li><li><a href='/blog/categories/shell/'>shell (3)</a></li><li><a href='/blog/categories/sourceinsight/'>sourceinsight (1)</a></li><li><a href='/blog/categories/sysctl/'>sysctl (1)</a></li><li><a href='/blog/categories/systemd/'>systemd (1)</a></li><li><a href='/blog/categories/todo/'>todo (1)</a></li><li><a href='/blog/categories/ubuntu/'>ubuntu (1)</a></li><li><a href='/blog/categories/vim/'>vim (1)</a></li><li><a href='/blog/categories/chuan-kou/'>串口 (1)</a></li><li><a href='/blog/categories/gong-ju/'>工具 (2)</a></li><li><a href='/blog/categories/wang-luo/'>网络 (3)</a></li><li><a href='/blog/categories/she-ji-mo-shi/'>设计模式 (1)</a></li></ul>
 </section>
 <section>
   <h1>Tag Cloud</h1>
-    <span id="tag-cloud"><a href='/blog/categories/iptables' style='font-size: 112.0%'>iptables(1)</a> <a href='/blog/categories/kernel' style='font-size: 160.0%'>kernel(5)</a> <a href='/blog/categories/linuxc' style='font-size: 112.0%'>linuxc(1)</a> <a href='/blog/categories/linuxbian-cheng' style='font-size: 112.0%'>linux编程(1)</a> <a href='/blog/categories/makefile' style='font-size: 124.0%'>makefile(2)</a> <a href='/blog/categories/netfilter' style='font-size: 112.0%'>netfilter(1)</a> <a href='/blog/categories/ocp' style='font-size: 124.0%'>ocp(2)</a> <a href='/blog/categories/python' style='font-size: 112.0%'>python(1)</a> <a href='/blog/categories/regax' style='font-size: 112.0%'>regax(1)</a> <a href='/blog/categories/shell' style='font-size: 136.0%'>shell(3)</a> <a href='/blog/categories/sourceinsight' style='font-size: 112.0%'>sourceinsight(1)</a> <a href='/blog/categories/sysctl' style='font-size: 112.0%'>sysctl(1)</a> <a href='/blog/categories/todo' style='font-size: 112.0%'>todo(1)</a> <a href='/blog/categories/ubuntu' style='font-size: 112.0%'>ubuntu(1)</a> <a href='/blog/categories/vim' style='font-size: 112.0%'>vim(1)</a> <a href='/blog/categories/chuan-kou' style='font-size: 112.0%'>串口(1)</a> <a href='/blog/categories/gong-ju' style='font-size: 124.0%'>工具(2)</a> <a href='/blog/categories/wang-luo' style='font-size: 136.0%'>网络(3)</a> <a href='/blog/categories/she-ji-mo-shi' style='font-size: 112.0%'>设计模式(1)</a> </span>
+    <span id="tag-cloud"><a href='/blog/categories/iptables' style='font-size: 112.0%'>iptables(1)</a> <a href='/blog/categories/kernel' style='font-size: 160.0%'>kernel(5)</a> <a href='/blog/categories/linuxc' style='font-size: 112.0%'>linuxc(1)</a> <a href='/blog/categories/linuxbian-cheng' style='font-size: 112.0%'>linux编程(1)</a> <a href='/blog/categories/lvm' style='font-size: 112.0%'>lvm(1)</a> <a href='/blog/categories/makefile' style='font-size: 124.0%'>makefile(2)</a> <a href='/blog/categories/netfilter' style='font-size: 112.0%'>netfilter(1)</a> <a href='/blog/categories/ocp' style='font-size: 124.0%'>ocp(2)</a> <a href='/blog/categories/octopress' style='font-size: 112.0%'>octopress(1)</a> <a href='/blog/categories/python' style='font-size: 112.0%'>python(1)</a> <a href='/blog/categories/regax' style='font-size: 112.0%'>regax(1)</a> <a href='/blog/categories/shell' style='font-size: 136.0%'>shell(3)</a> <a href='/blog/categories/sourceinsight' style='font-size: 112.0%'>sourceinsight(1)</a> <a href='/blog/categories/sysctl' style='font-size: 112.0%'>sysctl(1)</a> <a href='/blog/categories/systemd' style='font-size: 112.0%'>systemd(1)</a> <a href='/blog/categories/todo' style='font-size: 112.0%'>todo(1)</a> <a href='/blog/categories/ubuntu' style='font-size: 112.0%'>ubuntu(1)</a> <a href='/blog/categories/vim' style='font-size: 112.0%'>vim(1)</a> <a href='/blog/categories/chuan-kou' style='font-size: 112.0%'>串口(1)</a> <a href='/blog/categories/gong-ju' style='font-size: 124.0%'>工具(2)</a> <a href='/blog/categories/wang-luo' style='font-size: 136.0%'>网络(3)</a> <a href='/blog/categories/she-ji-mo-shi' style='font-size: 112.0%'>设计模式(1)</a> </span>
 </section>
 
 

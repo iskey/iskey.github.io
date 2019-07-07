@@ -9,8 +9,8 @@
   <meta name="author" content="Iskey">
 
   
-  <meta name="description" content="单机minikube安装 安装kubectl 要安装minikube需要先安装kubectl
-下载后，把kubectl的执行文件拷贝到本地的PATH目录 安装minikube 下载minikube,并拷贝到本地的PATH目录 curl -Lo minikube http://kubernetes. &hellip;">
+  <meta name="description" content="
+">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -64,6 +64,510 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2019/07/07/simpe-example-of-kubernetes/">Simpe_example_of_kubernetes</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2019-07-07T15:32:37+00:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>7</span><span class='date-suffix'>th</span>, <span class='date-year'>2019</span></span> <span class='time'>3:32 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content">
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2019/07/07/helloworld-of-systemd/">Helloworld_of_systemd</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2019-07-07T15:31:20+00:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>7</span><span class='date-suffix'>th</span>, <span class='date-year'>2019</span></span> <span class='time'>3:31 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>init系统.</h2>
+
+<p>linux操作系统首先从BIOS启动开始，接下来进入bootloader（桌面系统现在一般用Grub），bootloader载入内核并进行初始化。内核初始化的最好一步就是启动PID为1的init进程。init进程是以守护进程的方式存在，是所有其他进程的祖先。</p>
+
+<p>init系统的演进路线经历了sysvinit->upstart->systemd。</p>
+
+<h2>systemd系统简介</h2>
+
+<p>借用一下帮助文档里的关系图(man bootup)</p>
+
+<pre><code>       local-fs-pre.target
+                |
+                v
+       (various mounts and   (various swap   (various cryptsetup
+        fsck services...)     devices...)        devices...)       (various low-level   (various low-level
+                |                  |                  |             services: udevd,     API VFS mounts:
+                v                  v                  v             tmpfiles, random     mqueue, configfs,
+         local-fs.target      swap.target     cryptsetup.target    seed, sysctl, ...)      debugfs, ...)
+                |                  |                  |                    |                    |
+                \__________________|_________________ | ___________________|____________________/
+                                                     \|/
+                                                      v
+                                               sysinit.target
+                                                      |
+                 ____________________________________/|\________________________________________
+                /                  |                  |                    |                    \
+                |                  |                  |                    |                    |
+                v                  v                  |                    v                    v
+            (various           (various               |                (various          rescue.service
+           timers...)          paths...)              |               sockets...)               |
+                |                  |                  |                    |                    v
+                v                  v                  |                    v              rescue.target
+          timers.target      paths.target             |             sockets.target
+                |                  |                  |                    |
+                \__________________|_________________ | ___________________/
+                                                     \|/
+                                                      v
+                                                basic.target
+                                                      |
+                 ____________________________________/|                                 emergency.service
+                /                  |                  |                                         |
+                |                  |                  |                                         v
+                v                  v                  v                                 emergency.target
+            display-        (various system    (various system
+        manager.service         services           services)
+                |             required for            |
+                |            graphical UIs)           v
+                |                  |           multi-user.target
+                |                  |                  |
+                \_________________ | _________________/
+                                  \|/
+                                   v
+                         graphical.target
+</code></pre>
+
+<h2>systemd 使用</h2>
+
+<ul>
+<li>显示某个服务的实时日志</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">journalctl</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">pager</span> <span class="o">-</span><span class="n">f</span> <span class="o">-</span><span class="n">u</span> <span class="n">hello</span><span class="o">.</span><span class="na">service</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>编写服务配置文件</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="err">#</span> <span class="n">cat</span> <span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="n">hello</span>
+</span><span class='line'><span class="n">NAME</span><span class="o">=</span><span class="n">xxxxyyyyzzz</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>编写服务脚本</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="err">#</span> <span class="n">cat</span> <span class="o">/</span><span class="n">usr</span><span class="c1">//local/bin/hello.sh</span>
+</span><span class='line'><span class="err">#</span><span class="o">!/</span><span class="n">bin</span><span class="o">/</span><span class="n">bash</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">name</span><span class="o">=</span><span class="n">$1</span>
+</span><span class='line'><span class="k">while</span> <span class="kc">true</span>
+</span><span class='line'><span class="k">do</span>
+</span><span class='line'>    <span class="n">echo</span> <span class="n">Hello</span> <span class="n">World</span> <span class="n">$name</span>
+</span><span class='line'>    <span class="n">echo</span> <span class="s">&quot;*&quot;</span> <span class="o">&gt;&gt;</span> <span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="n">hello</span><span class="o">.</span><span class="na">log</span>
+</span><span class='line'>    <span class="n">sleep</span> <span class="mi">1</span>
+</span><span class='line'><span class="n">done</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>编写服务的systemd配置文件
+可以放到<code>/lib/systemd/system</code>目录，也可以放到<code>/etc/systemd/system</code>目录下，<code>/etc/systemd/system</code>的优先级更高</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="o">[</span><span class="n">Unit</span><span class="o">]</span>
+</span><span class='line'><span class="n">Description</span><span class="o">=</span><span class="n">Hello</span> <span class="n">world</span> <span class="n">Service</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">[</span><span class="n">Service</span><span class="o">]</span>
+</span><span class='line'><span class="n">EnvironmentFile</span><span class="o">=/</span><span class="n">root</span><span class="o">/</span><span class="n">hello</span>
+</span><span class='line'><span class="n">ExecStartPre</span><span class="o">=-/</span><span class="n">usr</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">touch</span> <span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="n">hello</span><span class="o">.</span><span class="na">start</span>
+</span><span class='line'><span class="n">ExecStartPre</span><span class="o">=-/</span><span class="n">usr</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">pkill</span> <span class="n">hello</span><span class="o">.</span><span class="na">sh</span>
+</span><span class='line'><span class="n">ExecStart</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">hello</span><span class="o">.</span><span class="na">sh</span> <span class="n">$</span><span class="o">{</span><span class="n">NAME</span><span class="o">}</span>
+</span><span class='line'><span class="err">#</span><span class="n">Type</span><span class="o">=</span><span class="n">forking</span>
+</span><span class='line'><span class="n">Restart</span><span class="o">=</span><span class="n">on</span><span class="o">-</span><span class="n">success</span>
+</span><span class='line'><span class="n">RestartSec</span><span class="o">=</span><span class="mi">5</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>设置服务的cgroups参数</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">systemctl</span> <span class="n">set</span><span class="o">-</span><span class="n">property</span> <span class="n">hello</span> <span class="n">CPUShares</span><span class="o">=</span><span class="mi">1600</span> <span class="n">MemoryLimit</span><span class="o">=</span><span class="mi">600</span><span class="n">M</span> <span class="o">--</span><span class="n">runtime</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>systemd-run examples</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">systemd</span><span class="o">-</span><span class="n">run</span> <span class="o">--</span><span class="n">user</span> <span class="o">--</span><span class="n">on</span><span class="o">-</span><span class="n">calendar</span> <span class="err">&#39;</span><span class="mi">2017</span><span class="o">-</span><span class="mi">08</span><span class="o">-</span><span class="mi">12</span> <span class="mi">14</span><span class="o">:</span><span class="mi">46</span><span class="err">&#39;</span> <span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">bash</span> <span class="o">-</span><span class="n">c</span> <span class="err">&#39;</span><span class="n">echo</span> <span class="n">done</span> <span class="o">&gt;/</span><span class="n">tmp</span><span class="o">/</span><span class="n">done</span><span class="err">&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>service/socket example</h2>
+
+<ul>
+<li>with golang <a href="https://github.com/coreos/go-systemd/tree/v14/examples/activation/httpserver">Httpserver</a></li>
+<li>with python <a href="https://gist.github.com/drmalex07/333d8a88c4918954e8e4">Httpserver</a></li>
+</ul>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2019/07/07/use-lvm-to-expend-root-partition/">Use Lvm to Expend Root Partition</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2019-07-07T15:28:26+00:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>7</span><span class='date-suffix'>th</span>, <span class='date-year'>2019</span></span> <span class='time'>3:28 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>装完Linux系统后，如果当时规划的根分区太小了，有几种方法：
+- 新挂一个盘，挂着到某个目录，比如<code>/usr1</code>,后续所有的大文件尽量放到/usr1
+- 对跟分区进行扩容</p>
+
+<p>新挂磁盘，比较简单，这里主要介绍一下如何对根分区进行扩容，对根分区进行扩容分两种情况：
+- 根分区是非Linux LVM格式
+- 根分区是Linux LVM格式</p>
+
+<h2>扩容Linux LVM格式的分区</h2>
+
+<p>查看当前分区，根分区挂的是<code>/dev/mapper/rhel-root</code>卷</p>
+
+<pre><code>[root@bms-slave-0001 ~]# df -h
+Filesystem             Size  Used Avail Use% Mounted on
+/dev/mapper/rhel-root  8G  6.5G  8G   80% /
+</code></pre>
+
+<p>查看当前磁盘:</p>
+
+<pre><code>root@bms-slave-0001 ~]# fdisk -l
+
+Disk /dev/sda: 599.0 GB, 598999040000 bytes, 1169920000 sectors
+Units = sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 262144 bytes / 262144 bytes
+Disk label type: dos
+Disk identifier: 0x000afd24
+
+Device Boot      Start         End      Blocks   Id  System
+/dev/sda1   *        2048     2099199     1048576   83  Linux
+/dev/sda2         2099200    20479999     9190400   8e  Linux LVM
+/dev/sda3      1169788928  1169919999       65536   83  Linux
+</code></pre>
+
+<p>发现磁盘上还有很多空间，用fdisk，新建一个分区</p>
+
+<pre><code>[root@bms-slave-0001 ~]# fdisk -l
+
+Disk /dev/sda: 599.0 GB, 598999040000 bytes, 1169920000 sectors
+Units = sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 262144 bytes / 262144 bytes
+Disk label type: dos
+Disk identifier: 0x000afd24
+
+Device Boot      Start         End      Blocks   Id  System
+/dev/sda1   *        2048     2099199     1048576   83  Linux
+/dev/sda2         2099200    20479999     9190400   8e  Linux LVM
+/dev/sda3      1169788928  1169919999       65536   83  Linux
+/dev/sda4        20480000  1169788927   574654464    5  Extended
+/dev/sda5        20482048  1169788927   574653440   8e  Linux LVM
+</code></pre>
+
+<p>新建分区保存退出之后，执行一下<code>partprobe</code>命令，这样不用重启系统就可以重新加载分区表了。</p>
+
+<p>这里有个小知识，如果硬盘的分区模式是BIOS+MBR，受限于MBR的容量，只能有4个主分区
+如果采用ELF+GPT模式，则不受此限制。</p>
+
+<p>我的主机是BIOS+MBR模式，所以就新建一个扩展分区，然后在扩展分区里新建一个分区格式是Linux LVM的分区<code>/dev/sda5</code></p>
+
+<p>现在基于<code>/dev/sda5</code>，创建一个物理卷</p>
+
+<pre><code># pvcreate /dev/sda5
+</code></pre>
+
+<p>把<code>/dev/sda5</code>加入到根分区卷组，但是首先要查看根分区卷组</p>
+
+<pre><code># vgdisplay
+--- Volume group ---
+VG Name               rhel
+System ID
+Format                lvm2
+Metadata Areas        2
+Metadata Sequence No  5
+VG Access             read/write
+VG Status             resizable
+MAX LV                0
+Cur LV                2
+Open LV               1
+Max PV                0
+Cur PV                2
+Act PV                2
+VG Size               556.79 GiB
+PE Size               4.00 MiB
+Total PE              142539
+Alloc PE / Size       130243 / 508.76 GiB
+Free  PE / Size       12296 / 48.03 GiB
+VG UUID               1KHMUX-rlrd-Pypj-ucQZ-zPwA-TZd2-5oeHzv
+
+# vgextend rhel /dev/sda5
+</code></pre>
+
+<p>扩容卷组之后，对根分区逻辑卷进行扩容</p>
+
+<pre><code># lvextend -L +500G /dev/mapper/rhel-root
+
+[root@bms-slave-0001 ~]# df -h
+Filesystem             Size  Used Avail Use% Mounted on
+/dev/mapper/rhel-root  508G  6.5G  502G   2% /
+devtmpfs               126G     0  126G   0% /dev
+tmpfs                  126G     0  126G   0% /dev/shm
+tmpfs                  126G   19M  126G   1% /run
+tmpfs                  126G     0  126G   0% /sys/fs/cgroup
+</code></pre>
+
+<p>卷扩容之后，需要用re-size对文件系统进行扩容</p>
+
+<pre><code># resize2fs /dev/mapper/rhel-root
+</code></pre>
+
+<p>如果在centos/redhat上的话，可以用如下命令进行扩容</p>
+
+<pre><code># xfs_growfs /dev/mapper/rhel-root
+</code></pre>
+
+<h2>扩容非Lininx LVM格式的分区</h2>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2019/07/07/install-octopress-on-windows/">Install Octopress on Windows</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2019-07-07T00:45:05+00:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>7</span><span class='date-suffix'>th</span>, <span class='date-year'>2019</span></span> <span class='time'>12:45 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>最近在windows上安装了octopress（在linux的步骤差不多），简单记录一下，防止以后自己忘了</p>
+
+<h2>安装git</h2>
+
+<p>因为我们需要用github来存放我们生成的pages</p>
+
+<h2>安装ruby</h2>
+
+<ul>
+<li>下载安装包</li>
+</ul>
+
+
+<p>这里要注意一下octopress要求的ruby版本，我自己fork的octpress分支的readme.markdown里有如下字样</p>
+
+<pre><code>Note: Octopress requires a minimum Ruby version of 1.9.3-p0
+</code></pre>
+
+<p>到ruby的官方网站下载最接近的ruby版本就可以了，<a href="https://rubyinstaller.org/downloads/">Ruby</a>,
+我选用的是<a href="https://dl.bintray.com/oneclick/rubyinstaller/rubyinstaller-2.2.6-x64.exe">Ruby 2.2.6(x64)</a>.</p>
+
+<p>对应的Developmenet Kit是<a href="DevKit-mingw64-64-4.7.2-20130224-1432-sfx.exe">DevKit-mingw64-64-4.7.2-20130224-1432-sfx.exe</a>
+(<code>注:Developmenet Kit是Ruby的开发工具集，安装octopress过程中，有些库需要编译</code>)</p>
+
+<ul>
+<li><p>安装Ruby（运行安装包，把Ruby安装到<code>D:/Ruby23-64</code>目录）</p></li>
+<li><p>安装DevKit</p></li>
+</ul>
+
+
+<p>解压安装包到<code>D:/DevKit</code>，命令行进到<code>D:/DevKit</code>目录，执行</p>
+
+<pre><code>ruby dk.rb init
+</code></pre>
+
+<p>执行完成后，打开<code>D:/DevKit</code>目录下的<code>config.yml</code>,查看里边有没有<code>- D:\Ruby23-64</code>字样，如果没有需要手动加上，继续执行命令</p>
+
+<pre><code>ruby dk.rb install
+</code></pre>
+
+<p>另外记得把ruby的bin目录添加到系统环境变量</p>
+
+<h3>安装Python</h3>
+
+<p>安装Python2.7,不要用Python3</p>
+
+<h3>安装octopress</h3>
+
+<ul>
+<li>下载octopress，我这里用自己的fork的repo，<a href="https://github.com/iskey/iskey.github.io">My octopres</a></li>
+</ul>
+
+
+<p>新建一个目录，<code>D:/octopress</code>,在该目录下用git</p>
+
+<pre><code>git clone https://github.com/iskey/iskey.github.io
+</code></pre>
+
+<p>切换到<code>D:/octopress</code>，然后执行如下命令，切换一下gem的源（国内访问国外的源比较慢）</p>
+
+<pre><code>gem sources -a https://ruby.taobao.org/
+gem sources -r http://rubygems.org/
+gem sources -l
+</code></pre>
+
+<p>然后，执行如下命令，安装gem库</p>
+
+<pre><code>gem install bundler
+bundle install
+</code></pre>
+
+<p>安装Octopress主题</p>
+
+<pre><code>rake install
+</code></pre>
+
+<h2>octopress使用</h2>
+
+<ul>
+<li><p>编写新文章</p>
+
+<p>  rake new_post</p></li>
+</ul>
+
+
+<p>根据提示输入标题，或者直接使用如下命令</p>
+
+<pre><code>rake new_post['welcome']
+</code></pre>
+
+<ul>
+<li>发布、预览</li>
+</ul>
+
+
+<p>运行命令，设置github的pages地址</p>
+
+<pre><code>rake setup_Github_pages 
+</code></pre>
+
+<p>发布文章到Github</p>
+
+<pre><code>rake generate 
+rake deploy
+</code></pre>
+
+<p>本地预览</p>
+
+<pre><code>rake preview
+</code></pre>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -858,745 +1362,6 @@ kube-system kubernetes-dashboard-mg5jt 1/1 Running 0 2h
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2018/04/26/10-tips-to-push-your-git-skills-to-the-next-level/">10 Tips to Push Your Git Skills to the Next Level</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2018-04-26T15:38:05+00:00'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>26</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>3:38 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Recently we published a couple of tutorials to get you familiar with Git basics and using Git in a team environment. The commands that we discussed were about enough to help a developer survive in the Git world. In this post, we will try to explore how to manage your time effectively and make full use of the features that Git provides.</p>
-
-<p>Note: Some commands in this article include part of the command in square brackets (e.g. git add -p [file_name]). In those examples, you would insert the necessary number, identifier, etc. without the square brackets.</p>
-
-<h3>1.  Git Auto Completion</h3>
-
-<p>If you run Git commands through the command line, it’s a tiresome task to type in the commands manually every single time. To help with this, you can enable auto completion of Git commands within a few minutes.
-To get the script, run the following in a Unix system:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="n">cd</span> <span class="o">~</span>
-</span><span class='line'><span class="n">curl</span> <span class="nl">https</span><span class="p">:</span><span class="c1">//raw.github.com/git/git/master/contrib/completion/git-completion.bash -o ~/.git-completion.bash</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Next, add the following lines to your ~/.bash_profile file:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="k">if</span> <span class="p">[</span> <span class="o">-</span><span class="n">f</span> <span class="o">~/</span><span class="p">.</span><span class="n">git</span><span class="o">-</span><span class="n">completion</span><span class="p">.</span><span class="n">bash</span> <span class="p">];</span> <span class="n">then</span>
-</span><span class='line'>    <span class="p">.</span> <span class="o">~/</span><span class="p">.</span><span class="n">git</span><span class="o">-</span><span class="n">completion</span><span class="p">.</span><span class="n">bash</span>
-</span><span class='line'><span class="n">fi</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Although I have mentioned this earlier, I can not stress it enough: If you want to use the features of Git fully, you should definitely shift to the command line interface!</p>
-
-<h3>2.  Ignoring Files in Git</h3>
-
-<p>Are you tired of compiled files (like .pyc) appearing in your Git repository? Or are you so fed up that you have added them to Git? Look no further, there is a way through which you can tell Git to ignore certain files and directories altogether. Simply create a file with the name .gitignore and list the files and directories that you don’t want Git to track. You can make exceptions using the exclamation mark(!).</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="o">*</span><span class="p">.</span><span class="n">pyc</span>
-</span><span class='line'><span class="o">*</span><span class="p">.</span><span class="n">exe</span>
-</span><span class='line'><span class="n">my_db_config</span><span class="o">/</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>!main.pyc</p>
-
-<h3>3.  Who Messed With My Code?</h3>
-
-<p>It’s the natural instinct of human beings to blame others when something goes wrong. If your production server is broke, it’s very easy to find out the culprit — just do a git blame. This command shows you the author of every line in a file, the commit that saw the last change in that line, and the timestamp of the commit.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="n">git</span> <span class="n">blame</span> <span class="p">[</span><span class="n">file_name</span><span class="p">]</span>
-</span><span class='line'><span class="n">git</span> <span class="n">blame</span> <span class="n">demonstration</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>And in the screenshot below, you can see how this command would look on a bigger repository:</p>
-
-<p>git blame on the ATutor repository</p>
-
-<h3>4. Review History of the Repository</h3>
-
-<p>We had a look at the use of git log in a previous tutorial, however, there are three options that you should know about.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="o">--</span><span class="n">oneline</span> <span class="err">–</span> <span class="n">Compresses</span> <span class="n">the</span> <span class="n">information</span> <span class="n">shown</span> <span class="n">beside</span> <span class="n">each</span> <span class="n">commit</span> <span class="n">to</span> <span class="n">a</span> <span class="n">reduced</span> <span class="n">commit</span> <span class="n">hash</span> <span class="n">and</span> <span class="n">the</span> <span class="n">commit</span> <span class="n">message</span><span class="p">,</span> <span class="n">all</span> <span class="n">shown</span> <span class="n">in</span> <span class="n">a</span> <span class="n">single</span> <span class="n">line</span><span class="p">.</span>
-</span><span class='line'><span class="o">--</span><span class="n">graph</span> <span class="err">–</span> <span class="n">This</span> <span class="n">option</span> <span class="n">draws</span> <span class="n">a</span> <span class="n">text</span><span class="o">-</span><span class="n">based</span> <span class="n">graphical</span> <span class="n">representation</span> <span class="n">of</span> <span class="n">the</span> <span class="n">history</span> <span class="n">on</span> <span class="n">the</span> <span class="n">left</span> <span class="n">hand</span> <span class="n">side</span> <span class="n">of</span> <span class="n">the</span> <span class="n">output</span><span class="p">.</span> <span class="n">It</span><span class="err">’</span><span class="n">s</span> <span class="n">of</span> <span class="n">no</span> <span class="n">use</span> <span class="k">if</span> <span class="n">you</span> <span class="n">are</span> <span class="n">viewing</span> <span class="n">the</span> <span class="n">history</span> <span class="k">for</span> <span class="n">a</span> <span class="n">single</span> <span class="n">branch</span><span class="p">.</span>
-</span><span class='line'><span class="o">--</span><span class="n">all</span> <span class="err">–</span> <span class="n">Shows</span> <span class="n">the</span> <span class="n">history</span> <span class="n">of</span> <span class="n">all</span> <span class="n">branches</span><span class="p">.</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Here’s what a combination of the options looks like:
-Use of git log with all, graph and oneline</p>
-
-<h3>5. Never Lose Track of a Commit</h3>
-
-<p>Let’s say you committed something you didn’t want to and ended up doing a hard reset to come back to your previous state. Later, you realize you lost some other information in the process and want to get it back, or at least view it. This is where git reflog can help.</p>
-
-<p>A simple git log shows you the latest commit, its parent, its parent’s parent, and so on. However, git reflog is a list of commits that the head was pointed to. Remember that it’s local to your system; it’s not a part of your repository and not included in pushes or merges.</p>
-
-<p>If I run git log, I get the commits that are a part of my repository:</p>
-
-<p>Project history</p>
-
-<p>However, a git reflog shows a commit (b1b0ee9 – HEAD@{4}) that was lost when I did a hard reset:</p>
-
-<p>Git reflog</p>
-
-<h3>6. Staging Parts of a Changed File for a Commit</h3>
-
-<p>It is generally a good practice to make feature-based commits, that is, each commit must represent a feature or a bug fix. Consider what would happen if you fixed two bugs, or added multiple features without committing the changes. In such a situation situation, you could put the changes in a single commit. But there is a better way: Stage the files individually and commit them separately.</p>
-
-<p>Let’s say you’ve made multiple changes to a single file and want them to appear in separate commits. In that case, we add files by prefixing -p to our add commands.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="n">git</span> <span class="n">add</span> <span class="o">-</span><span class="n">p</span> <span class="p">[</span><span class="n">file_name</span><span class="p">]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Let’s try to demonstrate the same. I have added three new lines to file_name and I want only the first and third lines to appear in my commit. Let’s see what a git diff shows us.</p>
-
-<p>Changes in repo</p>
-
-<p>And let’s see what happes when we prefix a -p to our add command.</p>
-
-<p>Running add with -p</p>
-
-<p>It seems that Git assumed that all the changes were a part of the same idea, thereby grouping it into a single hunk. You have the following options:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="n">Enter</span> <span class="n">y</span> <span class="n">to</span> <span class="n">stage</span> <span class="n">that</span> <span class="n">hunk</span>
-</span><span class='line'><span class="n">Enter</span> <span class="n">n</span> <span class="n">to</span> <span class="n">not</span> <span class="n">stage</span> <span class="n">that</span> <span class="n">hunk</span>
-</span><span class='line'><span class="n">Enter</span> <span class="n">e</span> <span class="n">to</span> <span class="n">manually</span> <span class="n">edit</span> <span class="n">the</span> <span class="n">hunk</span>
-</span><span class='line'><span class="n">Enter</span> <span class="n">d</span> <span class="n">to</span> <span class="n">exit</span> <span class="n">or</span> <span class="n">go</span> <span class="n">to</span> <span class="n">the</span> <span class="n">next</span> <span class="n">file</span><span class="p">.</span>
-</span><span class='line'><span class="n">Enter</span> <span class="n">s</span> <span class="n">to</span> <span class="n">split</span> <span class="n">the</span> <span class="n">hunk</span><span class="p">.</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>In our case, we definitely want to split it into smaller parts to selectively add some and ignore the rest.</p>
-
-<p>Adding all hunks</p>
-
-<p>As you can see, we have added the first and third lines and ignored the second. You can then view the status of the repository and make a commit.</p>
-
-<p>Repository after selectively adding a file</p>
-
-<h3>7. Squash Multiple Commits</h3>
-
-<p>When you submit your code for review and create a pull request (which happens often in open source projects), you might be asked to make a change to your code before it’s accepted. You make the change, only to be asked to change it yet again in the next review. Before you know it, you have a few extra commits. Ideally, you could squash them into one using the rebase command.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="n">git</span> <span class="n">rebase</span> <span class="o">-</span><span class="n">i</span> <span class="n">HEAD</span><span class="o">~</span><span class="p">[</span><span class="n">number_of_commits</span><span class="p">]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>If you want to squash the last two commits, the command that you run is the following.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="n">git</span> <span class="n">rebase</span> <span class="o">-</span><span class="n">i</span> <span class="n">HEAD</span><span class="o">~</span><span class="mi">2</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>On running this command, you are taken to an interactive interface listing the commits and asking you which ones to squash. Ideally, you pick the latest commit and squash the old ones.</p>
-
-<p>Git squash interactive</p>
-
-<p>You are then asked to provide a commit message to the new commit. This process essentially re-writes your commit history.</p>
-
-<p>Adding a commit message</p>
-
-<h3>8. Stash Uncommitted Changes</h3>
-
-<p>Let’s say you are working on a certain bug or a feature, and you are suddenly asked to demonstrate your work. Your current work is not complete enough to be committed, and you can’t give a demonstration at this stage (without reverting the changes). In such a situation, git stash comes to the rescue. Stash essentially takes all your changes and stores them for further use. To stash your changes, you simply run the following-</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="n">git</span> <span class="n">stash</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>To check the list of stashes, you can run the following:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="n">git</span> <span class="n">stash</span> <span class="n">list</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Stash list</p>
-
-<p>If you want to un-stash and recover the uncommitted changes, you apply the stash:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="n">git</span> <span class="n">stash</span> <span class="n">apply</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>In the last screenshot, you can see that each stash has an indentifier, a unique number (although we have only one stash in this case). In case you want to apply only selective stashes, you add the specific identifier to the apply command:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="n">git</span> <span class="n">stash</span> <span class="n">apply</span> <span class="n">stash</span><span class="err">@</span><span class="p">{</span><span class="mi">2</span><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>After un-stashing changes</p>
-
-<h3>9. Check for Lost Commits</h3>
-
-<p>Although reflog is one way of checking for lost commits, it’s not feasible in large repositories. That is when the fsck (file system check) command comes into play.</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="n">git</span> <span class="n">fsck</span> <span class="o">--</span><span class="n">lost</span><span class="o">-</span><span class="n">found</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Git fsck results</p>
-
-<p>Here you can see a lost commit. You can check the changes in the commit by running git show [commit_hash] or recover it by running git merge [commit_hash].</p>
-
-<p>git fsck has an advantage over reflog. Let’s say you deleted a remote branch and then cloned the repository. With fsck you can search for and recover the deleted remote branch.</p>
-
-<h3>10. Cherry Pick</h3>
-
-<p>I have saved the most elegant Git command for the last. The cherry-pick command is by far my favorite Git command, because of its literal meaning as well as its utility!</p>
-
-<p>In the simplest of terms, cherry-pick is picking a single commit from a different branch and merging it with your current one. If you are working in a parallel fashion on two or more branches, you might notice a bug that is present in all branches. If you solve it in one, you can cherry pick the commit into the other branches, without messing with other files or commits.</p>
-
-<p>Let’s consider a scenario where we can apply this. I have two branches and I want to cherry-pick the commit b20fd14: Cleaned junk into another one.</p>
-
-<p>Before cherry pick</p>
-
-<p>I switch to the branch into which I want to cherry-pick the commit, and run the following:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='c'><span class='line'><span class="n">git</span> <span class="n">cherry</span><span class="o">-</span><span class="n">pick</span> <span class="p">[</span><span class="n">commit_hash</span><span class="p">]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>After cherry pick</p>
-
-<p>Although we had a clean cherry-pick this time, you should know that this command can often lead to conflicts, so use it with care.
-Conclusion</p>
-
-<p>With this, we come to the end of our list of tips that I think can help you take your Git skills to a new level. Git is the best out there and it can accomplish anything you can imagine. Therefore, always try to challenge yourself with Git. Chances are, you will end up learning something new!</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2018/04/24/shell-fds/">Shell文件描述符操作</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2018-04-24T02:39:25+00:00'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>24</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>2:39 am</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>shell在产生一个新进程后，新进程的前三个文件描述符都默认指向三个相关文件。
-这三个文件描述符对应的数组下标分别为<strong>0，1，2</strong>。</p>
-
-<pre><code>- 0  对应的文件叫做标准输入（stdin）
-- 1  对应的文件叫做标准输出（stdout）
-- 2  对应的文件叫做标准报错(stderr)
-</code></pre>
-
-<p>但是实际上，默认跟人交互的<strong>输入是键盘、鼠标，输出是显示器屏幕</strong>，这些硬件设备对于程序来说都是不认识的，所以操作系统借用了原来“终端”的概念，将键盘鼠标显示器都表现成一个终端文件。于是<strong>stdin、stdout和stderr</strong>就最重都指向了这所谓的终端文件上。</p>
-
-<p>于是，从键盘输入的内容，进程可以从标准输入的0号文件描述符读取，正常的输出内容从1号描述符写出，报错信息被定义为从2号描述符写出。这就是标准输入、标准输出和标准报错对应的描述符编号是0、1、2的原因。这也是为什么对报错进行重定向要使用2>的原因(其实1>也是可以用的)。</p>
-
-<p>明白了以上内容之后，很多重定向的数字魔法就好理解了，比如：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="o">[</span><span class="n">zorro</span><span class="nd">@zorrozou</span><span class="o">-</span><span class="n">pc0</span> <span class="n">prime</span><span class="o">]</span><span class="n">$</span> <span class="n">find</span> <span class="o">/</span><span class="n">etc</span> <span class="o">-</span><span class="n">name</span> <span class="n">passwd</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="kc">null</span>
-</span><span class='line'><span class="nl">find:</span> <span class="err">‘</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">docker</span><span class="err">’</span><span class="o">:</span> <span class="n">Permission</span> <span class="n">denied</span>
-</span><span class='line'><span class="nl">find:</span> <span class="err">‘</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">sudoers</span><span class="o">.</span><span class="na">d</span><span class="err">’</span><span class="o">:</span> <span class="n">Permission</span> <span class="n">denied</span>
-</span><span class='line'><span class="nl">find:</span> <span class="err">‘</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">lvm</span><span class="o">/</span><span class="n">cache</span><span class="err">’</span><span class="o">:</span> <span class="n">Permission</span> <span class="n">denied</span>
-</span><span class='line'><span class="nl">find:</span> <span class="err">‘</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">pacman</span><span class="o">.</span><span class="na">d</span><span class="o">/</span><span class="n">gnupg</span><span class="o">/</span><span class="n">openpgp</span><span class="o">-</span><span class="n">revocs</span><span class="o">.</span><span class="na">d</span><span class="err">’</span><span class="o">:</span> <span class="n">Permission</span> <span class="n">denied</span>
-</span><span class='line'><span class="nl">find:</span> <span class="err">‘</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">pacman</span><span class="o">.</span><span class="na">d</span><span class="o">/</span><span class="n">gnupg</span><span class="o">/</span><span class="kd">private</span><span class="o">-</span><span class="n">keys</span><span class="o">-</span><span class="n">v1</span><span class="o">.</span><span class="na">d</span><span class="err">’</span><span class="o">:</span> <span class="n">Permission</span> <span class="n">denied</span>
-</span><span class='line'><span class="nl">find:</span> <span class="err">‘</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">polkit</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="n">rules</span><span class="o">.</span><span class="na">d</span><span class="err">’</span><span class="o">:</span> <span class="n">Permission</span> <span class="n">denied</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>这相当于只看报错信息。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="o">[</span><span class="n">zorro</span><span class="nd">@zorrozou</span><span class="o">-</span><span class="n">pc0</span> <span class="n">prime</span><span class="o">]</span><span class="n">$</span> <span class="n">find</span> <span class="o">/</span><span class="n">etc</span> <span class="o">-</span><span class="n">name</span> <span class="n">passwd</span> <span class="mi">2</span><span class="o">&gt;</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="kc">null</span>
-</span><span class='line'><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="k">default</span><span class="o">/</span><span class="n">passwd</span>
-</span><span class='line'><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">pam</span><span class="o">.</span><span class="na">d</span><span class="o">/</span><span class="n">passwd</span>
-</span><span class='line'><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">passwd</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>这相当于只看正确输出信息。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="o">[</span><span class="n">zorro</span><span class="nd">@zorrozou</span><span class="o">-</span><span class="n">pc0</span> <span class="n">prime</span><span class="o">]</span><span class="n">$</span> <span class="n">find</span> <span class="o">/</span><span class="n">etc</span> <span class="o">-</span><span class="n">name</span> <span class="n">passwd</span> <span class="o">&amp;&gt;</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="kc">null</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>所有输出都不看，也可以写成”>&amp;”。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="o">[</span><span class="n">zorro</span><span class="nd">@zorrozou</span><span class="o">-</span><span class="n">pc0</span> <span class="n">prime</span><span class="o">]</span><span class="n">$</span> <span class="n">find</span> <span class="o">/</span><span class="n">etc</span> <span class="o">-</span><span class="n">name</span> <span class="n">passwd</span> <span class="mi">2</span><span class="o">&gt;&amp;</span><span class="mi">1</span>
-</span><span class='line'><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="k">default</span><span class="o">/</span><span class="n">passwd</span>
-</span><span class='line'><span class="nl">find:</span> <span class="err">‘</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">docker</span><span class="err">’</span><span class="o">:</span> <span class="n">Permission</span> <span class="n">denied</span>
-</span><span class='line'><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">pam</span><span class="o">.</span><span class="na">d</span><span class="o">/</span><span class="n">passwd</span>
-</span><span class='line'><span class="nl">find:</span> <span class="err">‘</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">sudoers</span><span class="o">.</span><span class="na">d</span><span class="err">’</span><span class="o">:</span> <span class="n">Permission</span> <span class="n">denied</span>
-</span><span class='line'><span class="nl">find:</span> <span class="err">‘</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">lvm</span><span class="o">/</span><span class="n">cache</span><span class="err">’</span><span class="o">:</span> <span class="n">Permission</span> <span class="n">denied</span>
-</span><span class='line'><span class="nl">find:</span> <span class="err">‘</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">pacman</span><span class="o">.</span><span class="na">d</span><span class="o">/</span><span class="n">gnupg</span><span class="o">/</span><span class="n">openpgp</span><span class="o">-</span><span class="n">revocs</span><span class="o">.</span><span class="na">d</span><span class="err">’</span><span class="o">:</span> <span class="n">Permission</span> <span class="n">denied</span>
-</span><span class='line'><span class="nl">find:</span> <span class="err">‘</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">pacman</span><span class="o">.</span><span class="na">d</span><span class="o">/</span><span class="n">gnupg</span><span class="o">/</span><span class="kd">private</span><span class="o">-</span><span class="n">keys</span><span class="o">-</span><span class="n">v1</span><span class="o">.</span><span class="na">d</span><span class="err">’</span><span class="o">:</span> <span class="n">Permission</span> <span class="n">denied</span>
-</span><span class='line'><span class="nl">find:</span> <span class="err">‘</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">polkit</span><span class="o">-</span><span class="mi">1</span><span class="o">/</span><span class="n">rules</span><span class="o">.</span><span class="na">d</span><span class="err">’</span><span class="o">:</span> <span class="n">Permission</span> <span class="n">denied</span>
-</span><span class='line'><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">passwd</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>将标准报错输出的，重定向到标准输出再输出。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="o">[</span><span class="n">zorro</span><span class="nd">@zorrozou</span><span class="o">-</span><span class="n">pc0</span> <span class="n">prime</span><span class="o">]</span><span class="n">$</span> <span class="n">echo</span> <span class="n">hello</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">out</span>
-</span><span class='line'><span class="o">[</span><span class="n">zorro</span><span class="nd">@zorrozou</span><span class="o">-</span><span class="n">pc0</span> <span class="n">prime</span><span class="o">]</span><span class="n">$</span> <span class="n">cat</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">out</span>
-</span><span class='line'><span class="n">hello</span>
-</span><span class='line'><span class="o">[</span><span class="n">zorro</span><span class="nd">@zorrozou</span><span class="o">-</span><span class="n">pc0</span> <span class="n">prime</span><span class="o">]</span><span class="n">$</span> <span class="n">echo</span> <span class="n">hello2</span> <span class="o">&gt;&gt;</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">out</span>
-</span><span class='line'><span class="o">[</span><span class="n">zorro</span><span class="nd">@zorrozou</span><span class="o">-</span><span class="n">pc0</span> <span class="n">prime</span><span class="o">]</span><span class="n">$</span> <span class="n">cat</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">out</span>
-</span><span class='line'><span class="n">hello</span>
-</span><span class='line'><span class="n">hello2</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>“>>”表示追加重定向。</p>
-
-<p>相信大家对<strong>&amp;>>、1>&amp;2、？2>&amp;3、6>&amp;8、>>file 2>&amp;1</strong>这样的写法应该也都能理解了。
-进程可以打开多个文件，多个描述符之间都可以进行重定向。当然，输入也可以，比如：3&lt;表示从描述符3读取。</p>
-
-<p>下面我们罗列一下其他重定向符号和用法：
-Here Document：
-语法：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="o">&lt;&lt;[-]</span><span class="n">word</span>
-</span><span class='line'>    <span class="n">here</span><span class="o">-</span><span class="n">document</span>
-</span><span class='line'><span class="n">delimiter</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>这是一种特殊的输入重定向，重定向的内容并不是来自于某个文件，而是从当前输入读取，直到输入中写入了delimiter字符标记结束。用法：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="o">[</span><span class="n">zorro</span><span class="nd">@zorrozou</span><span class="o">-</span><span class="n">pc0</span> <span class="n">prime</span><span class="o">]</span><span class="n">$</span> <span class="n">cat</span> <span class="o">&lt;&lt;</span> <span class="n">EOF</span>
-</span><span class='line'><span class="o">&gt;</span> <span class="n">hello</span> <span class="n">world</span><span class="o">!</span>
-</span><span class='line'><span class="o">&gt;</span> <span class="n">I</span> <span class="n">am</span> <span class="n">zorro</span>
-</span><span class='line'><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&gt;</span>
-</span><span class='line'><span class="o">&gt;</span> <span class="n">sadfsdf</span>
-</span><span class='line'><span class="o">&gt;</span> <span class="n">ertert</span>
-</span><span class='line'><span class="o">&gt;</span> <span class="n">eof</span>
-</span><span class='line'><span class="o">&gt;</span> <span class="n">EOF</span>
-</span><span class='line'><span class="n">hello</span> <span class="n">world</span><span class="o">!</span>
-</span><span class='line'><span class="n">I</span> <span class="n">am</span> <span class="n">zorro</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="n">sadfsdf</span>
-</span><span class='line'><span class="n">ertert</span>
-</span><span class='line'><span class="n">eof</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>这个例子可以看到，最后cat输出的内容都是在上面写入的内容，而且内容中不包括EOF，因为EOF是标记输入结束的字符串。这个功能在脚本中通常可以用于需要交互式处理的某些命令的输入和文件编辑，比如想在脚本中使用fdisk命令新建一个分区：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="o">[</span><span class="n">root</span><span class="nd">@zorrozou</span><span class="o">-</span><span class="n">pc0</span> <span class="n">prime</span><span class="o">]</span><span class="err">#</span> <span class="n">cat</span> <span class="n">fdisk</span><span class="o">.</span><span class="na">sh</span>
-</span><span class='line'><span class="err">#</span><span class="o">!/</span><span class="n">bin</span><span class="o">/</span><span class="n">bash</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">fdisk</span> <span class="o">/</span><span class="n">dev</span><span class="o">/</span><span class="n">sdb</span> <span class="o">&lt;&lt;</span> <span class="n">EOF</span>
-</span><span class='line'><span class="n">n</span>
-</span><span class='line'><span class="n">p</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="n">w</span>
-</span><span class='line'><span class="n">EOF</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>当然这个脚本大家千万不要乱执行，可能会修改你的分区表。其中要输入的内容，相信熟悉fdisk命令的人应该都能明白，我就不多解释了。
-Here strings：
-语法：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="o">&lt;&lt;&lt;</span><span class="n">word</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>使用方式：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="o">[</span><span class="n">zorro</span><span class="nd">@zorrozou</span><span class="o">-</span><span class="n">pc0</span> <span class="n">prime</span><span class="o">]</span><span class="n">$</span> <span class="n">cat</span> <span class="o">&lt;&lt;&lt;</span> <span class="n">asdasdasd</span>
-</span><span class='line'><span class="n">asdasdasd</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>其实就是将&lt;&lt;&lt;符号后面的字符串当成要输入的内容给cat，而不是定向一个文件描述符。这样是不是就相当于把cat当echo用了？</p>
-
-<ul>
-<li>文件描述符的复制：</li>
-</ul>
-
-
-<p><strong>复制输入文件描述符：[n]&lt;&amp;word</strong></p>
-
-<p>如果n没有指定数字，则默认复制0号文件描述符。
-word一般写一个已经打开的并且用来作为输入的描述符数字，表示将制订的n号描述符在制定的描述符上复制一个。
-如果word写的是“-”符号，则表示关闭这个文件描述符。如果word指定的不是一个用来输入的文件描述符，则会报错。</p>
-
-<p><strong>复制输出文件描述符：[n]>&amp;word</strong></p>
-
-<p>复制一个输出的描述符，字段描述参考上面的输入复制，例子上面已经讲过了。这里还需要知道的就是1>&amp;-表示关闭1号描述符。</p>
-
-<ul>
-<li>文件描述符的移动：</li>
-</ul>
-
-
-<p><strong>移动输入描述符：[n]&lt;&amp;digit-</strong>
-<strong>移动输出描述符：[n]>&amp;digit-</strong></p>
-
-<p>这两个符号的意思都是将原有描述符在新的描述符编号上打开，并且关闭原有描述符。</p>
-
-<ul>
-<li>描述符新建：</li>
-</ul>
-
-
-<p><strong>新建一个用来输入的描述符：[n]&lt;word</strong>
-<strong>新建一个用来输出的描述符：[n]>word</strong>
-<strong>新建一个用来输入和输出的描述符：[n]&lt;>word</strong></p>
-
-<p>word都应该写一个文件路径，用来表示这个文件描述符的关联文件是谁。</p>
-
-<p>下面我们来看相关的编程例子：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="err">#</span><span class="o">!/</span><span class="n">bin</span><span class="o">/</span><span class="n">bash</span>
-</span><span class='line'>
-</span><span class='line'><span class="err">#</span> <span class="n">example</span> <span class="mi">1</span>
-</span><span class='line'><span class="err">#</span><span class="n">打开3号fd用来输入</span><span class="err">，</span><span class="n">关联文件为</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">passwd</span>
-</span><span class='line'><span class="n">exec</span> <span class="mi">3</span><span class="o">&lt;</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">passwd</span>
-</span><span class='line'><span class="err">#</span><span class="n">让3号描述符成为标准输入</span>
-</span><span class='line'><span class="n">exec</span> <span class="mi">0</span><span class="o">&lt;&amp;</span><span class="mi">3</span>
-</span><span class='line'><span class="err">#</span><span class="n">此时cat的输入将是</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">passwd</span><span class="err">，</span><span class="n">会在屏幕上显示出</span><span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">passwd的内容</span><span class="err">。</span>
-</span><span class='line'><span class="n">cat</span>
-</span><span class='line'>
-</span><span class='line'><span class="err">#</span><span class="n">关闭3号描述符</span><span class="err">。</span>
-</span><span class='line'><span class="n">exec</span> <span class="mi">3</span><span class="o">&gt;&amp;-</span>
-</span><span class='line'>
-</span><span class='line'><span class="err">#</span> <span class="n">example</span> <span class="mi">2</span>
-</span><span class='line'><span class="err">#</span><span class="n">打开3号和4号描述符作为输出</span><span class="err">，</span><span class="n">并且分别关联文件</span><span class="err">。</span>
-</span><span class='line'><span class="n">exec</span> <span class="mi">3</span><span class="o">&gt;</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">stdout</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">exec</span> <span class="mi">4</span><span class="o">&gt;</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">stderr</span>
-</span><span class='line'>
-</span><span class='line'><span class="err">#</span><span class="n">将标准输入关联到3号描述符</span><span class="err">，</span><span class="n">关闭原来的1号fd</span><span class="err">。</span>
-</span><span class='line'><span class="n">exec</span> <span class="mi">1</span><span class="o">&gt;&amp;</span><span class="mi">3</span><span class="o">-</span>
-</span><span class='line'><span class="err">#</span><span class="n">将标准报错关联到4号描述符</span><span class="err">，</span><span class="n">关闭原来的2号fd</span><span class="err">。</span>
-</span><span class='line'><span class="n">exec</span> <span class="mi">2</span><span class="o">&gt;&amp;</span><span class="mi">4</span><span class="o">-</span>
-</span><span class='line'>
-</span><span class='line'><span class="err">#</span><span class="n">这个find命令的所有正常输出都会写到</span><span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">stdout文件中</span><span class="err">，</span><span class="n">错误输出都会写到</span><span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">stderr文件中</span><span class="err">。</span>
-</span><span class='line'><span class="n">find</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span> <span class="o">-</span><span class="n">name</span> <span class="s">&quot;passwd&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="err">#</span><span class="n">关闭两个描述符</span><span class="err">。</span>
-</span><span class='line'><span class="n">exec</span> <span class="mi">3</span><span class="o">&gt;&amp;-</span>
-</span><span class='line'><span class="n">exec</span> <span class="mi">4</span><span class="o">&gt;&amp;-</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>以上脚本要注意的地方是，一般输入输出重定向都是放到命令后面作为后缀使用，所以如果单纯改变脚本的描述符，需要在前面加exec命令。这种用法也叫做描述符魔术。某些特殊符号还有一些特殊用法，比如：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">zorro</span><span class="nd">@zorrozou</span><span class="o">-</span><span class="n">pc0</span> <span class="n">bash</span><span class="o">]</span><span class="n">$</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">out</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>表示清空文件，当然也可以写成：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="o">[</span><span class="n">zorro</span><span class="nd">@zorrozou</span><span class="o">-</span><span class="n">pc0</span> <span class="n">bash</span><span class="o">]</span><span class="n">$</span> <span class="o">:&gt;</span> <span class="o">/</span><span class="n">tmp</span><span class="o">/</span><span class="n">out</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>因为”:”是一个内建命令，跟true是同样的功能，所以没有任何输出，所以这个命令清空文件的作用。</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2018/03/08/ip-tunnel/">建立IP隧道</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2018-03-08T08:44:00+00:00'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>8</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>8:44 am</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>需求</h2>
-
-<p>  有2个相互隔离的网络，拓扑见下图。ServerA想直接访问到ServerB连接的私有网络</p>
-
-<pre><code>                    |
-1.1.1.1               2.2.2.2       |
-+---------+  Public   +---------+   | Private
-| ServerA +-----------+ ServerB +-------+
-+---------+  Network  +---------+   | Network
-                    |
-                    | 192.168.1.0/24 
-</code></pre>
-
-<h2>实现</h2>
-
-<p>  通过ip tunnel建立ipip隧道，再通过iptables进行nat，便可以实现。</p>
-
-<h3>Step 1. 建立ip隧道</h3>
-
-<p>  ServerA配置iptunnel,并给tunnel接口配置上ip</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>#ip tunnel add a2b mode ipip remote 2.2.2.2 local 1.1.1.1
-</span><span class='line'>
-</span><span class='line'>#ifconfig a2b 192.168.2.1 netmask 255.255.255.0</span></code></pre></td></tr></table></div></figure>
-
-
-<p>  ServerB配置iptunnel,并给tunnel接口配置上ip</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>#ip tunnel add a2b mode ipip remote 1.1.1.1 local 2.2.2.2
-</span><span class='line'>
-</span><span class='line'>#ifconfig a2b 192.168.2.2 netmask 255.255.255.0</span></code></pre></td></tr></table></div></figure>
-
-
-<p>  隧道配置完成后，请在ServerA上192.168.2.2，看是否可以ping通，ping通则继续，ping不通需要再看一下上面的命令执行是否有报错</p>
-
-<h3>Step 2. 添加路由和nat</h3>
-
-<p>  ServerA上，添加到192.168.1.0/24的路由</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>#/sbin/route add -net 192.168.1.0/24 gw 192.168.2.2</span></code></pre></td></tr></table></div></figure>
-
-
-<p>  ServerB上，添加iptables nat，将ServerA过了访问192.168.1.0/24段的包进行NAT，并开启ip foward功能</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>#iptables -t nat -A POSTROUTING -s 192.168.2.1 -d 192.168.1.0/24 -j MASQUERADE
-</span><span class='line'>
-</span><span class='line'>#sysctl -w net.ipv4.ip_forward=1
-</span><span class='line'>
-</span><span class='line'>#sed -i '/net.ipv4.ip_forward/ s/0/1/'  /etc/sysctl.conf</span></code></pre></td></tr></table></div></figure>
-
-
-<p>  至此，完成了两端的配置，ServerA可以直接访问ServerB 所接的私网了。</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2018/03/07/TODO/">TODO</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2018-03-07T08:44:00+00:00'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>7</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>8:44 am</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h3>TODO</h3>
-
-<p><a href="http://www.adminsehow.com/2011/09/iptables-packet-traverse-map">Netfilter</a></p>
-
-<hr />
-
-<p><img src="http://www.adminsehow.com/wp-content/uploads/2011/09/tables_traverse.jpg" alt="1" /></p>
-
-<hr />
-
-<p><img src="http://www.adminsehow.com/wp-content/uploads/2011/09/packet_flow9.png" alt="2" /></p>
-
-<hr />
-
-<p><img src="http://www.adminsehow.com/wp-content/uploads/2011/09/iptables.png" alt="3" /></p>
-
-<hr />
-
-<p><a href="http://liu2lin600.github.io/2016/07/23/iptables%E7%AE%80%E4%BB%8B%E5%8F%8A%E5%91%BD%E4%BB%A4%E7%94%A8%E6%B3%95/">http://liu2lin600.github.io/2016/07/23/iptables%E7%AE%80%E4%BB%8B%E5%8F%8A%E5%91%BD%E4%BB%A4%E7%94%A8%E6%B3%95/</a></p>
-
-<p><a href="http://www.brendangregg.com/overview.html">http://www.brendangregg.com/overview.html</a></p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/2">&larr; Older</a>
@@ -1612,34 +1377,34 @@ word一般写一个已经打开的并且用来作为输入的描述符数字，�
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2019/07/07/simpe-example-of-kubernetes/">Simpe_example_of_kubernetes</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2019/07/07/helloworld-of-systemd/">Helloworld_of_systemd</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2019/07/07/use-lvm-to-expend-root-partition/">Use Lvm to Expend Root Partition</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2019/07/07/install-octopress-on-windows/">Install Octopress on Windows</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2019/05/30/minikube-install/">Minikube Install</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2019/05/28/xubuntu-upgrade/">Xubuntu Upgrade</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2019/05/27/reset-env-for-running-process/">Reset-env-for-running-process</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2018/04/27/iptables-with-time/">Iptables时间规则匹配</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2018/04/27/redirect-extern-request-to-localhost/">重定向外部连接到本地环回地址</a>
       </li>
     
   </ul>
 </section>
 <section>
   <h1>Categories</h1>
-    <ul id="category-list"><li><a href='/blog/categories/iptables/'>iptables (1)</a></li><li><a href='/blog/categories/kernel/'>kernel (5)</a></li><li><a href='/blog/categories/linuxc/'>linuxc (1)</a></li><li><a href='/blog/categories/linuxbian-cheng/'>linux编程 (1)</a></li><li><a href='/blog/categories/makefile/'>makefile (2)</a></li><li><a href='/blog/categories/netfilter/'>netfilter (1)</a></li><li><a href='/blog/categories/ocp/'>ocp (2)</a></li><li><a href='/blog/categories/python/'>python (1)</a></li><li><a href='/blog/categories/regax/'>regax (1)</a></li><li><a href='/blog/categories/shell/'>shell (3)</a></li><li><a href='/blog/categories/sourceinsight/'>sourceinsight (1)</a></li><li><a href='/blog/categories/sysctl/'>sysctl (1)</a></li><li><a href='/blog/categories/todo/'>todo (1)</a></li><li><a href='/blog/categories/ubuntu/'>ubuntu (1)</a></li><li><a href='/blog/categories/vim/'>vim (1)</a></li><li><a href='/blog/categories/chuan-kou/'>串口 (1)</a></li><li><a href='/blog/categories/gong-ju/'>工具 (2)</a></li><li><a href='/blog/categories/wang-luo/'>网络 (3)</a></li><li><a href='/blog/categories/she-ji-mo-shi/'>设计模式 (1)</a></li></ul>
+    <ul id="category-list"><li><a href='/blog/categories/iptables/'>iptables (1)</a></li><li><a href='/blog/categories/kernel/'>kernel (5)</a></li><li><a href='/blog/categories/linuxc/'>linuxc (1)</a></li><li><a href='/blog/categories/linuxbian-cheng/'>linux编程 (1)</a></li><li><a href='/blog/categories/lvm/'>lvm (1)</a></li><li><a href='/blog/categories/makefile/'>makefile (2)</a></li><li><a href='/blog/categories/netfilter/'>netfilter (1)</a></li><li><a href='/blog/categories/ocp/'>ocp (2)</a></li><li><a href='/blog/categories/octopress/'>octopress (1)</a></li><li><a href='/blog/categories/python/'>python (1)</a></li><li><a href='/blog/categories/regax/'>regax (1)</a></li><li><a href='/blog/categories/shell/'>shell (3)</a></li><li><a href='/blog/categories/sourceinsight/'>sourceinsight (1)</a></li><li><a href='/blog/categories/sysctl/'>sysctl (1)</a></li><li><a href='/blog/categories/systemd/'>systemd (1)</a></li><li><a href='/blog/categories/todo/'>todo (1)</a></li><li><a href='/blog/categories/ubuntu/'>ubuntu (1)</a></li><li><a href='/blog/categories/vim/'>vim (1)</a></li><li><a href='/blog/categories/chuan-kou/'>串口 (1)</a></li><li><a href='/blog/categories/gong-ju/'>工具 (2)</a></li><li><a href='/blog/categories/wang-luo/'>网络 (3)</a></li><li><a href='/blog/categories/she-ji-mo-shi/'>设计模式 (1)</a></li></ul>
 </section>
 <section>
   <h1>Tag Cloud</h1>
-    <span id="tag-cloud"><a href='/blog/categories/iptables' style='font-size: 112.0%'>iptables(1)</a> <a href='/blog/categories/kernel' style='font-size: 160.0%'>kernel(5)</a> <a href='/blog/categories/linuxc' style='font-size: 112.0%'>linuxc(1)</a> <a href='/blog/categories/linuxbian-cheng' style='font-size: 112.0%'>linux编程(1)</a> <a href='/blog/categories/makefile' style='font-size: 124.0%'>makefile(2)</a> <a href='/blog/categories/netfilter' style='font-size: 112.0%'>netfilter(1)</a> <a href='/blog/categories/ocp' style='font-size: 124.0%'>ocp(2)</a> <a href='/blog/categories/python' style='font-size: 112.0%'>python(1)</a> <a href='/blog/categories/regax' style='font-size: 112.0%'>regax(1)</a> <a href='/blog/categories/shell' style='font-size: 136.0%'>shell(3)</a> <a href='/blog/categories/sourceinsight' style='font-size: 112.0%'>sourceinsight(1)</a> <a href='/blog/categories/sysctl' style='font-size: 112.0%'>sysctl(1)</a> <a href='/blog/categories/todo' style='font-size: 112.0%'>todo(1)</a> <a href='/blog/categories/ubuntu' style='font-size: 112.0%'>ubuntu(1)</a> <a href='/blog/categories/vim' style='font-size: 112.0%'>vim(1)</a> <a href='/blog/categories/chuan-kou' style='font-size: 112.0%'>串口(1)</a> <a href='/blog/categories/gong-ju' style='font-size: 124.0%'>工具(2)</a> <a href='/blog/categories/wang-luo' style='font-size: 136.0%'>网络(3)</a> <a href='/blog/categories/she-ji-mo-shi' style='font-size: 112.0%'>设计模式(1)</a> </span>
+    <span id="tag-cloud"><a href='/blog/categories/iptables' style='font-size: 112.0%'>iptables(1)</a> <a href='/blog/categories/kernel' style='font-size: 160.0%'>kernel(5)</a> <a href='/blog/categories/linuxc' style='font-size: 112.0%'>linuxc(1)</a> <a href='/blog/categories/linuxbian-cheng' style='font-size: 112.0%'>linux编程(1)</a> <a href='/blog/categories/lvm' style='font-size: 112.0%'>lvm(1)</a> <a href='/blog/categories/makefile' style='font-size: 124.0%'>makefile(2)</a> <a href='/blog/categories/netfilter' style='font-size: 112.0%'>netfilter(1)</a> <a href='/blog/categories/ocp' style='font-size: 124.0%'>ocp(2)</a> <a href='/blog/categories/octopress' style='font-size: 112.0%'>octopress(1)</a> <a href='/blog/categories/python' style='font-size: 112.0%'>python(1)</a> <a href='/blog/categories/regax' style='font-size: 112.0%'>regax(1)</a> <a href='/blog/categories/shell' style='font-size: 136.0%'>shell(3)</a> <a href='/blog/categories/sourceinsight' style='font-size: 112.0%'>sourceinsight(1)</a> <a href='/blog/categories/sysctl' style='font-size: 112.0%'>sysctl(1)</a> <a href='/blog/categories/systemd' style='font-size: 112.0%'>systemd(1)</a> <a href='/blog/categories/todo' style='font-size: 112.0%'>todo(1)</a> <a href='/blog/categories/ubuntu' style='font-size: 112.0%'>ubuntu(1)</a> <a href='/blog/categories/vim' style='font-size: 112.0%'>vim(1)</a> <a href='/blog/categories/chuan-kou' style='font-size: 112.0%'>串口(1)</a> <a href='/blog/categories/gong-ju' style='font-size: 124.0%'>工具(2)</a> <a href='/blog/categories/wang-luo' style='font-size: 136.0%'>网络(3)</a> <a href='/blog/categories/she-ji-mo-shi' style='font-size: 112.0%'>设计模式(1)</a> </span>
 </section>
 
 

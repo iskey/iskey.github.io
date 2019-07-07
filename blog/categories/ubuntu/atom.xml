@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ubuntu | Iskey's Blog]]></title>
   <link href="http://iskey.github.io/blog/categories/ubuntu/atom.xml" rel="self"/>
   <link href="http://iskey.github.io/"/>
-  <updated>2019-07-06T22:56:22+00:00</updated>
+  <updated>2019-07-07T15:34:15+00:00</updated>
   <id>http://iskey.github.io/</id>
   <author>
     <name><![CDATA[Iskey]]></name>
@@ -133,68 +133,42 @@ make: *** [default] Error 2
 <h3>　其它</h3>
 
 <p>中间有个插曲，升级后Grub进不去了，不得已，用ubuntuＵ盘系统进去，使用boot-repaire重新修复了Grub,
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>sudo apt-add-repository ppa:yannubuntu/boot-repair&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;sudo apt-get update&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;sudo apt-get install -y boot-repair&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;boot-repair</span></code></pre></td></tr></table></div></figure></p>
+```
+sudo apt-add-repository ppa:yannubuntu/boot-repair</p>
+
+<p>sudo apt-get update</p>
+
+<p>sudo apt-get install -y boot-repair</p>
+
+<p>boot-repair
+```</p>
 
 <p>但是Grub菜单里的Windows系统没有了，所有又安装了grub-customizer进行调整：
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>1. Open terminal either via Ctrl+Alt+T or by searching for ‘terminal’ from app launcher. When it opens, run command to add the PPA:&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;sudo add-apt-repository ppa:danielrichter2007/grub-customizer&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;Input your password (no visual feedback while typing) when it prompts and hit Enter to continue.&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;grub-customizer-ppa&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;ol&gt;
-</span><span class='line'>&lt;li&gt;After added the PPA, run commands one by one to refresh package cache and install Grub Customizer:&lt;/li&gt;
-</span><span class='line'>&lt;/ol&gt;
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;sudo apt-get update&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;sudo apt-get install grub-customizer&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;Once installed, launch the software from your application launcher and enjoy!
-</span><span class='line'>Uninstall:&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;To remove the software, run command in terminal:&lt;/p&gt;
-</span><span class='line'>
-</span><span class='line'>&lt;p&gt;sudo apt-get remove &ndash;autoremove grub-customizer</span></code></pre></td></tr></table></div></figure></p>
+```
+1. Open terminal either via Ctrl+Alt+T or by searching for ‘terminal’ from app launcher. When it opens, run command to add the PPA:</p>
+
+<p>sudo add-apt-repository ppa:danielrichter2007/grub-customizer</p>
+
+<p>Input your password (no visual feedback while typing) when it prompts and hit Enter to continue.</p>
+
+<p>grub-customizer-ppa</p>
+
+<ol>
+<li>After added the PPA, run commands one by one to refresh package cache and install Grub Customizer:</li>
+</ol>
+
+
+<p>sudo apt-get update</p>
+
+<p>sudo apt-get install grub-customizer</p>
+
+<p>Once installed, launch the software from your application launcher and enjoy!
+Uninstall:</p>
+
+<p>To remove the software, run command in terminal:</p>
+
+<p>sudo apt-get remove &ndash;autoremove grub-customizer
+```</p>
 ]]></content>
   </entry>
   

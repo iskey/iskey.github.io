@@ -1,0 +1,308 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Install Octopress on Windows - Iskey's Blog</title>
+  <meta name="author" content="Iskey">
+
+  
+  <meta name="description" content="最近在windows上安装了octopress（在linux的步骤差不多），简单记录一下，防止以后自己忘了 安装git 因为我们需要用github来存放我们生成的pages 安装ruby 下载安装包 这里要注意一下octopress要求的ruby版本， &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://iskey.github.io/blog/2019/07/07/install-octopress-on-windows/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Iskey's Blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Iskey's Blog</a></h1>
+  
+    <h2>A free place to write something down.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="iskey.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Install Octopress on Windows</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2019-07-07T00:45:05+00:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>7</span><span class='date-suffix'>th</span>, <span class='date-year'>2019</span></span> <span class='time'>12:45 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>最近在windows上安装了octopress（在linux的步骤差不多），简单记录一下，防止以后自己忘了</p>
+
+<h2>安装git</h2>
+
+<p>因为我们需要用github来存放我们生成的pages</p>
+
+<h2>安装ruby</h2>
+
+<ul>
+<li>下载安装包</li>
+</ul>
+
+
+<p>这里要注意一下octopress要求的ruby版本，我自己fork的octpress分支的readme.markdown里有如下字样</p>
+
+<pre><code>Note: Octopress requires a minimum Ruby version of 1.9.3-p0
+</code></pre>
+
+<p>到ruby的官方网站下载最接近的ruby版本就可以了，<a href="https://rubyinstaller.org/downloads/">Ruby</a>,
+我选用的是<a href="https://dl.bintray.com/oneclick/rubyinstaller/rubyinstaller-2.2.6-x64.exe">Ruby 2.2.6(x64)</a>.</p>
+
+<p>对应的Developmenet Kit是<a href="DevKit-mingw64-64-4.7.2-20130224-1432-sfx.exe">DevKit-mingw64-64-4.7.2-20130224-1432-sfx.exe</a>
+(<code>注:Developmenet Kit是Ruby的开发工具集，安装octopress过程中，有些库需要编译</code>)</p>
+
+<ul>
+<li><p>安装Ruby（运行安装包，把Ruby安装到<code>D:/Ruby23-64</code>目录）</p></li>
+<li><p>安装DevKit</p></li>
+</ul>
+
+
+<p>解压安装包到<code>D:/DevKit</code>，命令行进到<code>D:/DevKit</code>目录，执行</p>
+
+<pre><code>ruby dk.rb init
+</code></pre>
+
+<p>执行完成后，打开<code>D:/DevKit</code>目录下的<code>config.yml</code>,查看里边有没有<code>- D:\Ruby23-64</code>字样，如果没有需要手动加上，继续执行命令</p>
+
+<pre><code>ruby dk.rb install
+</code></pre>
+
+<p>另外记得把ruby的bin目录添加到系统环境变量</p>
+
+<h3>安装Python</h3>
+
+<p>安装Python2.7,不要用Python3</p>
+
+<h3>安装octopress</h3>
+
+<ul>
+<li>下载octopress，我这里用自己的fork的repo，<a href="https://github.com/iskey/iskey.github.io">My octopres</a></li>
+</ul>
+
+
+<p>新建一个目录，<code>D:/octopress</code>,在该目录下用git</p>
+
+<pre><code>git clone https://github.com/iskey/iskey.github.io
+</code></pre>
+
+<p>切换到<code>D:/octopress</code>，然后执行如下命令，切换一下gem的源（国内访问国外的源比较慢）</p>
+
+<pre><code>gem sources -a https://ruby.taobao.org/
+gem sources -r http://rubygems.org/
+gem sources -l
+</code></pre>
+
+<p>然后，执行如下命令，安装gem库</p>
+
+<pre><code>gem install bundler
+bundle install
+</code></pre>
+
+<p>安装Octopress主题</p>
+
+<pre><code>rake install
+</code></pre>
+
+<h2>octopress使用</h2>
+
+<ul>
+<li><p>编写新文章</p>
+
+<p>  rake new_post</p></li>
+</ul>
+
+
+<p>根据提示输入标题，或者直接使用如下命令</p>
+
+<pre><code>rake new_post['welcome']
+</code></pre>
+
+<ul>
+<li>发布、预览</li>
+</ul>
+
+
+<p>运行命令，设置github的pages地址</p>
+
+<pre><code>rake setup_Github_pages 
+</code></pre>
+
+<p>发布文章到Github</p>
+
+<pre><code>rake generate 
+rake deploy
+</code></pre>
+
+<p>本地预览</p>
+
+<pre><code>rake preview
+</code></pre>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Iskey</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2019-07-07T00:45:05+00:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>7</span><span class='date-suffix'>th</span>, <span class='date-year'>2019</span></span> <span class='time'>12:45 am</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/octopress/'>octopress</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2019/05/30/minikube-install/" title="Previous Post: minikube install">&laquo; minikube install</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2019/07/07/use-lvm-to-expend-root-partition/" title="Next Post: use lvm to expend root partition">use lvm to expend root partition &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2019/07/07/simpe-example-of-kubernetes/">Simpe_example_of_kubernetes</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2019/07/07/helloworld-of-systemd/">Helloworld_of_systemd</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2019/07/07/use-lvm-to-expend-root-partition/">Use Lvm to Expend Root Partition</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2019/07/07/install-octopress-on-windows/">Install Octopress on Windows</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2019/05/30/minikube-install/">Minikube Install</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+  <h1>Categories</h1>
+    <ul id="category-list"><li><a href='/blog/categories/iptables/'>iptables (1)</a></li><li><a href='/blog/categories/kernel/'>kernel (5)</a></li><li><a href='/blog/categories/linuxc/'>linuxc (1)</a></li><li><a href='/blog/categories/linuxbian-cheng/'>linux编程 (1)</a></li><li><a href='/blog/categories/lvm/'>lvm (1)</a></li><li><a href='/blog/categories/makefile/'>makefile (2)</a></li><li><a href='/blog/categories/netfilter/'>netfilter (1)</a></li><li><a href='/blog/categories/ocp/'>ocp (2)</a></li><li><a href='/blog/categories/octopress/'>octopress (1)</a></li><li><a href='/blog/categories/python/'>python (1)</a></li><li><a href='/blog/categories/regax/'>regax (1)</a></li><li><a href='/blog/categories/shell/'>shell (3)</a></li><li><a href='/blog/categories/sourceinsight/'>sourceinsight (1)</a></li><li><a href='/blog/categories/sysctl/'>sysctl (1)</a></li><li><a href='/blog/categories/systemd/'>systemd (1)</a></li><li><a href='/blog/categories/todo/'>todo (1)</a></li><li><a href='/blog/categories/ubuntu/'>ubuntu (1)</a></li><li><a href='/blog/categories/vim/'>vim (1)</a></li><li><a href='/blog/categories/chuan-kou/'>串口 (1)</a></li><li><a href='/blog/categories/gong-ju/'>工具 (2)</a></li><li><a href='/blog/categories/wang-luo/'>网络 (3)</a></li><li><a href='/blog/categories/she-ji-mo-shi/'>设计模式 (1)</a></li></ul>
+</section>
+<section>
+  <h1>Tag Cloud</h1>
+    <span id="tag-cloud"><a href='/blog/categories/iptables' style='font-size: 112.0%'>iptables(1)</a> <a href='/blog/categories/kernel' style='font-size: 160.0%'>kernel(5)</a> <a href='/blog/categories/linuxc' style='font-size: 112.0%'>linuxc(1)</a> <a href='/blog/categories/linuxbian-cheng' style='font-size: 112.0%'>linux编程(1)</a> <a href='/blog/categories/lvm' style='font-size: 112.0%'>lvm(1)</a> <a href='/blog/categories/makefile' style='font-size: 124.0%'>makefile(2)</a> <a href='/blog/categories/netfilter' style='font-size: 112.0%'>netfilter(1)</a> <a href='/blog/categories/ocp' style='font-size: 124.0%'>ocp(2)</a> <a href='/blog/categories/octopress' style='font-size: 112.0%'>octopress(1)</a> <a href='/blog/categories/python' style='font-size: 112.0%'>python(1)</a> <a href='/blog/categories/regax' style='font-size: 112.0%'>regax(1)</a> <a href='/blog/categories/shell' style='font-size: 136.0%'>shell(3)</a> <a href='/blog/categories/sourceinsight' style='font-size: 112.0%'>sourceinsight(1)</a> <a href='/blog/categories/sysctl' style='font-size: 112.0%'>sysctl(1)</a> <a href='/blog/categories/systemd' style='font-size: 112.0%'>systemd(1)</a> <a href='/blog/categories/todo' style='font-size: 112.0%'>todo(1)</a> <a href='/blog/categories/ubuntu' style='font-size: 112.0%'>ubuntu(1)</a> <a href='/blog/categories/vim' style='font-size: 112.0%'>vim(1)</a> <a href='/blog/categories/chuan-kou' style='font-size: 112.0%'>串口(1)</a> <a href='/blog/categories/gong-ju' style='font-size: 124.0%'>工具(2)</a> <a href='/blog/categories/wang-luo' style='font-size: 136.0%'>网络(3)</a> <a href='/blog/categories/she-ji-mo-shi' style='font-size: 112.0%'>设计模式(1)</a> </span>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2019 - Iskey -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>
