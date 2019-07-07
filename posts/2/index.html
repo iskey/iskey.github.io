@@ -9,7 +9,9 @@
   <meta name="author" content="Iskey">
 
   
-  <meta name="description" content="Recently we published a couple of tutorials to get you familiar with Git basics and using Git in a team environment. The commands that we discussed &hellip;">
+  <meta name="description" content="可以通过/etc/sysctl.conf控制和配置Linux内核及网络设置。 避免放大攻击 1
+net.ipv4.icmp_echo_ignore_broadcasts = 1 开启恶意icmp错误消息保护 1
+net.ipv4.icmp_ignore_bogus_error_responses &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -63,6 +65,227 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2018/04/27/linux-sysctl-dot-conf-you-hua/">Linux sysctl.conf 优化</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2018-04-27T01:32:43+00:00'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>27</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>1:32 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>可以通过/etc/sysctl.conf控制和配置Linux内核及网络设置。</p>
+
+<ul>
+<li>避免放大攻击</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">net</span><span class="o">.</span><span class="na">ipv4</span><span class="o">.</span><span class="na">icmp_echo_ignore_broadcasts</span> <span class="o">=</span> <span class="mi">1</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>开启恶意icmp错误消息保护</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">net</span><span class="o">.</span><span class="na">ipv4</span><span class="o">.</span><span class="na">icmp_ignore_bogus_error_responses</span> <span class="o">=</span> <span class="mi">1</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>开启SYN洪水攻击保护</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">net</span><span class="o">.</span><span class="na">ipv4</span><span class="o">.</span><span class="na">tcp_syncookies</span> <span class="o">=</span> <span class="mi">1</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>开启并记录欺骗，源路由和重定向包</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">net</span><span class="o">.</span><span class="na">ipv4</span><span class="o">.</span><span class="na">conf</span><span class="o">.</span><span class="na">all</span><span class="o">.</span><span class="na">log_martians</span> <span class="o">=</span> <span class="mi">1</span>
+</span><span class='line'><span class="n">net</span><span class="o">.</span><span class="na">ipv4</span><span class="o">.</span><span class="na">conf</span><span class="o">.</span><span class="na">default</span><span class="o">.</span><span class="na">log_martians</span> <span class="o">=</span> <span class="mi">1</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>处理无源路由的包</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">net</span><span class="o">.</span><span class="na">ipv4</span><span class="o">.</span><span class="na">conf</span><span class="o">.</span><span class="na">all</span><span class="o">.</span><span class="na">accept_source_route</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span class='line'><span class="n">net</span><span class="o">.</span><span class="na">ipv4</span><span class="o">.</span><span class="na">conf</span><span class="o">.</span><span class="na">default</span><span class="o">.</span><span class="na">accept_source_route</span> <span class="o">=</span> <span class="mi">0</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>开启反向路径过滤</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">net</span><span class="o">.</span><span class="na">ipv4</span><span class="o">.</span><span class="na">conf</span><span class="o">.</span><span class="na">all</span><span class="o">.</span><span class="na">rp_filter</span> <span class="o">=</span> <span class="mi">1</span>
+</span><span class='line'><span class="n">net</span><span class="o">.</span><span class="na">ipv4</span><span class="o">.</span><span class="na">conf</span><span class="o">.</span><span class="na">default</span><span class="o">.</span><span class="na">rp_filter</span> <span class="o">=</span> <span class="mi">1</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>确保无人能修改路由表</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">net</span><span class="o">.</span><span class="na">ipv4</span><span class="o">.</span><span class="na">conf</span><span class="o">.</span><span class="na">all</span><span class="o">.</span><span class="na">accept_redirects</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span class='line'><span class="n">net</span><span class="o">.</span><span class="na">ipv4</span><span class="o">.</span><span class="na">conf</span><span class="o">.</span><span class="na">default</span><span class="o">.</span><span class="na">accept_redirects</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span class='line'><span class="n">net</span><span class="o">.</span><span class="na">ipv4</span><span class="o">.</span><span class="na">conf</span><span class="o">.</span><span class="na">all</span><span class="o">.</span><span class="na">secure_redirects</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span class='line'><span class="n">net</span><span class="o">.</span><span class="na">ipv4</span><span class="o">.</span><span class="na">conf</span><span class="o">.</span><span class="na">default</span><span class="o">.</span><span class="na">secure_redirects</span> <span class="o">=</span> <span class="mi">0</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>不充当路由器</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">net</span><span class="o">.</span><span class="na">ipv4</span><span class="o">.</span><span class="na">ip_forward</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span class='line'><span class="n">net</span><span class="o">.</span><span class="na">ipv4</span><span class="o">.</span><span class="na">conf</span><span class="o">.</span><span class="na">all</span><span class="o">.</span><span class="na">send_redirects</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span class='line'><span class="n">net</span><span class="o">.</span><span class="na">ipv4</span><span class="o">.</span><span class="na">conf</span><span class="o">.</span><span class="na">default</span><span class="o">.</span><span class="na">send_redirects</span> <span class="o">=</span> <span class="mi">0</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>开启execshild</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">kernel</span><span class="o">.</span><span class="na">exec</span><span class="o">-</span><span class="n">shield</span> <span class="o">=</span> <span class="mi">1</span>
+</span><span class='line'><span class="n">kernel</span><span class="o">.</span><span class="na">randomize_va_space</span> <span class="o">=</span> <span class="mi">1</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>IPv6设置</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">net</span><span class="o">.</span><span class="na">ipv6</span><span class="o">.</span><span class="na">conf</span><span class="o">.</span><span class="na">default</span><span class="o">.</span><span class="na">router_solicitations</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span class='line'><span class="n">net</span><span class="o">.</span><span class="na">ipv6</span><span class="o">.</span><span class="na">conf</span><span class="o">.</span><span class="na">default</span><span class="o">.</span><span class="na">accept_ra_rtr_pref</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span class='line'><span class="n">net</span><span class="o">.</span><span class="na">ipv6</span><span class="o">.</span><span class="na">conf</span><span class="o">.</span><span class="na">default</span><span class="o">.</span><span class="na">accept_ra_pinfo</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span class='line'><span class="n">net</span><span class="o">.</span><span class="na">ipv6</span><span class="o">.</span><span class="na">conf</span><span class="o">.</span><span class="na">default</span><span class="o">.</span><span class="na">accept_ra_defrtr</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span class='line'><span class="n">net</span><span class="o">.</span><span class="na">ipv6</span><span class="o">.</span><span class="na">conf</span><span class="o">.</span><span class="na">default</span><span class="o">.</span><span class="na">autoconf</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span class='line'><span class="n">net</span><span class="o">.</span><span class="na">ipv6</span><span class="o">.</span><span class="na">conf</span><span class="o">.</span><span class="na">default</span><span class="o">.</span><span class="na">dad_transmits</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span class='line'><span class="n">net</span><span class="o">.</span><span class="na">ipv6</span><span class="o">.</span><span class="na">conf</span><span class="o">.</span><span class="na">default</span><span class="o">.</span><span class="na">max_addresses</span> <span class="o">=</span> <span class="mi">1</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><p>优化LB使用的端口</p></li>
+<li><p>增加系统文件描述符限制</p></li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">fs</span><span class="o">.</span><span class="na">file</span><span class="o">-</span><span class="n">max</span> <span class="o">=</span> <span class="mi">65535</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>允许更多的PIDs (减少滚动翻转问题); may break some programs 32768</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">kernel</span><span class="o">.</span><span class="na">pid_max</span> <span class="o">=</span> <span class="mi">65536</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>增加系统IP端口限制</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">net</span><span class="o">.</span><span class="na">ipv4</span><span class="o">.</span><span class="na">ip_local_port_range</span> <span class="o">=</span> <span class="mi">2000</span> <span class="mi">65000</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>增加TCP最大缓冲区大小</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">net</span><span class="o">.</span><span class="na">ipv4</span><span class="o">.</span><span class="na">tcp_rmem</span> <span class="o">=</span> <span class="mi">4096</span> <span class="mi">87380</span> <span class="mi">8388608</span>
+</span><span class='line'><span class="n">net</span><span class="o">.</span><span class="na">ipv4</span><span class="o">.</span><span class="na">tcp_wmem</span> <span class="o">=</span> <span class="mi">4096</span> <span class="mi">87380</span> <span class="mi">8388608</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>增加Linux自动调整TCP缓冲区限制</li>
+<li>最小，默认和最大可使用的字节数</li>
+<li><p>最大值不低于4MB，如果你使用非常高的BDP路径可以设置得更高</p></li>
+<li><p>Tcp窗口等</p></li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">net</span><span class="o">.</span><span class="na">core</span><span class="o">.</span><span class="na">rmem_max</span> <span class="o">=</span> <span class="mi">8388608</span>
+</span><span class='line'><span class="n">net</span><span class="o">.</span><span class="na">core</span><span class="o">.</span><span class="na">wmem_max</span> <span class="o">=</span> <span class="mi">8388608</span>
+</span><span class='line'><span class="n">net</span><span class="o">.</span><span class="na">core</span><span class="o">.</span><span class="na">netdev_max_backlog</span> <span class="o">=</span> <span class="mi">5000</span>
+</span><span class='line'><span class="n">net</span><span class="o">.</span><span class="na">ipv4</span><span class="o">.</span><span class="na">tcp_window_scaling</span> <span class="o">=</span> <span class="mi">1</span>
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1475,67 +1698,6 @@ region above).
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/04/22/vim-regax/">Vim中断零宽断言-正则环视</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2016-04-22T20:36:00+00:00'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>22</span><span class='date-suffix'>nd</span>, <span class='date-year'>2016</span></span> <span class='time'>8:36 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>转载》vim中断零宽断言-正则环视</h2>
-
-<p>vim与perl的零宽断言表达式相比，(?换成了\@，并且这个符号应该跟在匹配模式的后边。
-vim Perl 意义</p>
-
-<h3>\@=   (?= 顺序环视</h3>
-
-<pre><code>eg:查找后面是sql的my： /my\(sql\)\@=
-</code></pre>
-
-<h3>\@!   (?! 顺序否定环视</h3>
-
-<pre><code>eg:查找后面不是sql的my： /my\(sql\)\@!
-</code></pre>
-
-<h3>\@&lt;=   (?&lt;= 逆序环视</h3>
-
-<pre><code>eg: 查找前面是my的sql： /\(my\)\@&lt;=sql
-</code></pre>
-
-<h3>\@&lt;!   (?&lt;! 逆序否定环视</h3>
-
-<pre><code>eg:查找前面不是my的sql： /\(my\)\@&lt;!sql
-</code></pre>
-
-<h3>\@>   (?> 固化分组</h3>
-
-<h3>\%(atom)   (?: 非捕获型括号</h3>
-
-<pre><code>意思是，此分组不捕获，可以理解为不算在分组信息中，eg：
-:%s/\%(my\)sql\(ok\)/\1
-上面的命令会将mysqlok替换为 ok ，由于my为捕获在分组中，故组中\1 为ok。
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/3">&larr; Older</a>
@@ -1553,6 +1715,10 @@ vim Perl 意义</p>
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2019/07/07/simple-example-of-ansible/">Simple Example of Ansible</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2019/07/07/simpe-example-of-kubernetes/">Simpe_example_of_kubernetes</a>
       </li>
     
@@ -1568,19 +1734,15 @@ vim Perl 意义</p>
         <a href="/blog/2019/07/07/install-octopress-on-windows/">Install Octopress on Windows</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/2019/05/30/minikube-install/">Minikube Install</a>
-      </li>
-    
   </ul>
 </section>
 <section>
   <h1>Categories</h1>
-    <ul id="category-list"><li><a href='/blog/categories/iptables/'>iptables (1)</a></li><li><a href='/blog/categories/kernel/'>kernel (5)</a></li><li><a href='/blog/categories/linuxc/'>linuxc (1)</a></li><li><a href='/blog/categories/linuxbian-cheng/'>linux编程 (1)</a></li><li><a href='/blog/categories/lvm/'>lvm (1)</a></li><li><a href='/blog/categories/makefile/'>makefile (2)</a></li><li><a href='/blog/categories/netfilter/'>netfilter (1)</a></li><li><a href='/blog/categories/ocp/'>ocp (2)</a></li><li><a href='/blog/categories/octopress/'>octopress (1)</a></li><li><a href='/blog/categories/python/'>python (1)</a></li><li><a href='/blog/categories/regax/'>regax (1)</a></li><li><a href='/blog/categories/shell/'>shell (3)</a></li><li><a href='/blog/categories/sourceinsight/'>sourceinsight (1)</a></li><li><a href='/blog/categories/sysctl/'>sysctl (1)</a></li><li><a href='/blog/categories/systemd/'>systemd (1)</a></li><li><a href='/blog/categories/todo/'>todo (1)</a></li><li><a href='/blog/categories/ubuntu/'>ubuntu (1)</a></li><li><a href='/blog/categories/vim/'>vim (1)</a></li><li><a href='/blog/categories/chuan-kou/'>串口 (1)</a></li><li><a href='/blog/categories/gong-ju/'>工具 (2)</a></li><li><a href='/blog/categories/wang-luo/'>网络 (3)</a></li><li><a href='/blog/categories/she-ji-mo-shi/'>设计模式 (1)</a></li></ul>
+    <ul id="category-list"><li><a href='/blog/categories/ansible/'>ansible (1)</a></li><li><a href='/blog/categories/iptables/'>iptables (1)</a></li><li><a href='/blog/categories/kernel/'>kernel (5)</a></li><li><a href='/blog/categories/linuxc/'>linuxc (1)</a></li><li><a href='/blog/categories/linuxbian-cheng/'>linux编程 (1)</a></li><li><a href='/blog/categories/lvm/'>lvm (1)</a></li><li><a href='/blog/categories/makefile/'>makefile (2)</a></li><li><a href='/blog/categories/netfilter/'>netfilter (1)</a></li><li><a href='/blog/categories/ocp/'>ocp (2)</a></li><li><a href='/blog/categories/octopress/'>octopress (1)</a></li><li><a href='/blog/categories/python/'>python (1)</a></li><li><a href='/blog/categories/regax/'>regax (1)</a></li><li><a href='/blog/categories/shell/'>shell (3)</a></li><li><a href='/blog/categories/sourceinsight/'>sourceinsight (1)</a></li><li><a href='/blog/categories/sysctl/'>sysctl (1)</a></li><li><a href='/blog/categories/systemd/'>systemd (1)</a></li><li><a href='/blog/categories/todo/'>todo (1)</a></li><li><a href='/blog/categories/ubuntu/'>ubuntu (1)</a></li><li><a href='/blog/categories/vim/'>vim (1)</a></li><li><a href='/blog/categories/chuan-kou/'>串口 (1)</a></li><li><a href='/blog/categories/gong-ju/'>工具 (2)</a></li><li><a href='/blog/categories/wang-luo/'>网络 (3)</a></li><li><a href='/blog/categories/she-ji-mo-shi/'>设计模式 (1)</a></li></ul>
 </section>
 <section>
   <h1>Tag Cloud</h1>
-    <span id="tag-cloud"><a href='/blog/categories/iptables' style='font-size: 112.0%'>iptables(1)</a> <a href='/blog/categories/kernel' style='font-size: 160.0%'>kernel(5)</a> <a href='/blog/categories/linuxc' style='font-size: 112.0%'>linuxc(1)</a> <a href='/blog/categories/linuxbian-cheng' style='font-size: 112.0%'>linux编程(1)</a> <a href='/blog/categories/lvm' style='font-size: 112.0%'>lvm(1)</a> <a href='/blog/categories/makefile' style='font-size: 124.0%'>makefile(2)</a> <a href='/blog/categories/netfilter' style='font-size: 112.0%'>netfilter(1)</a> <a href='/blog/categories/ocp' style='font-size: 124.0%'>ocp(2)</a> <a href='/blog/categories/octopress' style='font-size: 112.0%'>octopress(1)</a> <a href='/blog/categories/python' style='font-size: 112.0%'>python(1)</a> <a href='/blog/categories/regax' style='font-size: 112.0%'>regax(1)</a> <a href='/blog/categories/shell' style='font-size: 136.0%'>shell(3)</a> <a href='/blog/categories/sourceinsight' style='font-size: 112.0%'>sourceinsight(1)</a> <a href='/blog/categories/sysctl' style='font-size: 112.0%'>sysctl(1)</a> <a href='/blog/categories/systemd' style='font-size: 112.0%'>systemd(1)</a> <a href='/blog/categories/todo' style='font-size: 112.0%'>todo(1)</a> <a href='/blog/categories/ubuntu' style='font-size: 112.0%'>ubuntu(1)</a> <a href='/blog/categories/vim' style='font-size: 112.0%'>vim(1)</a> <a href='/blog/categories/chuan-kou' style='font-size: 112.0%'>串口(1)</a> <a href='/blog/categories/gong-ju' style='font-size: 124.0%'>工具(2)</a> <a href='/blog/categories/wang-luo' style='font-size: 136.0%'>网络(3)</a> <a href='/blog/categories/she-ji-mo-shi' style='font-size: 112.0%'>设计模式(1)</a> </span>
+    <span id="tag-cloud"><a href='/blog/categories/ansible' style='font-size: 112.0%'>ansible(1)</a> <a href='/blog/categories/iptables' style='font-size: 112.0%'>iptables(1)</a> <a href='/blog/categories/kernel' style='font-size: 160.0%'>kernel(5)</a> <a href='/blog/categories/linuxc' style='font-size: 112.0%'>linuxc(1)</a> <a href='/blog/categories/linuxbian-cheng' style='font-size: 112.0%'>linux编程(1)</a> <a href='/blog/categories/lvm' style='font-size: 112.0%'>lvm(1)</a> <a href='/blog/categories/makefile' style='font-size: 124.0%'>makefile(2)</a> <a href='/blog/categories/netfilter' style='font-size: 112.0%'>netfilter(1)</a> <a href='/blog/categories/ocp' style='font-size: 124.0%'>ocp(2)</a> <a href='/blog/categories/octopress' style='font-size: 112.0%'>octopress(1)</a> <a href='/blog/categories/python' style='font-size: 112.0%'>python(1)</a> <a href='/blog/categories/regax' style='font-size: 112.0%'>regax(1)</a> <a href='/blog/categories/shell' style='font-size: 136.0%'>shell(3)</a> <a href='/blog/categories/sourceinsight' style='font-size: 112.0%'>sourceinsight(1)</a> <a href='/blog/categories/sysctl' style='font-size: 112.0%'>sysctl(1)</a> <a href='/blog/categories/systemd' style='font-size: 112.0%'>systemd(1)</a> <a href='/blog/categories/todo' style='font-size: 112.0%'>todo(1)</a> <a href='/blog/categories/ubuntu' style='font-size: 112.0%'>ubuntu(1)</a> <a href='/blog/categories/vim' style='font-size: 112.0%'>vim(1)</a> <a href='/blog/categories/chuan-kou' style='font-size: 112.0%'>串口(1)</a> <a href='/blog/categories/gong-ju' style='font-size: 124.0%'>工具(2)</a> <a href='/blog/categories/wang-luo' style='font-size: 136.0%'>网络(3)</a> <a href='/blog/categories/she-ji-mo-shi' style='font-size: 112.0%'>设计模式(1)</a> </span>
 </section>
 
 
