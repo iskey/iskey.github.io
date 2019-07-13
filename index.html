@@ -9,7 +9,7 @@
   <meta name="author" content="Iskey">
 
   
-  <meta name="description" content="背景 代码开发时，有时候必须要把代码拷贝到远程的主机上去执行，这时候大部分我们会用ssh登上去，用vim修改，但是如果改的代码比较多，对于不太习惯vim的同学，就会觉得比较累。这时候一般的做法是在本地用编辑器（SourceInsighet/PyCharm）等修改代码，然后再传到服务器上去。[ &hellip;">
+  <meta name="description" content="之前在网上看到一张iptables的数据包路径决策图,在这里收藏一下,原始地址找不到了^-^,这里就不写转载链接了,如果作者看到,可以提醒我一下,多谢 ">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -63,6 +63,37 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2019/07/13/iptables-packets-flow/">Iptables_packets_flow</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2019-07-13T12:32:33+00:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>13</span><span class='date-suffix'>th</span>, <span class='date-year'>2019</span></span> <span class='time'>12:32 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>之前在网上看到一张iptables的数据包路径决策图,在这里收藏一下,原始地址找不到了^-^,这里就不写转载链接了,如果作者看到,可以提醒我一下,多谢</p>
+
+<p><img src="https://raw.githubusercontent.com/iskey/iskey.github.io/source/source/images/blogs/iptables_packet_flow.png" alt="iptables_packets_flow" /></p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1942,288 +1973,6 @@ kube-system kubernetes-dashboard-mg5jt 1/1 Running 0 2h
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2019/05/28/xubuntu-upgrade/">Xubuntu Upgrade</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2019-05-28T15:37:53+00:00'><span class='date'><span class='date-month'>May</span> <span class='date-day'>28</span><span class='date-suffix'>th</span>, <span class='date-year'>2019</span></span> <span class='time'>3:37 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><hr />
-
-<h2>升级ubuntu内核</h2>
-
-<hr />
-
-<p><code>apt-get upgrade</code>命令进行升级，如果内核有更新，会直接更新</p>
-
-<h3>关于boot分区</h3>
-
-<p>现在的ubuntu系统，一般都不建议再单独安装/boot分区来存放内核/initrd等文件了，可以直接放到根分区之下，如果要单独划分/boot分区的话,最好设置的大一点（以前翻看资料经典的推荐设置200M，现在推荐设置500M~1G）,避免后续升级的时候,出现空间不够用.</p>
-
-<h3>清理旧的系统映像</h3>
-
-<p>经过几次更新以后，boot分区一般会保留了好多不用的旧版本内核/初始文件系统，可以使用命令<code>sudo apt-get autoremove</code>来进行清理，
-也可以制定版本号进行清理：<code>sudo apt-get remove linux-image-(版本号)</code></p>
-
-<h3>升级内核之后，设备异常（一般是网卡/声卡）</h3>
-
-<p>我在升级完成后，就遇到了网卡不识别的问题，这时候通过grub启动菜单，切换回之前的版本，查看一下网卡驱动</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>~: lspci -k | grep Ethernet -A5
-</span><span class='line'>05:00.0 Ethernet controller: Qualcomm Atheros AR8161 Gigabit Ethernet (rev 10)
-</span><span class='line'>  Subsystem: Gigabyte Technology Co., Ltd AR8161 Gigabit Ethernet
-</span><span class='line'>  Kernel driver in use: alx
-</span><span class='line'>  Kernel modules: alx</span></code></pre></td></tr></table></div></figure>
-
-
-<p>可以看到旧的内核用的驱动是<code>alx</code>,通过查询资料<code>Qualcomm Atheros AR8161 Gigabit Ethernet</code>,找到了<code>https://mirrors.edge.kernel.org/pub/linux/kernel/projects/backports/</code>,打开后可以看到如下：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>v3.8-rc5/                                          26-Jan-2013 17:47       -
-</span><span class='line'>v3.8-rc7/                                          10-Feb-2013 23:35       -
-</span><span class='line'>v3.8.2/                                            11-Mar-2013 23:44       -
-</span><span class='line'>v3.8.3/                                            15-Mar-2013 21:55       -
-</span><span class='line'>v3.9-rc1/                                          09-Mar-2013 07:20       -
-</span><span class='line'>v3.9-rc2/                                          12-Mar-2013 00:45       -
-</span><span class='line'>v3.9-rc3/                                          29-Mar-2013 02:43       -
-</span><span class='line'>v3.9-rc4/                                          29-Mar-2013 06:04       -
-</span><span class='line'>v4.0.1/                                            29-Apr-2015 20:14       -
-</span><span class='line'>v4.1-rc1/                                          28-Apr-2015 21:26       -
-</span><span class='line'>v4.1.1/                                            01-Jul-2015 21:14       -
-</span><span class='line'>v4.14-rc2/                                         30-Sep-2017 16:02       -
-</span><span class='line'>v4.19-rc5/                                         25-Sep-2018 20:14       -
-</span><span class='line'>v4.19.23/                                          15-Feb-2019 19:41       -
-</span><span class='line'>v4.19.32/                                          28-Mar-2019 14:42       -
-</span><span class='line'>v4.19.7/                                           07-Dec-2018 19:25       -
-</span><span class='line'>v4.2-rc1/                                          11-Jul-2015 23:32       -
-</span><span class='line'>v4.2.6/                                            15-Nov-2015 21:22       -
-</span><span class='line'>v4.20-rc5/                                         06-Dec-2018 22:27       -
-</span><span class='line'>v4.20.10/                                          15-Feb-2019 22:03       -
-</span><span class='line'>v4.20.17/                                          28-Mar-2019 12:58       -
-</span><span class='line'>v4.3/                                              15-Nov-2015 18:31       -
-</span><span class='line'>v4.4-rc2/                                          25-Nov-2015 22:24       -
-</span><span class='line'>v4.4.2/                                            18-Feb-2016 21:44       -
-</span><span class='line'>v5.0-rc6/                                          13-Feb-2019 20:46       -
-</span><span class='line'>v5.0.5/                                            28-Mar-2019 01:06       -
-</span><span class='line'>v5.1-rc2/                                          27-Mar-2019 23:17       -</span></code></pre></td></tr></table></div></figure>
-
-
-<p>左边一列是内核版本号，找到与自己的内核版本对应的版本，查看内核版本号的方法如下：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>~ uname -r
-</span><span class='line'>4.4.0-145-generic</span></code></pre></td></tr></table></div></figure>
-
-
-<p>所以我下载了<code>v4.4-rc2</code>的版本（<code>backports-4.4-rc2-1.tar.gz</code>[<a href="https://mirrors.edge.kernel.org/pub/linux/kernel/projects/backports/stable/v4.4-rc2/backports-4.4-rc2-1.tar.gz">https://mirrors.edge.kernel.org/pub/linux/kernel/projects/backports/stable/v4.4-rc2/backports-4.4-rc2-1.tar.gz</a>]），</p>
-
-<p>下载并解压，编译并安装alx驱动，就可以了</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>| Your backport package isn't configured, please configure it
-</span><span class='line'>| using one of the following options:
-</span><span class='line'>| To configure manually:
-</span><span class='line'>|     make oldconfig
-</span><span class='line'>|     make menuconfig
-</span><span class='line'>|
-</span><span class='line'>| To get defaults for certain drivers:
-</span><span class='line'>|     make defconfig-alx
-</span><span class='line'>|     make defconfig-ar5523
-</span><span class='line'>|     make defconfig-ath10k
-</span><span class='line'>|     make defconfig-ath5k
-</span><span class='line'>|     make defconfig-ath6kl
-</span><span class='line'>|     make defconfig-ath9k
-</span><span class='line'>|     make defconfig-ath9k-debug
-</span><span class='line'>|     make defconfig-b43
-</span><span class='line'>|     make defconfig-b43legacy
-</span><span class='line'>|     make defconfig-brcmfmac
-</span><span class='line'>|     make defconfig-brcmsmac
-</span><span class='line'>|     make defconfig-carl9170
-</span><span class='line'>|     make defconfig-cw1200
-</span><span class='line'>|     make defconfig-hwsim
-</span><span class='line'>|     make defconfig-ieee802154
-</span><span class='line'>|     make defconfig-igb
-</span><span class='line'>|     make defconfig-iwlwifi
-</span><span class='line'>|     make defconfig-media
-</span><span class='line'>|     make defconfig-nfc
-</span><span class='line'>|     make defconfig-rtlwifi
-</span><span class='line'>|     make defconfig-wcn36xx
-</span><span class='line'>|     make defconfig-wifi
-</span><span class='line'>|     make defconfig-wil6210
-</span><span class='line'>|     make defconfig-wwan
-</span><span class='line'>\--
-</span><span class='line'>Makefile.real:45: recipe for target '.config' failed
-</span><span class='line'>make[2]: *** [.config] Error 1
-</span><span class='line'>Makefile:40: recipe for target 'modules' failed
-</span><span class='line'>make[1]: *** [modules] Error 2
-</span><span class='line'>Makefile:30: recipe for target 'default' failed
-</span><span class='line'>make: *** [default] Error 2</span></code></pre></td></tr></table></div></figure>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>~: sudo make defconfig-alx
-</span><span class='line'>~: sudo make install
-</span><span class='line'>~: reboot</span></code></pre></td></tr></table></div></figure>
-
-
-<p>安装完成后，重启就可以找到网卡了</p>
-
-<h3>　其它</h3>
-
-<p>中间有个插曲，升级后Grub进不去了，不得已，用ubuntuＵ盘系统进去，使用boot-repaire重新修复了Grub,</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>sudo apt-add-repository ppa:yannubuntu/boot-repair
-</span><span class='line'>
-</span><span class='line'>sudo apt-get update
-</span><span class='line'>
-</span><span class='line'>sudo apt-get install -y boot-repair
-</span><span class='line'>
-</span><span class='line'>boot-repair</span></code></pre></td></tr></table></div></figure>
-
-
-<p>但是Grub菜单里的Windows系统没有了，所有又安装了grub-customizer进行调整：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>1. Open terminal either via Ctrl+Alt+T or by searching for ‘terminal’ from app launcher. When it opens, run command to add the PPA:
-</span><span class='line'>
-</span><span class='line'>sudo add-apt-repository ppa:danielrichter2007/grub-customizer
-</span><span class='line'>
-</span><span class='line'>Input your password (no visual feedback while typing) when it prompts and hit Enter to continue.
-</span><span class='line'>
-</span><span class='line'>grub-customizer-ppa
-</span><span class='line'>
-</span><span class='line'>2. After added the PPA, run commands one by one to refresh package cache and install Grub Customizer:
-</span><span class='line'>
-</span><span class='line'>sudo apt-get update
-</span><span class='line'>
-</span><span class='line'>sudo apt-get install grub-customizer
-</span><span class='line'>
-</span><span class='line'>Once installed, launch the software from your application launcher and enjoy!
-</span><span class='line'>Uninstall:
-</span><span class='line'>
-</span><span class='line'>To remove the software, run command in terminal:
-</span><span class='line'>
-</span><span class='line'>sudo apt-get remove --autoremove grub-customizer</span></code></pre></td></tr></table></div></figure>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/2">&larr; Older</a>
@@ -2239,6 +1988,10 @@ kube-system kubernetes-dashboard-mg5jt 1/1 Running 0 2h
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2019/07/13/iptables-packets-flow/">Iptables_packets_flow</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2019/07/13/win-sshfs/">Win Sshfs</a>
       </li>
     
@@ -2252,10 +2005,6 @@ kube-system kubernetes-dashboard-mg5jt 1/1 Running 0 2h
     
       <li class="post">
         <a href="/blog/2019/07/07/simple-example-of-ansible/">Simple Example of Ansible</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2019/07/07/simpe-example-of-kubernetes/">Simpe Example of Kubernetes</a>
       </li>
     
   </ul>

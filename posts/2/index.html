@@ -9,8 +9,7 @@
   <meta name="author" content="Iskey">
 
   
-  <meta name="description" content="LD_PRELOAD注入 linux环境变量LD_PRELOAD可以指定程序运行时优先加载的动态链接库，在该环境变量路径下的动态链接库中的符号具有最高优先级。
-通过自己编写malloc/free动态链接库，并在LD_PRELOAD环境变量中指定该路径，就可以替换libc.so中的malloc/ &hellip;">
+  <meta name="description" content="升级ubuntu内核 apt-get upgrade命令进行升级，如果内核有更新，会直接更新 关于boot分区 现在的ubuntu系统，一般都不建议再单独安装/boot分区来存放内核/initrd等文件了，可以直接放到根分区之下，如果要单独划分/boot分区的话,最好设置的大一点（ &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -64,6 +63,288 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2019/05/28/xubuntu-upgrade/">Xubuntu Upgrade</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2019-05-28T15:37:53+00:00'><span class='date'><span class='date-month'>May</span> <span class='date-day'>28</span><span class='date-suffix'>th</span>, <span class='date-year'>2019</span></span> <span class='time'>3:37 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><hr />
+
+<h2>升级ubuntu内核</h2>
+
+<hr />
+
+<p><code>apt-get upgrade</code>命令进行升级，如果内核有更新，会直接更新</p>
+
+<h3>关于boot分区</h3>
+
+<p>现在的ubuntu系统，一般都不建议再单独安装/boot分区来存放内核/initrd等文件了，可以直接放到根分区之下，如果要单独划分/boot分区的话,最好设置的大一点（以前翻看资料经典的推荐设置200M，现在推荐设置500M~1G）,避免后续升级的时候,出现空间不够用.</p>
+
+<h3>清理旧的系统映像</h3>
+
+<p>经过几次更新以后，boot分区一般会保留了好多不用的旧版本内核/初始文件系统，可以使用命令<code>sudo apt-get autoremove</code>来进行清理，
+也可以制定版本号进行清理：<code>sudo apt-get remove linux-image-(版本号)</code></p>
+
+<h3>升级内核之后，设备异常（一般是网卡/声卡）</h3>
+
+<p>我在升级完成后，就遇到了网卡不识别的问题，这时候通过grub启动菜单，切换回之前的版本，查看一下网卡驱动</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>~: lspci -k | grep Ethernet -A5
+</span><span class='line'>05:00.0 Ethernet controller: Qualcomm Atheros AR8161 Gigabit Ethernet (rev 10)
+</span><span class='line'>  Subsystem: Gigabyte Technology Co., Ltd AR8161 Gigabit Ethernet
+</span><span class='line'>  Kernel driver in use: alx
+</span><span class='line'>  Kernel modules: alx</span></code></pre></td></tr></table></div></figure>
+
+
+<p>可以看到旧的内核用的驱动是<code>alx</code>,通过查询资料<code>Qualcomm Atheros AR8161 Gigabit Ethernet</code>,找到了<code>https://mirrors.edge.kernel.org/pub/linux/kernel/projects/backports/</code>,打开后可以看到如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>v3.8-rc5/                                          26-Jan-2013 17:47       -
+</span><span class='line'>v3.8-rc7/                                          10-Feb-2013 23:35       -
+</span><span class='line'>v3.8.2/                                            11-Mar-2013 23:44       -
+</span><span class='line'>v3.8.3/                                            15-Mar-2013 21:55       -
+</span><span class='line'>v3.9-rc1/                                          09-Mar-2013 07:20       -
+</span><span class='line'>v3.9-rc2/                                          12-Mar-2013 00:45       -
+</span><span class='line'>v3.9-rc3/                                          29-Mar-2013 02:43       -
+</span><span class='line'>v3.9-rc4/                                          29-Mar-2013 06:04       -
+</span><span class='line'>v4.0.1/                                            29-Apr-2015 20:14       -
+</span><span class='line'>v4.1-rc1/                                          28-Apr-2015 21:26       -
+</span><span class='line'>v4.1.1/                                            01-Jul-2015 21:14       -
+</span><span class='line'>v4.14-rc2/                                         30-Sep-2017 16:02       -
+</span><span class='line'>v4.19-rc5/                                         25-Sep-2018 20:14       -
+</span><span class='line'>v4.19.23/                                          15-Feb-2019 19:41       -
+</span><span class='line'>v4.19.32/                                          28-Mar-2019 14:42       -
+</span><span class='line'>v4.19.7/                                           07-Dec-2018 19:25       -
+</span><span class='line'>v4.2-rc1/                                          11-Jul-2015 23:32       -
+</span><span class='line'>v4.2.6/                                            15-Nov-2015 21:22       -
+</span><span class='line'>v4.20-rc5/                                         06-Dec-2018 22:27       -
+</span><span class='line'>v4.20.10/                                          15-Feb-2019 22:03       -
+</span><span class='line'>v4.20.17/                                          28-Mar-2019 12:58       -
+</span><span class='line'>v4.3/                                              15-Nov-2015 18:31       -
+</span><span class='line'>v4.4-rc2/                                          25-Nov-2015 22:24       -
+</span><span class='line'>v4.4.2/                                            18-Feb-2016 21:44       -
+</span><span class='line'>v5.0-rc6/                                          13-Feb-2019 20:46       -
+</span><span class='line'>v5.0.5/                                            28-Mar-2019 01:06       -
+</span><span class='line'>v5.1-rc2/                                          27-Mar-2019 23:17       -</span></code></pre></td></tr></table></div></figure>
+
+
+<p>左边一列是内核版本号，找到与自己的内核版本对应的版本，查看内核版本号的方法如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>~ uname -r
+</span><span class='line'>4.4.0-145-generic</span></code></pre></td></tr></table></div></figure>
+
+
+<p>所以我下载了<code>v4.4-rc2</code>的版本（<code>backports-4.4-rc2-1.tar.gz</code>[<a href="https://mirrors.edge.kernel.org/pub/linux/kernel/projects/backports/stable/v4.4-rc2/backports-4.4-rc2-1.tar.gz">https://mirrors.edge.kernel.org/pub/linux/kernel/projects/backports/stable/v4.4-rc2/backports-4.4-rc2-1.tar.gz</a>]），</p>
+
+<p>下载并解压，编译并安装alx驱动，就可以了</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>| Your backport package isn't configured, please configure it
+</span><span class='line'>| using one of the following options:
+</span><span class='line'>| To configure manually:
+</span><span class='line'>|     make oldconfig
+</span><span class='line'>|     make menuconfig
+</span><span class='line'>|
+</span><span class='line'>| To get defaults for certain drivers:
+</span><span class='line'>|     make defconfig-alx
+</span><span class='line'>|     make defconfig-ar5523
+</span><span class='line'>|     make defconfig-ath10k
+</span><span class='line'>|     make defconfig-ath5k
+</span><span class='line'>|     make defconfig-ath6kl
+</span><span class='line'>|     make defconfig-ath9k
+</span><span class='line'>|     make defconfig-ath9k-debug
+</span><span class='line'>|     make defconfig-b43
+</span><span class='line'>|     make defconfig-b43legacy
+</span><span class='line'>|     make defconfig-brcmfmac
+</span><span class='line'>|     make defconfig-brcmsmac
+</span><span class='line'>|     make defconfig-carl9170
+</span><span class='line'>|     make defconfig-cw1200
+</span><span class='line'>|     make defconfig-hwsim
+</span><span class='line'>|     make defconfig-ieee802154
+</span><span class='line'>|     make defconfig-igb
+</span><span class='line'>|     make defconfig-iwlwifi
+</span><span class='line'>|     make defconfig-media
+</span><span class='line'>|     make defconfig-nfc
+</span><span class='line'>|     make defconfig-rtlwifi
+</span><span class='line'>|     make defconfig-wcn36xx
+</span><span class='line'>|     make defconfig-wifi
+</span><span class='line'>|     make defconfig-wil6210
+</span><span class='line'>|     make defconfig-wwan
+</span><span class='line'>\--
+</span><span class='line'>Makefile.real:45: recipe for target '.config' failed
+</span><span class='line'>make[2]: *** [.config] Error 1
+</span><span class='line'>Makefile:40: recipe for target 'modules' failed
+</span><span class='line'>make[1]: *** [modules] Error 2
+</span><span class='line'>Makefile:30: recipe for target 'default' failed
+</span><span class='line'>make: *** [default] Error 2</span></code></pre></td></tr></table></div></figure>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>~: sudo make defconfig-alx
+</span><span class='line'>~: sudo make install
+</span><span class='line'>~: reboot</span></code></pre></td></tr></table></div></figure>
+
+
+<p>安装完成后，重启就可以找到网卡了</p>
+
+<h3>　其它</h3>
+
+<p>中间有个插曲，升级后Grub进不去了，不得已，用ubuntuＵ盘系统进去，使用boot-repaire重新修复了Grub,</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo apt-add-repository ppa:yannubuntu/boot-repair
+</span><span class='line'>
+</span><span class='line'>sudo apt-get update
+</span><span class='line'>
+</span><span class='line'>sudo apt-get install -y boot-repair
+</span><span class='line'>
+</span><span class='line'>boot-repair</span></code></pre></td></tr></table></div></figure>
+
+
+<p>但是Grub菜单里的Windows系统没有了，所有又安装了grub-customizer进行调整：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>1. Open terminal either via Ctrl+Alt+T or by searching for ‘terminal’ from app launcher. When it opens, run command to add the PPA:
+</span><span class='line'>
+</span><span class='line'>sudo add-apt-repository ppa:danielrichter2007/grub-customizer
+</span><span class='line'>
+</span><span class='line'>Input your password (no visual feedback while typing) when it prompts and hit Enter to continue.
+</span><span class='line'>
+</span><span class='line'>grub-customizer-ppa
+</span><span class='line'>
+</span><span class='line'>2. After added the PPA, run commands one by one to refresh package cache and install Grub Customizer:
+</span><span class='line'>
+</span><span class='line'>sudo apt-get update
+</span><span class='line'>
+</span><span class='line'>sudo apt-get install grub-customizer
+</span><span class='line'>
+</span><span class='line'>Once installed, launch the software from your application launcher and enjoy!
+</span><span class='line'>Uninstall:
+</span><span class='line'>
+</span><span class='line'>To remove the software, run command in terminal:
+</span><span class='line'>
+</span><span class='line'>sudo apt-get remove --autoremove grub-customizer</span></code></pre></td></tr></table></div></figure>
+
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1310,159 +1591,6 @@ word一般写一个已经打开的并且用来作为输入的描述符数字，�
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2017/03/02/netfilter_example/">Netfilter Example</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2017-03-02T21:42:00+00:00'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>2</span><span class='date-suffix'>nd</span>, <span class='date-year'>2017</span></span> <span class='time'>9:42 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>
-</span><span class='line'>    #include &lt;linux/module.h&gt;
-</span><span class='line'>    #include &lt;linux/kernel.h&gt;
-</span><span class='line'>    #include &lt;linux/init.h&gt;
-</span><span class='line'>    #include &lt;linux/types.h&gt;
-</span><span class='line'>    #include &lt;linux/netdevice.h&gt;
-</span><span class='line'>    #include &lt;linux/skbuff.h&gt;
-</span><span class='line'>    #include &lt;linux/netfilter_ipv4.h&gt;
-</span><span class='line'>    #include &lt;linux/inet.h&gt;
-</span><span class='line'>    #include &lt;linux/in.h&gt;
-</span><span class='line'>    #include &lt;linux/ip.h&gt;
-</span><span class='line'>    
-</span><span class='line'>    MODULE_LICENSE("GPL");
-</span><span class='line'>    #define NIPQUAD(addr) \
-</span><span class='line'>      ((unsigned char *)&addr)[0], \
-</span><span class='line'>      ((unsigned char *)&addr)[1], \
-</span><span class='line'>      ((unsigned char *)&addr)[2], \
-</span><span class='line'>      ((unsigned char *)&addr)[3]
-</span><span class='line'>    
-</span><span class='line'>    static unsigned int sample(
-</span><span class='line'>    unsigned int hooknum,
-</span><span class='line'>    struct sk_buff * skb,
-</span><span class='line'>    const struct net_device *in,
-</span><span class='line'>    const struct net_device *out,
-</span><span class='line'>    int (*okfn) (struct sk_buff *))
-</span><span class='line'>    {
-</span><span class='line'>        __be32 sip,dip;
-</span><span class='line'>     if(skb){
-</span><span class='line'>       struct sk_buff *sb = NULL;
-</span><span class='line'>       sb = skb;
-</span><span class='line'>       struct iphdr *iph;
-</span><span class='line'>       iph  = ip_hdr(sb);
-</span><span class='line'>       sip = iph-&gt;saddr;
-</span><span class='line'>       dip = iph-&gt;daddr;
-</span><span class='line'>       printk("Packet for source address: %d.%d.%d.%d\n destination address: %d.%d.%d.%d\n ", NIPQUAD(sip), NIPQUAD(dip));
-</span><span class='line'>        }
-</span><span class='line'>     return NF_ACCEPT;
-</span><span class='line'>    }
-</span><span class='line'>    
-</span><span class='line'>     struct nf_hook_ops sample_ops = {
-</span><span class='line'>       .list =  {NULL,NULL},
-</span><span class='line'>       .hook = sample,
-</span><span class='line'>       .pf = PF_INET,
-</span><span class='line'>       .hooknum = NF_INET_PRE_ROUTING,
-</span><span class='line'>       .priority = NF_IP_PRI_FILTER+2
-</span><span class='line'>     };
-</span><span class='line'>    
-</span><span class='line'>    static int __init sample_init(void) {
-</span><span class='line'>      nf_register_hook(&sample_ops);
-</span><span class='line'>      return 0;
-</span><span class='line'>    }
-</span><span class='line'>    
-</span><span class='line'>    
-</span><span class='line'>    static void __exit sample_exit(void) {
-</span><span class='line'>      nf_unregister_hook(&sample_ops);
-</span><span class='line'>    }
-</span><span class='line'>    
-</span><span class='line'>     module_init(sample_init);
-</span><span class='line'>     module_exit(sample_exit);
-</span><span class='line'>     MODULE_AUTHOR("chenkangrui");
-</span><span class='line'>     MODULE_DESCRIPTION("sample");  
-</span><span class='line'> </span></code></pre></td></tr></table></div></figure>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/3">&larr; Older</a>
@@ -1480,6 +1608,10 @@ word一般写一个已经打开的并且用来作为输入的描述符数字，�
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2019/07/13/iptables-packets-flow/">Iptables_packets_flow</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2019/07/13/win-sshfs/">Win Sshfs</a>
       </li>
     
@@ -1493,10 +1625,6 @@ word一般写一个已经打开的并且用来作为输入的描述符数字，�
     
       <li class="post">
         <a href="/blog/2019/07/07/simple-example-of-ansible/">Simple Example of Ansible</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2019/07/07/simpe-example-of-kubernetes/">Simpe Example of Kubernetes</a>
       </li>
     
   </ul>

@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>User Mode Linux - Iskey's Blog</title>
+  <title>Iptables_packets_flow - Iskey's Blog</title>
   <meta name="author" content="Iskey">
 
   
-  <meta name="description" content="以前研究内核，总是要依靠开发板或者自己编译内核．近来留意到了ＵＭＬ，才发现linux可以像进程一样跑起来，而且跑起来不不难，深感惭愧，以下是简单的使用方法介绍． 简介 用户模式Linux（User ModeLinux，UML）不同于其他Linux虚拟化项目，UML尽量将它自己作为一个普通的程序。 &hellip;">
+  <meta name="description" content="之前在网上看到一张iptables的数据包路径决策图,在这里收藏一下,原始地址找不到了^-^,这里就不写转载链接了,如果作者看到,可以提醒我一下,多谢 ">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://iskey.github.io/blog/2017/03/06/user_mode_linux/">
+  <link rel="canonical" href="http://iskey.github.io/blog/2019/07/13/iptables-packets-flow/">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="Iskey's Blog" type="application/atom+xml">
@@ -66,7 +66,7 @@
   
   <header>
     
-      <h1 class="entry-title">User Mode Linux</h1>
+      <h1 class="entry-title">Iptables_packets_flow</h1>
     
     
       <p class="meta">
@@ -75,68 +75,16 @@
 
 
 
-<time class='entry-date' datetime='2017-03-06T21:12:00+00:00'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>6</span><span class='date-suffix'>th</span>, <span class='date-year'>2017</span></span> <span class='time'>9:12 pm</span></time>
+<time class='entry-date' datetime='2019-07-13T12:32:33+00:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>13</span><span class='date-suffix'>th</span>, <span class='date-year'>2019</span></span> <span class='time'>12:32 pm</span></time>
         
       </p>
     
   </header>
 
 
-<div class="entry-content"><p>以前研究内核，总是要依靠开发板或者自己编译内核．近来留意到了ＵＭＬ，才发现linux可以像进程一样跑起来，而且跑起来不不难，深感惭愧，以下是简单的使用方法介绍．</p>
+<div class="entry-content"><p>之前在网上看到一张iptables的数据包路径决策图,在这里收藏一下,原始地址找不到了^-^,这里就不写转载链接了,如果作者看到,可以提醒我一下,多谢</p>
 
-<h2>简介</h2>
-
-<p>用户模式Linux（User ModeLinux，UML）不同于其他Linux虚拟化项目，UML尽量将它自己作为一个普通的程序。从Linux2.6.9版本起，用户模式Linux（User mode Linux,UML）已随Linux内核源代码一起发布，它存放于arch/um目录下。编译好UML的内核之后，可直接用gdb运行编译好的内核并进行调试。</p>
-
-<p>参考：<a href="http://uml.devloop.org.uk/howto.html">http://uml.devloop.org.uk/howto.html</a></p>
-
-<h2>编译内核</h2>
-
-<h3>以-O2编译内核</h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>make ARCH=um defconfig
-</span><span class='line'>make menuconfig ARCH=um
-</span><span class='line'>make ARCH=um</span></code></pre></td></tr></table></div></figure>
-
-
-<p><a href="http://user-mode-linux.sourceforge.net/source.html">参考</a></p>
-
-<h3>以-O0编译内核</h3>
-
-<p><a href="http://blog.chinaunix.net/uid-234303-id-2425015.html">参考</a></p>
-
-<h2>根文件系统</h2>
-
-<ul>
-<li><p><a href="http://fs.devloop.org.uk/">下载现成的根文件系统</a></p></li>
-<li><p><a href="http://fancymore.com/reading/linux-kernel-debugging.html">制作根文件系统</a></p></li>
-</ul>
-
-
-<h2>调试</h2>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># gdb ./linux   
-</span><span class='line'>(gdb) handle SIGSEGV pass nostop noprint   
-</span><span class='line'>(gdb) handle SIGUSR1 pass nostop noprint 
-</span><span class='line'>(gdb) start ubd0=/root/srcpkg/filesystem/CentOS6.x-x86-root_fs mem=256m</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>http://blog.csdn.net/ztz0223/article/details/7874759</code></p>
-
-<p>五、常见问题</p>
-
-<p>1、
-<a href="http://moodlearchive.epfl.ch/2010-2011/mod/forum/discuss.php?d=108781">http://moodlearchive.epfl.ch/2010-2011/mod/forum/discuss.php?d=108781</a></p>
-
-<p>2、
-<a href="http://www.lenky.info/archives/2012/04/1471">http://www.lenky.info/archives/2012/04/1471</a></p>
+<p><img src="https://raw.githubusercontent.com/iskey/iskey.github.io/source/source/images/blogs/iptables_packet_flow.png" alt="iptables_packets_flow" /></p>
 </div>
 
 
@@ -152,14 +100,8 @@
 
 
 
-<time class='entry-date' datetime='2017-03-06T21:12:00+00:00'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>6</span><span class='date-suffix'>th</span>, <span class='date-year'>2017</span></span> <span class='time'>9:12 pm</span></time>
+<time class='entry-date' datetime='2019-07-13T12:32:33+00:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>13</span><span class='date-suffix'>th</span>, <span class='date-year'>2019</span></span> <span class='time'>12:32 pm</span></time>
       
-
-<span class="categories">
-  
-    <a class='category' href='/blog/categories/kernel/'>kernel</a>
-  
-</span>
 
 
     </p>
@@ -173,10 +115,8 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2017/03/02/netfilter_example/" title="Previous Post: netfilter example">&laquo; netfilter example</a>
+        <a class="basic-alignment left" href="/blog/2019/07/13/win-sshfs/" title="Previous Post: win sshfs">&laquo; win sshfs</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2018/03/07/TODO/" title="Next Post: TODO">TODO &raquo;</a>
       
     </p>
   </footer>

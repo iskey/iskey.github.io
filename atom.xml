@@ -4,7 +4,7 @@
   <title><![CDATA[Iskey's Blog]]></title>
   <link href="http://iskey.github.io/atom.xml" rel="self"/>
   <link href="http://iskey.github.io/"/>
-  <updated>2019-07-13T11:50:33+00:00</updated>
+  <updated>2019-07-13T12:37:23+00:00</updated>
   <id>http://iskey.github.io/</id>
   <author>
     <name><![CDATA[Iskey]]></name>
@@ -12,6 +12,17 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Iptables_packets_flow]]></title>
+    <link href="http://iskey.github.io/blog/2019/07/13/iptables-packets-flow/"/>
+    <updated>2019-07-13T12:32:33+00:00</updated>
+    <id>http://iskey.github.io/blog/2019/07/13/iptables-packets-flow</id>
+    <content type="html"><![CDATA[<p>之前在网上看到一张iptables的数据包路径决策图,在这里收藏一下,原始地址找不到了^-^,这里就不写转载链接了,如果作者看到,可以提醒我一下,多谢</p>
+
+<p><img src="https://raw.githubusercontent.com/iskey/iskey.github.io/source/source/images/blogs/iptables_packet_flow.png" alt="iptables_packets_flow" /></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Win Sshfs]]></title>
@@ -3035,139 +3046,6 @@ word一般写一个已经打开的并且用来作为输入的描述符数字，�
 
 <p>2、
 <a href="http://www.lenky.info/archives/2012/04/1471">http://www.lenky.info/archives/2012/04/1471</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Netfilter Example]]></title>
-    <link href="http://iskey.github.io/blog/2017/03/02/netfilter_example/"/>
-    <updated>2017-03-02T21:42:00+00:00</updated>
-    <id>http://iskey.github.io/blog/2017/03/02/netfilter_example</id>
-    <content type="html"><![CDATA[<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>
-</span><span class='line'>    #include &lt;linux/module.h&gt;
-</span><span class='line'>    #include &lt;linux/kernel.h&gt;
-</span><span class='line'>    #include &lt;linux/init.h&gt;
-</span><span class='line'>    #include &lt;linux/types.h&gt;
-</span><span class='line'>    #include &lt;linux/netdevice.h&gt;
-</span><span class='line'>    #include &lt;linux/skbuff.h&gt;
-</span><span class='line'>    #include &lt;linux/netfilter_ipv4.h&gt;
-</span><span class='line'>    #include &lt;linux/inet.h&gt;
-</span><span class='line'>    #include &lt;linux/in.h&gt;
-</span><span class='line'>    #include &lt;linux/ip.h&gt;
-</span><span class='line'>    
-</span><span class='line'>    MODULE_LICENSE("GPL");
-</span><span class='line'>    #define NIPQUAD(addr) \
-</span><span class='line'>      ((unsigned char *)&addr)[0], \
-</span><span class='line'>      ((unsigned char *)&addr)[1], \
-</span><span class='line'>      ((unsigned char *)&addr)[2], \
-</span><span class='line'>      ((unsigned char *)&addr)[3]
-</span><span class='line'>    
-</span><span class='line'>    static unsigned int sample(
-</span><span class='line'>    unsigned int hooknum,
-</span><span class='line'>    struct sk_buff * skb,
-</span><span class='line'>    const struct net_device *in,
-</span><span class='line'>    const struct net_device *out,
-</span><span class='line'>    int (*okfn) (struct sk_buff *))
-</span><span class='line'>    {
-</span><span class='line'>        __be32 sip,dip;
-</span><span class='line'>     if(skb){
-</span><span class='line'>       struct sk_buff *sb = NULL;
-</span><span class='line'>       sb = skb;
-</span><span class='line'>       struct iphdr *iph;
-</span><span class='line'>       iph  = ip_hdr(sb);
-</span><span class='line'>       sip = iph-&gt;saddr;
-</span><span class='line'>       dip = iph-&gt;daddr;
-</span><span class='line'>       printk("Packet for source address: %d.%d.%d.%d\n destination address: %d.%d.%d.%d\n ", NIPQUAD(sip), NIPQUAD(dip));
-</span><span class='line'>        }
-</span><span class='line'>     return NF_ACCEPT;
-</span><span class='line'>    }
-</span><span class='line'>    
-</span><span class='line'>     struct nf_hook_ops sample_ops = {
-</span><span class='line'>       .list =  {NULL,NULL},
-</span><span class='line'>       .hook = sample,
-</span><span class='line'>       .pf = PF_INET,
-</span><span class='line'>       .hooknum = NF_INET_PRE_ROUTING,
-</span><span class='line'>       .priority = NF_IP_PRI_FILTER+2
-</span><span class='line'>     };
-</span><span class='line'>    
-</span><span class='line'>    static int __init sample_init(void) {
-</span><span class='line'>      nf_register_hook(&sample_ops);
-</span><span class='line'>      return 0;
-</span><span class='line'>    }
-</span><span class='line'>    
-</span><span class='line'>    
-</span><span class='line'>    static void __exit sample_exit(void) {
-</span><span class='line'>      nf_unregister_hook(&sample_ops);
-</span><span class='line'>    }
-</span><span class='line'>    
-</span><span class='line'>     module_init(sample_init);
-</span><span class='line'>     module_exit(sample_exit);
-</span><span class='line'>     MODULE_AUTHOR("chenkangrui");
-</span><span class='line'>     MODULE_DESCRIPTION("sample");  
-</span><span class='line'> </span></code></pre></td></tr></table></div></figure>
-
 ]]></content>
   </entry>
   

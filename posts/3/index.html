@@ -121,6 +121,159 @@
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2017/03/02/netfilter_example/">Netfilter Example</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2017-03-02T21:42:00+00:00'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>2</span><span class='date-suffix'>nd</span>, <span class='date-year'>2017</span></span> <span class='time'>9:42 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>
+</span><span class='line'>    #include &lt;linux/module.h&gt;
+</span><span class='line'>    #include &lt;linux/kernel.h&gt;
+</span><span class='line'>    #include &lt;linux/init.h&gt;
+</span><span class='line'>    #include &lt;linux/types.h&gt;
+</span><span class='line'>    #include &lt;linux/netdevice.h&gt;
+</span><span class='line'>    #include &lt;linux/skbuff.h&gt;
+</span><span class='line'>    #include &lt;linux/netfilter_ipv4.h&gt;
+</span><span class='line'>    #include &lt;linux/inet.h&gt;
+</span><span class='line'>    #include &lt;linux/in.h&gt;
+</span><span class='line'>    #include &lt;linux/ip.h&gt;
+</span><span class='line'>    
+</span><span class='line'>    MODULE_LICENSE("GPL");
+</span><span class='line'>    #define NIPQUAD(addr) \
+</span><span class='line'>      ((unsigned char *)&addr)[0], \
+</span><span class='line'>      ((unsigned char *)&addr)[1], \
+</span><span class='line'>      ((unsigned char *)&addr)[2], \
+</span><span class='line'>      ((unsigned char *)&addr)[3]
+</span><span class='line'>    
+</span><span class='line'>    static unsigned int sample(
+</span><span class='line'>    unsigned int hooknum,
+</span><span class='line'>    struct sk_buff * skb,
+</span><span class='line'>    const struct net_device *in,
+</span><span class='line'>    const struct net_device *out,
+</span><span class='line'>    int (*okfn) (struct sk_buff *))
+</span><span class='line'>    {
+</span><span class='line'>        __be32 sip,dip;
+</span><span class='line'>     if(skb){
+</span><span class='line'>       struct sk_buff *sb = NULL;
+</span><span class='line'>       sb = skb;
+</span><span class='line'>       struct iphdr *iph;
+</span><span class='line'>       iph  = ip_hdr(sb);
+</span><span class='line'>       sip = iph-&gt;saddr;
+</span><span class='line'>       dip = iph-&gt;daddr;
+</span><span class='line'>       printk("Packet for source address: %d.%d.%d.%d\n destination address: %d.%d.%d.%d\n ", NIPQUAD(sip), NIPQUAD(dip));
+</span><span class='line'>        }
+</span><span class='line'>     return NF_ACCEPT;
+</span><span class='line'>    }
+</span><span class='line'>    
+</span><span class='line'>     struct nf_hook_ops sample_ops = {
+</span><span class='line'>       .list =  {NULL,NULL},
+</span><span class='line'>       .hook = sample,
+</span><span class='line'>       .pf = PF_INET,
+</span><span class='line'>       .hooknum = NF_INET_PRE_ROUTING,
+</span><span class='line'>       .priority = NF_IP_PRI_FILTER+2
+</span><span class='line'>     };
+</span><span class='line'>    
+</span><span class='line'>    static int __init sample_init(void) {
+</span><span class='line'>      nf_register_hook(&sample_ops);
+</span><span class='line'>      return 0;
+</span><span class='line'>    }
+</span><span class='line'>    
+</span><span class='line'>    
+</span><span class='line'>    static void __exit sample_exit(void) {
+</span><span class='line'>      nf_unregister_hook(&sample_ops);
+</span><span class='line'>    }
+</span><span class='line'>    
+</span><span class='line'>     module_init(sample_init);
+</span><span class='line'>     module_exit(sample_exit);
+</span><span class='line'>     MODULE_AUTHOR("chenkangrui");
+</span><span class='line'>     MODULE_DESCRIPTION("sample");  
+</span><span class='line'> </span></code></pre></td></tr></table></div></figure>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2017/01/02/ctom_of_SourceInsight_for_kernel/">c.tom of SourceInsight for Kernel</a></h1>
     
     
@@ -3906,113 +4059,6 @@ all：
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/04/06/linux-shell-IO-redirect/">Linux Shell I/O重定向</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2016-04-06T15:48:00+00:00'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>6</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>3:48 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>在命令行中，经常会用到shell命令的重定向操作，最常用的做法是重定向到一个文件：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">$ls</span> <span class="o">&gt;</span> <span class="n">t</span><span class="o">.</span><span class="na">txt</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>把当前目录的文件列表重定向到t.txt文件，这里的<strong>></strong>符号的意思就是把<code>ls</code>命令的标准输出重定向到t.txt文件。
-熟悉linux的同学都知道，linux 有三个标准句柄，</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="mi">0</span><span class="o">:</span> <span class="n">stdin</span>
-</span><span class='line'><span class="mi">1</span><span class="o">:</span> <span class="n">stdout</span>
-</span><span class='line'><span class="mi">2</span><span class="o">:</span> <span class="n">stderr</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>所以如果我们想要截获命令行的所有输出标准输出信息的话，就应该采用如下写法：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">$ls</span> <span class="o">&gt;</span><span class="n">t</span><span class="o">.</span><span class="na">txt</span> <span class="mi">2</span><span class="o">&gt;&amp;</span><span class="mi">1</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>有次，移植python的时候，遇到些问题，需要看看configure的流程，看到了另外一种写法：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">exec</span> <span class="mi">5</span><span class="o">&gt;&gt;</span> <span class="n">config</span><span class="o">.</span><span class="na">log</span>
-</span><span class='line'><span class="n">exec</span> <span class="mi">6</span><span class="o">&gt;&gt;</span> <span class="n">Setup</span><span class="o">.</span><span class="na">config</span>
-</span><span class='line'><span class="n">echo</span> <span class="s">&quot;hello&quot;</span><span class="o">&gt;</span> <span class="o">&amp;</span><span class="mi">5</span>
-</span><span class='line'><span class="n">echo</span> <span class="s">&quot;test config&quot;</span><span class="o">&gt;</span> <span class="o">&amp;</span><span class="mi">6</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>这样就可以实现向不同的文件写入详细的过程，而不会污染configure执行过程的输出信息了。
-更巧妙的是，如果你是再改造一个已经混乱不堪，输出非常乱的脚本，你可以把标准输出重定向到文件，而自己用一个重定向的句柄来接管标准输出，如下：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">echo</span> <span class="s">&quot;first I am in stdout&quot;</span>
-</span><span class='line'><span class="n">exec</span> <span class="mi">3</span><span class="o">&gt;&gt;</span> <span class="n">t</span><span class="o">.</span><span class="na">log</span>
-</span><span class='line'><span class="n">exec</span> <span class="mi">4</span><span class="o">&gt;&amp;</span><span class="mi">1</span>
-</span><span class='line'><span class="n">exec</span> <span class="mi">5</span><span class="o">&gt;&amp;</span><span class="mi">2</span>
-</span><span class='line'><span class="n">exec</span> <span class="mi">1</span><span class="o">&gt;&amp;</span><span class="mi">3</span>
-</span><span class='line'><span class="n">exec</span> <span class="mi">2</span><span class="o">&gt;&amp;</span><span class="mi">3</span>
-</span><span class='line'><span class="n">echo</span> <span class="s">&quot;seconf I am not in stdout&quot;</span>
-</span><span class='line'><span class="n">echo</span> <span class="s">&quot;third I am in stdout&quot;</span><span class="o">&gt;&amp;</span><span class="mi">4</span>
-</span><span class='line'><span class="n">echo</span> <span class="s">&quot;fourth I am in stderr&quot;</span><span class="o">&gt;&amp;</span><span class="mi">5</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>题外话：
-在调试复杂脚本的时候，很难跟踪流程，可以使用trap命令来很方便的跟踪流程</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">trap</span> <span class="err">&#39;</span><span class="n">echo</span> <span class="err">“</span><span class="n">before</span> <span class="n">execute</span> <span class="nl">line:</span><span class="n">$LINENO</span><span class="o">,</span> <span class="n">a</span><span class="o">=</span><span class="n">$a</span><span class="o">,</span><span class="n">b</span><span class="o">=</span><span class="n">$b</span><span class="o">,</span><span class="n">c</span><span class="o">=</span><span class="n">$c</span><span class="err">”&#39;</span> <span class="n">DEBUG</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>trap捕捉到信号之后，可以有三种反应方式：</p>
-
-<blockquote><ol>
-<li>执行一段程序来处理这一信号</li>
-<li>接受信号的默认操作</li>
-<li>忽视这一信号</li>
-</ol>
-</blockquote>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/4">&larr; Older</a>
@@ -4030,6 +4076,10 @@ all：
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2019/07/13/iptables-packets-flow/">Iptables_packets_flow</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2019/07/13/win-sshfs/">Win Sshfs</a>
       </li>
     
@@ -4043,10 +4093,6 @@ all：
     
       <li class="post">
         <a href="/blog/2019/07/07/simple-example-of-ansible/">Simple Example of Ansible</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2019/07/07/simpe-example-of-kubernetes/">Simpe Example of Kubernetes</a>
       </li>
     
   </ul>
