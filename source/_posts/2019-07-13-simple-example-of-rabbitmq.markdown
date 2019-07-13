@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "simple_example_of_rabbitmq"
+title: "simple example of rabbitmq"
 date: 2019-07-13 11:45:27 +0000
 comments: true
 categories: tool MQ
