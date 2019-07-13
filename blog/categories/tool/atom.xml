@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Tool | Iskey's Blog]]></title>
   <link href="http://iskey.github.io/blog/categories/tool/atom.xml" rel="self"/>
   <link href="http://iskey.github.io/"/>
-  <updated>2019-07-13T11:41:37+00:00</updated>
+  <updated>2019-07-13T11:48:46+00:00</updated>
   <id>http://iskey.github.io/</id>
   <author>
     <name><![CDATA[Iskey]]></name>
@@ -12,6 +12,269 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Win Sshfs]]></title>
+    <link href="http://iskey.github.io/blog/2019/07/13/win-sshfs/"/>
+    <updated>2019-07-13T11:46:51+00:00</updated>
+    <id>http://iskey.github.io/blog/2019/07/13/win-sshfs</id>
+    <content type="html"><![CDATA[<h4>背景</h4>
+
+<p>代码开发时，有时候必须要把代码拷贝到远程的主机上去执行，这时候大部分我们会用ssh登上去，用vim修改，但是如果改的代码比较多，对于不太习惯vim的同学，就会觉得比较累。这时候一般的做法是在本地用编辑器（SourceInsighet/PyCharm）等修改代码，然后再传到服务器上去。[Pycharm专业版可以上传到ssh远端哦~]</p>
+
+<p>这里推荐一个开源的win-sshfs工具，可以利用ssh在本地建立一个远端的目录映射，将ssh远端服务器的目录映射成本地的一个目录，这样就可以直接利用本地丰富的编辑器来改代码了，改完之后，直接在远端执行就可以了。</p>
+
+<h4>win-sshfs下载、安装</h4>
+
+<p>首先需要下载dokan和win-sshfs，dokan提供win-sshfs需要的驱动和库文件，下载的时候一定要注意版本问题~，<a href="https://github.com/feo-cz/win-sshfs/releases">win-sshfs Releases</a>,在下载链接里一遍会标注推荐的dokan版本号。
+我这里用的是<a href="https://github.com/dokan-dev/dokany/releases/tag/v1.0.5">DokanSetup_redist-1.0.5.1000</a>和<a href="https://github.com/feo-cz/win-sshfs/releases/tag/1.6.1">WinSSHFS-1.6.1.13-devel</a></p>
+
+<h4>使用</h4>
+
+<p>UI界面很容易看懂，mount之后，就会在本地多一个磁盘出来，操作磁盘里的文件，就相当于操作远程ssh服务器上的文件。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Simple_example_of_rabbitmq]]></title>
+    <link href="http://iskey.github.io/blog/2019/07/13/simple-example-of-rabbitmq/"/>
+    <updated>2019-07-13T11:45:27+00:00</updated>
+    <id>http://iskey.github.io/blog/2019/07/13/simple-example-of-rabbitmq</id>
+    <content type="html"><![CDATA[<h1>simple example of rabbitmq</h1>
+
+<p>关于python的queue介绍
+关于python的队列，内置的有两种，一种是线程queue，另一种是进程queue，但是这两种queue都是只能在同一个进程下的线程间或者父进程与子进程之间进行队列通讯，并不能进行程序与程序之间的信息交换，这时候我们就需要一个中间件，来实现程序之间的通讯。</p>
+
+<h2>RabbitMQ</h2>
+
+<p>MQ并不是python内置的模块，而是一个需要你额外安装（ubuntu可直接apt-get其余请自行百度。）的程序，安装完毕后可通过python中内置的pika模块来调用MQ发送或接收队列请求。接下来我们就看几种python调用MQ的模式（作者自定义中文形象的模式名称）与方法。</p>
+
+<h3>RabbitMQ设置远程链接账号密码</h3>
+
+<p>启动rabbitmq web服务：
+远程访问rabbitmq:自己增加一个用户，步骤如下：
+- 创建一个admin用户：sudo rabbitmqctl add_user admin 123123
+- 设置该用户为administrator角色：sudo rabbitmqctl set_user_tags admin administrator
+- 设置权限：sudo rabbitmqctl  set_permissions  -p  &lsquo;/&rsquo;  admin &lsquo;.&rsquo; &lsquo;.&rsquo; &lsquo;.&rsquo;
+- 重启rabbitmq服务：sudo service rabbitmq-server restart
+之后就能用admin用户远程连接rabbitmq server了。</p>
+
+<h3>轮询消费模式</h3>
+
+<p>此模式下，发送队列的一方把消息存入mq的指定队列后，若有消费者端联入相应队列，即会获取到消息，并且队列中的消息会被消费掉。</p>
+
+<p>若有多个消费端同时连接着队列，则会已轮询的方式将队列中的消息消费掉。</p>
+
+<p>接下来是代码实例：</p>
+
+<h4>producer生产者</h4>
+
+<pre><code class="python"># !/usr/bin/env python
+import pika
+credentials = pika.PlainCredentials('admin','123456')
+connection = pika.BlockingConnection(pika.ConnectionParameters(
+    '192.168.56.19',5672,'/',credentials))
+channel = connection.channel()
+
+# 声明queue
+channel.queue_declare(queue='balance')
+
+# n RabbitMQ a message can never be sent directly to the queue, it always needs to go through an exchange.
+channel.basic_publish(exchange='',
+                      routing_key='balance',
+                      body='Hello World!')
+print(" [x] Sent 'Hello World!'")
+connection.close()
+</code></pre>
+
+<p>发送过队列后，可在MQ服务器中查看队列状态</p>
+
+<pre><code>[root@localhost ~]# rabbitmqctl list_queues
+Listing queues ...
+hello    1
+</code></pre>
+
+<h4>consumer消费者</h4>
+
+<pre><code class="python"># _*_coding:utf-8_*_
+__author__ = 'Alex Li'
+import pika
+
+credentials = pika.PlainCredentials('admin','123456')
+connection = pika.BlockingConnection(pika.ConnectionParameters(
+    '192.168.56.19',5672,'/',credentials))
+channel = connection.channel()
+
+# You may ask why we declare the queue again ‒ we have already declared it in our previous code.
+# We could avoid that if we were sure that the queue already exists. For example if send.py program
+# was run before. But we're not yet sure which program to run first. In such cases it's a good
+# practice to repeat declaring the queue in both programs.
+channel.queue_declare(queue='balance')
+
+
+def callback(ch, method, properties, body):
+    print(" [x] Received %r" % body)
+
+
+channel.basic_consume(callback,
+                      queue='balance',
+                      no_ack=True)
+
+print(' [*] Waiting for messages. To exit press CTRL+C')
+channel.start_consuming()
+</code></pre>
+
+<p>接收队列后，查看一下队列状态</p>
+
+<pre><code>[root@localhost ~]#  rabbitmqctl list_queues
+Listing queues ...
+hello    0
+</code></pre>
+
+<h3>队列持久化</h3>
+
+<p>当rabbitMQ意外宕机时，可能会有持久化保存队列的需求（队列中的消息不消失）。</p>
+
+<h4>producer生产者</h4>
+
+<pre><code class="python"># !/usr/bin/env python
+import pika
+
+credentials = pika.PlainCredentials('admin','123456')
+connection = pika.BlockingConnection(pika.ConnectionParameters(
+    '192.168.56.19',5672,'/',credentials))
+channel = connection.channel()
+
+# 声明queue
+channel.queue_declare(queue='durable',durable=True)
+
+# n RabbitMQ a message can never be sent directly to the queue, it always needs to go through an exchange.
+channel.basic_publish(exchange='',
+                      routing_key='durable',
+                      body='Hello cheng!',
+                      properties=pika.BasicProperties(
+                          delivery_mode=2,  # make message persistent
+                      )
+                      )
+print(" [x] Sent 'Hello cheng!'")
+connection.close()
+</code></pre>
+
+<p>执行后查看队列，记下队列名字与队列中所含消息的数量</p>
+
+<pre><code>[root@localhost ~]# rabbitmqctl list_queues
+Listing queues ...
+durable    1
+#重启rabbitmq
+[root@localhost ~]# systemctl restart rabbitmq-server
+#重启完毕后再次查看
+[root@localhost ~]# rabbitmqctl list_queues
+Listing queues ...
+durable   #队列以及消息并未消失
+</code></pre>
+
+<h4>consumer消费者</h4>
+
+<pre><code class="python"># _*_coding:utf-8_*_
+__author__ = 'Alex Li'
+import pika
+
+credentials = pika.PlainCredentials('admin','123456')
+connection = pika.BlockingConnection(pika.ConnectionParameters(
+    '192.168.56.19',5672,'/',credentials))
+channel = connection.channel()
+
+# You may ask why we declare the queue again ‒ we have already declared it in our previous code.
+# We could avoid that if we were sure that the queue already exists. For example if send.py program
+# was run before. But we're not yet sure which program to run first. In such cases it's a good
+# practice to repeat declaring the queue in both programs.
+channel.queue_declare(queue='durable',durable=True)
+
+
+def callback(ch, method, properties, body):
+    print(" [x] Received %r" % body)
+    ch.basic_ack(delivery_tag=method.delivery_tag)
+
+channel.basic_consume(callback,
+                      queue='durable',
+                      #no_ack=True
+                      )
+
+print(' [*] Waiting for messages. To exit press CTRL+C')
+channel.start_consuming()
+</code></pre>
+
+<p>可正确接收到信息。</p>
+
+<p>再次查看队列的情况。</p>
+
+<pre><code>[root@localhost ~]# rabbitmqctl list_queues
+Listing queues ...
+durable    0
+</code></pre>
+
+<h3>广播模式</h3>
+
+<p>当producer发送消息到队列后，所有的consumer都会收到消息，需要注意的是，此模式下producer与concerned之间的关系类似与广播电台与收音机，如果广播后收音机没有接受到，那么消息就会丢失。</p>
+
+<p>建议先执行consumer</p>
+
+<h4>consumer生产者</h4>
+
+<pre><code class="python"># _*_coding:utf-8_*_
+__author__ = 'Alex Li'
+import pika
+
+credentials = pika.PlainCredentials('admin','123456')
+connection = pika.BlockingConnection(pika.ConnectionParameters(
+    '192.168.56.19',5672,'/',credentials))
+channel = connection.channel()
+
+channel.exchange_declare(exchange='Clogs',
+                         type='fanout')
+
+result = channel.queue_declare(exclusive=True)  # 不指定queue名字,rabbit会随机分配一个名字,exclusive=True会在使用此queue的消费者断开后,自动将queue删除
+queue_name = result.method.queue
+
+channel.queue_bind(exchange='Clogs',
+                   queue=queue_name)
+
+print(' [*] Waiting for logs. To exit press CTRL+C')
+
+
+def callback(ch, method, properties, body):
+    print(" [x] %r" % body)
+
+
+channel.basic_consume(callback,
+                      queue=queue_name,
+                      no_ack=True)
+
+channel.start_consuming()
+</code></pre>
+
+<h4>producer生产者</h4>
+
+<pre><code class="python">import pika
+import sys
+
+credentials = pika.PlainCredentials('admin','123456')
+connection = pika.BlockingConnection(pika.ConnectionParameters(
+    '192.168.56.19',5672,'/',credentials))
+channel = connection.channel()
+
+channel.exchange_declare(exchange='Clogs',
+                         type='fanout')
+
+message = ' '.join(sys.argv[1:]) or "info: Hello World!"
+channel.basic_publish(exchange='Clogs',
+                      routing_key='',
+                      body=message)
+print(" [x] Sent %r" % message)
+connection.close()
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Simple Example of Ansible]]></title>
@@ -457,278 +720,6 @@ rake deploy
 <p>本地预览</p>
 
 <pre><code>rake preview
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[10 Tips to Push Your Git Skills to the Next Level]]></title>
-    <link href="http://iskey.github.io/blog/2018/04/26/10-tips-to-push-your-git-skills-to-the-next-level/"/>
-    <updated>2018-04-26T15:38:05+00:00</updated>
-    <id>http://iskey.github.io/blog/2018/04/26/10-tips-to-push-your-git-skills-to-the-next-level</id>
-    <content type="html"><![CDATA[<p>Recently we published a couple of tutorials to get you familiar with Git basics and using Git in a team environment. The commands that we discussed were about enough to help a developer survive in the Git world. In this post, we will try to explore how to manage your time effectively and make full use of the features that Git provides.</p>
-
-<p>Note: Some commands in this article include part of the command in square brackets (e.g. git add -p [file_name]). In those examples, you would insert the necessary number, identifier, etc. without the square brackets.</p>
-
-<h3>1.  Git Auto Completion</h3>
-
-<p>If you run Git commands through the command line, it’s a tiresome task to type in the commands manually every single time. To help with this, you can enable auto completion of Git commands within a few minutes.
-To get the script, run the following in a Unix system:</p>
-
-<pre><code class="c">cd ~
-curl https://raw.github.com/git/git/master/contrib/completion/git-completion.bash -o ~/.git-completion.bash
-</code></pre>
-
-<p>Next, add the following lines to your ~/.bash_profile file:</p>
-
-<pre><code>if [ -f ~/.git-completion.bash ]; then
-    . ~/.git-completion.bash
-fi
-</code></pre>
-
-<p>Although I have mentioned this earlier, I can not stress it enough: If you want to use the features of Git fully, you should definitely shift to the command line interface!</p>
-
-<h3>2.  Ignoring Files in Git</h3>
-
-<p>Are you tired of compiled files (like .pyc) appearing in your Git repository? Or are you so fed up that you have added them to Git? Look no further, there is a way through which you can tell Git to ignore certain files and directories altogether. Simply create a file with the name .gitignore and list the files and directories that you don’t want Git to track. You can make exceptions using the exclamation mark(!).</p>
-
-<pre><code>*.pyc
-*.exe
-my_db_config/
-</code></pre>
-
-<p>!main.pyc</p>
-
-<h3>3.  Who Messed With My Code?</h3>
-
-<p>It’s the natural instinct of human beings to blame others when something goes wrong. If your production server is broke, it’s very easy to find out the culprit — just do a git blame. This command shows you the author of every line in a file, the commit that saw the last change in that line, and the timestamp of the commit.</p>
-
-<pre><code>git blame [file_name]
-git blame demonstration
-</code></pre>
-
-<p>And in the screenshot below, you can see how this command would look on a bigger repository:</p>
-
-<p>git blame on the ATutor repository</p>
-
-<h3>4. Review History of the Repository</h3>
-
-<p>We had a look at the use of git log in a previous tutorial, however, there are three options that you should know about.</p>
-
-<pre><code>    --oneline – Compresses the information shown beside each commit to a reduced commit hash and the commit message, all shown in a single line.
-    --graph – This option draws a text-based graphical representation of the history on the left hand side of the output. It’s of no use if you are viewing the history for a single branch.
-    --all – Shows the history of all branches.
-</code></pre>
-
-<p>Here’s what a combination of the options looks like:
-Use of git log with all, graph and oneline</p>
-
-<h3>5. Never Lose Track of a Commit</h3>
-
-<p>Let’s say you committed something you didn’t want to and ended up doing a hard reset to come back to your previous state. Later, you realize you lost some other information in the process and want to get it back, or at least view it. This is where git reflog can help.</p>
-
-<p>A simple git log shows you the latest commit, its parent, its parent’s parent, and so on. However, git reflog is a list of commits that the head was pointed to. Remember that it’s local to your system; it’s not a part of your repository and not included in pushes or merges.</p>
-
-<p>If I run git log, I get the commits that are a part of my repository:</p>
-
-<p>Project history</p>
-
-<p>However, a git reflog shows a commit (b1b0ee9 – HEAD@{4}) that was lost when I did a hard reset:</p>
-
-<p>Git reflog</p>
-
-<h3>6. Staging Parts of a Changed File for a Commit</h3>
-
-<p>It is generally a good practice to make feature-based commits, that is, each commit must represent a feature or a bug fix. Consider what would happen if you fixed two bugs, or added multiple features without committing the changes. In such a situation situation, you could put the changes in a single commit. But there is a better way: Stage the files individually and commit them separately.</p>
-
-<p>Let’s say you’ve made multiple changes to a single file and want them to appear in separate commits. In that case, we add files by prefixing -p to our add commands.</p>
-
-<pre><code>git add -p [file_name]
-</code></pre>
-
-<p>Let’s try to demonstrate the same. I have added three new lines to file_name and I want only the first and third lines to appear in my commit. Let’s see what a git diff shows us.</p>
-
-<p>Changes in repo</p>
-
-<p>And let’s see what happes when we prefix a -p to our add command.</p>
-
-<p>Running add with -p</p>
-
-<p>It seems that Git assumed that all the changes were a part of the same idea, thereby grouping it into a single hunk. You have the following options:</p>
-
-<pre><code>    Enter y to stage that hunk
-    Enter n to not stage that hunk
-    Enter e to manually edit the hunk
-    Enter d to exit or go to the next file.
-    Enter s to split the hunk.
-</code></pre>
-
-<p>In our case, we definitely want to split it into smaller parts to selectively add some and ignore the rest.</p>
-
-<p>Adding all hunks</p>
-
-<p>As you can see, we have added the first and third lines and ignored the second. You can then view the status of the repository and make a commit.</p>
-
-<p>Repository after selectively adding a file</p>
-
-<h3>7. Squash Multiple Commits</h3>
-
-<p>When you submit your code for review and create a pull request (which happens often in open source projects), you might be asked to make a change to your code before it’s accepted. You make the change, only to be asked to change it yet again in the next review. Before you know it, you have a few extra commits. Ideally, you could squash them into one using the rebase command.</p>
-
-<pre><code>git rebase -i HEAD~[number_of_commits]
-</code></pre>
-
-<p>If you want to squash the last two commits, the command that you run is the following.</p>
-
-<pre><code>git rebase -i HEAD~2
-</code></pre>
-
-<p>On running this command, you are taken to an interactive interface listing the commits and asking you which ones to squash. Ideally, you pick the latest commit and squash the old ones.</p>
-
-<p>Git squash interactive</p>
-
-<p>You are then asked to provide a commit message to the new commit. This process essentially re-writes your commit history.</p>
-
-<p>Adding a commit message</p>
-
-<h3>8. Stash Uncommitted Changes</h3>
-
-<p>Let’s say you are working on a certain bug or a feature, and you are suddenly asked to demonstrate your work. Your current work is not complete enough to be committed, and you can’t give a demonstration at this stage (without reverting the changes). In such a situation, git stash comes to the rescue. Stash essentially takes all your changes and stores them for further use. To stash your changes, you simply run the following-</p>
-
-<pre><code>git stash
-</code></pre>
-
-<p>To check the list of stashes, you can run the following:</p>
-
-<pre><code>git stash list
-</code></pre>
-
-<p>Stash list</p>
-
-<p>If you want to un-stash and recover the uncommitted changes, you apply the stash:</p>
-
-<pre><code>git stash apply
-</code></pre>
-
-<p>In the last screenshot, you can see that each stash has an indentifier, a unique number (although we have only one stash in this case). In case you want to apply only selective stashes, you add the specific identifier to the apply command:</p>
-
-<pre><code>git stash apply stash@{2}
-</code></pre>
-
-<p>After un-stashing changes</p>
-
-<h3>9. Check for Lost Commits</h3>
-
-<p>Although reflog is one way of checking for lost commits, it’s not feasible in large repositories. That is when the fsck (file system check) command comes into play.</p>
-
-<pre><code>git fsck --lost-found
-</code></pre>
-
-<p>Git fsck results</p>
-
-<p>Here you can see a lost commit. You can check the changes in the commit by running git show [commit_hash] or recover it by running git merge [commit_hash].</p>
-
-<p>git fsck has an advantage over reflog. Let’s say you deleted a remote branch and then cloned the repository. With fsck you can search for and recover the deleted remote branch.</p>
-
-<h3>10. Cherry Pick</h3>
-
-<p>I have saved the most elegant Git command for the last. The cherry-pick command is by far my favorite Git command, because of its literal meaning as well as its utility!</p>
-
-<p>In the simplest of terms, cherry-pick is picking a single commit from a different branch and merging it with your current one. If you are working in a parallel fashion on two or more branches, you might notice a bug that is present in all branches. If you solve it in one, you can cherry pick the commit into the other branches, without messing with other files or commits.</p>
-
-<p>Let’s consider a scenario where we can apply this. I have two branches and I want to cherry-pick the commit b20fd14: Cleaned junk into another one.</p>
-
-<p>Before cherry pick</p>
-
-<p>I switch to the branch into which I want to cherry-pick the commit, and run the following:</p>
-
-<pre><code>git cherry-pick [commit_hash]
-</code></pre>
-
-<p>After cherry pick</p>
-
-<p>Although we had a clean cherry-pick this time, you should know that this command can often lead to conflicts, so use it with care.
-Conclusion</p>
-
-<p>With this, we come to the end of our list of tips that I think can help you take your Git skills to a new level. Git is the best out there and it can accomplish anything you can imagine. Therefore, always try to challenge yourself with Git. Chances are, you will end up learning something new!</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[调试串口转应用串口]]></title>
-    <link href="http://iskey.github.io/blog/2016/04/22/debug-serial-to-general/"/>
-    <updated>2016-04-22T20:36:00+00:00</updated>
-    <id>http://iskey.github.io/blog/2016/04/22/debug-serial-to-general</id>
-    <content type="html"><![CDATA[<h2>调试串口转应用串口</h2>
-
-<pre><code>#include "stdio.h"
-#include "sys/ioctl.h"
-#include "fcntl.h"
-
-#include "termios.h"
-#include "unistd.h"
-
-#define ECHOFLAGS (ECHO | ECHOE | ECHOK | ECHONL)
-
-int main()
-{
-    int fd;
-    int ret;
-    char buf[100];
-    struct termios term;
-
-    fd= open("/dev/pts/0",O_RDONLY);
-    if(fd&lt;=0){
-        printf("Error. open /dev/pts/0.\n");
-        goto err;
-    }
-    ioctl(fd, TIOCCONS);
-    close(fd);
-
-    fd= open("/dev/ttyS0",O_RDONLY);
-    if(fd&lt;=0){
-    fd= open("/dev/ttyS0",O_RDONLY);
-    if(fd&lt;=0){
-        printf("Error. open /dev/console.\n");
-        goto err;
-    }
-
-    ret= tcgetattr(fd, &amp;term);
-    if(-1== ret){
-        printf("tcgetattr error.\n");
-        goto err;
-    }
-    cfmakeraw(&amp;term);
-    term.c_lflag&amp;= ~ECHOFLAGS;
-    tcsetattr(fd, TCSAFLUSH, &amp;term);
-    tcsetattr(fd, TCSANOW, &amp;term);
-    if(-1== ret){
-        printf("tcsetattr error.\n");
-        goto err;
-    }
-
-    ret= read(fd, buf, 1);
-    if(ret== -1){
-        perror("read error.\n");    
-        goto err;
-    }
-
-    while(*buf!='\n')
-    {
-        ret= read(fd, buf, 1);
-        if(ret== -1){
-            perror("read error1.\n");
-            goto err;
-        }
-        printf("%02x\n",*buf);
-    }
-    ioctl(fd, TIOCCONS);
-    close(fd);
-
-    return 0;
-err:
-    return -1;
-}
 </code></pre>
 ]]></content>
   </entry>

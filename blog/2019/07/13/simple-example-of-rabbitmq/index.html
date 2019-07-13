@@ -1,0 +1,597 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Simple_example_of_rabbitmq - Iskey's Blog</title>
+  <meta name="author" content="Iskey">
+
+  
+  <meta name="description" content="simple example of rabbitmq 关于python的queue介绍
+关于python的队列，内置的有两种，一种是线程queue，另一种是进程queue，但是这两种queue都是只能在同一个进程下的线程间或者父进程与子进程之间进行队列通讯，并不能进行程序与程序之间的信息交换， &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://iskey.github.io/blog/2019/07/13/simple-example-of-rabbitmq/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Iskey's Blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Iskey's Blog</a></h1>
+  
+    <h2>A free place to write something down.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="iskey.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Simple_example_of_rabbitmq</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2019-07-13T11:45:27+00:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>13</span><span class='date-suffix'>th</span>, <span class='date-year'>2019</span></span> <span class='time'>11:45 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h1>simple example of rabbitmq</h1>
+
+<p>关于python的queue介绍
+关于python的队列，内置的有两种，一种是线程queue，另一种是进程queue，但是这两种queue都是只能在同一个进程下的线程间或者父进程与子进程之间进行队列通讯，并不能进行程序与程序之间的信息交换，这时候我们就需要一个中间件，来实现程序之间的通讯。</p>
+
+<h2>RabbitMQ</h2>
+
+<p>MQ并不是python内置的模块，而是一个需要你额外安装（ubuntu可直接apt-get其余请自行百度。）的程序，安装完毕后可通过python中内置的pika模块来调用MQ发送或接收队列请求。接下来我们就看几种python调用MQ的模式（作者自定义中文形象的模式名称）与方法。</p>
+
+<h3>RabbitMQ设置远程链接账号密码</h3>
+
+<p>启动rabbitmq web服务：
+远程访问rabbitmq:自己增加一个用户，步骤如下：
+- 创建一个admin用户：sudo rabbitmqctl add_user admin 123123
+- 设置该用户为administrator角色：sudo rabbitmqctl set_user_tags admin administrator
+- 设置权限：sudo rabbitmqctl  set_permissions  -p  &lsquo;/&rsquo;  admin &lsquo;.&rsquo; &lsquo;.&rsquo; &lsquo;.&rsquo;
+- 重启rabbitmq服务：sudo service rabbitmq-server restart
+之后就能用admin用户远程连接rabbitmq server了。</p>
+
+<h3>轮询消费模式</h3>
+
+<p>此模式下，发送队列的一方把消息存入mq的指定队列后，若有消费者端联入相应队列，即会获取到消息，并且队列中的消息会被消费掉。</p>
+
+<p>若有多个消费端同时连接着队列，则会已轮询的方式将队列中的消息消费掉。</p>
+
+<p>接下来是代码实例：</p>
+
+<h4>producer生产者</h4>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="c"># !/usr/bin/env python</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">pika</span>
+</span><span class='line'><span class="n">credentials</span> <span class="o">=</span> <span class="n">pika</span><span class="o">.</span><span class="n">PlainCredentials</span><span class="p">(</span><span class="s">&#39;admin&#39;</span><span class="p">,</span><span class="s">&#39;123456&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="n">connection</span> <span class="o">=</span> <span class="n">pika</span><span class="o">.</span><span class="n">BlockingConnection</span><span class="p">(</span><span class="n">pika</span><span class="o">.</span><span class="n">ConnectionParameters</span><span class="p">(</span>
+</span><span class='line'>    <span class="s">&#39;192.168.56.19&#39;</span><span class="p">,</span><span class="mi">5672</span><span class="p">,</span><span class="s">&#39;/&#39;</span><span class="p">,</span><span class="n">credentials</span><span class="p">))</span>
+</span><span class='line'><span class="n">channel</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">channel</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># 声明queue</span>
+</span><span class='line'><span class="n">channel</span><span class="o">.</span><span class="n">queue_declare</span><span class="p">(</span><span class="n">queue</span><span class="o">=</span><span class="s">&#39;balance&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># n RabbitMQ a message can never be sent directly to the queue, it always needs to go through an exchange.</span>
+</span><span class='line'><span class="n">channel</span><span class="o">.</span><span class="n">basic_publish</span><span class="p">(</span><span class="n">exchange</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span>
+</span><span class='line'>                      <span class="n">routing_key</span><span class="o">=</span><span class="s">&#39;balance&#39;</span><span class="p">,</span>
+</span><span class='line'>                      <span class="n">body</span><span class="o">=</span><span class="s">&#39;Hello World!&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="k">print</span><span class="p">(</span><span class="s">&quot; [x] Sent &#39;Hello World!&#39;&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>发送过队列后，可在MQ服务器中查看队列状态</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="p">[</span><span class="n">root</span><span class="nd">@localhost</span> <span class="o">~</span><span class="p">]</span><span class="c"># rabbitmqctl list_queues</span>
+</span><span class='line'><span class="n">Listing</span> <span class="n">queues</span> <span class="o">...</span>
+</span><span class='line'><span class="n">hello</span>    <span class="mi">1</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>consumer消费者</h4>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="c"># _*_coding:utf-8_*_</span>
+</span><span class='line'><span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;Alex Li&#39;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">pika</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">credentials</span> <span class="o">=</span> <span class="n">pika</span><span class="o">.</span><span class="n">PlainCredentials</span><span class="p">(</span><span class="s">&#39;admin&#39;</span><span class="p">,</span><span class="s">&#39;123456&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="n">connection</span> <span class="o">=</span> <span class="n">pika</span><span class="o">.</span><span class="n">BlockingConnection</span><span class="p">(</span><span class="n">pika</span><span class="o">.</span><span class="n">ConnectionParameters</span><span class="p">(</span>
+</span><span class='line'>    <span class="s">&#39;192.168.56.19&#39;</span><span class="p">,</span><span class="mi">5672</span><span class="p">,</span><span class="s">&#39;/&#39;</span><span class="p">,</span><span class="n">credentials</span><span class="p">))</span>
+</span><span class='line'><span class="n">channel</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">channel</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># You may ask why we declare the queue again ‒ we have already declared it in our previous code.</span>
+</span><span class='line'><span class="c"># We could avoid that if we were sure that the queue already exists. For example if send.py program</span>
+</span><span class='line'><span class="c"># was run before. But we&#39;re not yet sure which program to run first. In such cases it&#39;s a good</span>
+</span><span class='line'><span class="c"># practice to repeat declaring the queue in both programs.</span>
+</span><span class='line'><span class="n">channel</span><span class="o">.</span><span class="n">queue_declare</span><span class="p">(</span><span class="n">queue</span><span class="o">=</span><span class="s">&#39;balance&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">callback</span><span class="p">(</span><span class="n">ch</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">properties</span><span class="p">,</span> <span class="n">body</span><span class="p">):</span>
+</span><span class='line'>    <span class="k">print</span><span class="p">(</span><span class="s">&quot; [x] Received </span><span class="si">%r</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">body</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="n">channel</span><span class="o">.</span><span class="n">basic_consume</span><span class="p">(</span><span class="n">callback</span><span class="p">,</span>
+</span><span class='line'>                      <span class="n">queue</span><span class="o">=</span><span class="s">&#39;balance&#39;</span><span class="p">,</span>
+</span><span class='line'>                      <span class="n">no_ack</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">print</span><span class="p">(</span><span class="s">&#39; [*] Waiting for messages. To exit press CTRL+C&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="n">channel</span><span class="o">.</span><span class="n">start_consuming</span><span class="p">()</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>接收队列后，查看一下队列状态</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="p">[</span><span class="n">root</span><span class="nd">@localhost</span> <span class="o">~</span><span class="p">]</span><span class="c">#  rabbitmqctl list_queues</span>
+</span><span class='line'><span class="n">Listing</span> <span class="n">queues</span> <span class="o">...</span>
+</span><span class='line'><span class="n">hello</span>    <span class="mi">0</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>队列持久化</h3>
+
+<p>当rabbitMQ意外宕机时，可能会有持久化保存队列的需求（队列中的消息不消失）。</p>
+
+<h4>producer生产者</h4>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="c"># !/usr/bin/env python</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">pika</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">credentials</span> <span class="o">=</span> <span class="n">pika</span><span class="o">.</span><span class="n">PlainCredentials</span><span class="p">(</span><span class="s">&#39;admin&#39;</span><span class="p">,</span><span class="s">&#39;123456&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="n">connection</span> <span class="o">=</span> <span class="n">pika</span><span class="o">.</span><span class="n">BlockingConnection</span><span class="p">(</span><span class="n">pika</span><span class="o">.</span><span class="n">ConnectionParameters</span><span class="p">(</span>
+</span><span class='line'>    <span class="s">&#39;192.168.56.19&#39;</span><span class="p">,</span><span class="mi">5672</span><span class="p">,</span><span class="s">&#39;/&#39;</span><span class="p">,</span><span class="n">credentials</span><span class="p">))</span>
+</span><span class='line'><span class="n">channel</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">channel</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># 声明queue</span>
+</span><span class='line'><span class="n">channel</span><span class="o">.</span><span class="n">queue_declare</span><span class="p">(</span><span class="n">queue</span><span class="o">=</span><span class="s">&#39;durable&#39;</span><span class="p">,</span><span class="n">durable</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># n RabbitMQ a message can never be sent directly to the queue, it always needs to go through an exchange.</span>
+</span><span class='line'><span class="n">channel</span><span class="o">.</span><span class="n">basic_publish</span><span class="p">(</span><span class="n">exchange</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span>
+</span><span class='line'>                      <span class="n">routing_key</span><span class="o">=</span><span class="s">&#39;durable&#39;</span><span class="p">,</span>
+</span><span class='line'>                      <span class="n">body</span><span class="o">=</span><span class="s">&#39;Hello cheng!&#39;</span><span class="p">,</span>
+</span><span class='line'>                      <span class="n">properties</span><span class="o">=</span><span class="n">pika</span><span class="o">.</span><span class="n">BasicProperties</span><span class="p">(</span>
+</span><span class='line'>                          <span class="n">delivery_mode</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span>  <span class="c"># make message persistent</span>
+</span><span class='line'>                      <span class="p">)</span>
+</span><span class='line'>                      <span class="p">)</span>
+</span><span class='line'><span class="k">print</span><span class="p">(</span><span class="s">&quot; [x] Sent &#39;Hello cheng!&#39;&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>执行后查看队列，记下队列名字与队列中所含消息的数量</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="p">[</span><span class="n">root</span><span class="nd">@localhost</span> <span class="o">~</span><span class="p">]</span><span class="c"># rabbitmqctl list_queues</span>
+</span><span class='line'><span class="n">Listing</span> <span class="n">queues</span> <span class="o">...</span>
+</span><span class='line'><span class="n">durable</span>    <span class="mi">1</span>
+</span><span class='line'><span class="c">#重启rabbitmq</span>
+</span><span class='line'><span class="p">[</span><span class="n">root</span><span class="nd">@localhost</span> <span class="o">~</span><span class="p">]</span><span class="c"># systemctl restart rabbitmq-server</span>
+</span><span class='line'><span class="c">#重启完毕后再次查看</span>
+</span><span class='line'><span class="p">[</span><span class="n">root</span><span class="nd">@localhost</span> <span class="o">~</span><span class="p">]</span><span class="c"># rabbitmqctl list_queues</span>
+</span><span class='line'><span class="n">Listing</span> <span class="n">queues</span> <span class="o">...</span>
+</span><span class='line'><span class="n">durable</span>   <span class="c">#队列以及消息并未消失</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>consumer消费者</h4>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="c"># _*_coding:utf-8_*_</span>
+</span><span class='line'><span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;Alex Li&#39;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">pika</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">credentials</span> <span class="o">=</span> <span class="n">pika</span><span class="o">.</span><span class="n">PlainCredentials</span><span class="p">(</span><span class="s">&#39;admin&#39;</span><span class="p">,</span><span class="s">&#39;123456&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="n">connection</span> <span class="o">=</span> <span class="n">pika</span><span class="o">.</span><span class="n">BlockingConnection</span><span class="p">(</span><span class="n">pika</span><span class="o">.</span><span class="n">ConnectionParameters</span><span class="p">(</span>
+</span><span class='line'>    <span class="s">&#39;192.168.56.19&#39;</span><span class="p">,</span><span class="mi">5672</span><span class="p">,</span><span class="s">&#39;/&#39;</span><span class="p">,</span><span class="n">credentials</span><span class="p">))</span>
+</span><span class='line'><span class="n">channel</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">channel</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'><span class="c"># You may ask why we declare the queue again ‒ we have already declared it in our previous code.</span>
+</span><span class='line'><span class="c"># We could avoid that if we were sure that the queue already exists. For example if send.py program</span>
+</span><span class='line'><span class="c"># was run before. But we&#39;re not yet sure which program to run first. In such cases it&#39;s a good</span>
+</span><span class='line'><span class="c"># practice to repeat declaring the queue in both programs.</span>
+</span><span class='line'><span class="n">channel</span><span class="o">.</span><span class="n">queue_declare</span><span class="p">(</span><span class="n">queue</span><span class="o">=</span><span class="s">&#39;durable&#39;</span><span class="p">,</span><span class="n">durable</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">callback</span><span class="p">(</span><span class="n">ch</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">properties</span><span class="p">,</span> <span class="n">body</span><span class="p">):</span>
+</span><span class='line'>    <span class="k">print</span><span class="p">(</span><span class="s">&quot; [x] Received </span><span class="si">%r</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">body</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">ch</span><span class="o">.</span><span class="n">basic_ack</span><span class="p">(</span><span class="n">delivery_tag</span><span class="o">=</span><span class="n">method</span><span class="o">.</span><span class="n">delivery_tag</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">channel</span><span class="o">.</span><span class="n">basic_consume</span><span class="p">(</span><span class="n">callback</span><span class="p">,</span>
+</span><span class='line'>                      <span class="n">queue</span><span class="o">=</span><span class="s">&#39;durable&#39;</span><span class="p">,</span>
+</span><span class='line'>                      <span class="c">#no_ack=True</span>
+</span><span class='line'>                      <span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">print</span><span class="p">(</span><span class="s">&#39; [*] Waiting for messages. To exit press CTRL+C&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="n">channel</span><span class="o">.</span><span class="n">start_consuming</span><span class="p">()</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>可正确接收到信息。</p>
+
+<p>再次查看队列的情况。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="p">[</span><span class="n">root</span><span class="nd">@localhost</span> <span class="o">~</span><span class="p">]</span><span class="c"># rabbitmqctl list_queues</span>
+</span><span class='line'><span class="n">Listing</span> <span class="n">queues</span> <span class="o">...</span>
+</span><span class='line'><span class="n">durable</span>    <span class="mi">0</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>广播模式</h3>
+
+<p>当producer发送消息到队列后，所有的consumer都会收到消息，需要注意的是，此模式下producer与concerned之间的关系类似与广播电台与收音机，如果广播后收音机没有接受到，那么消息就会丢失。</p>
+
+<p>建议先执行consumer</p>
+
+<h4>consumer生产者</h4>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="c"># _*_coding:utf-8_*_</span>
+</span><span class='line'><span class="n">__author__</span> <span class="o">=</span> <span class="s">&#39;Alex Li&#39;</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">pika</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">credentials</span> <span class="o">=</span> <span class="n">pika</span><span class="o">.</span><span class="n">PlainCredentials</span><span class="p">(</span><span class="s">&#39;admin&#39;</span><span class="p">,</span><span class="s">&#39;123456&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="n">connection</span> <span class="o">=</span> <span class="n">pika</span><span class="o">.</span><span class="n">BlockingConnection</span><span class="p">(</span><span class="n">pika</span><span class="o">.</span><span class="n">ConnectionParameters</span><span class="p">(</span>
+</span><span class='line'>    <span class="s">&#39;192.168.56.19&#39;</span><span class="p">,</span><span class="mi">5672</span><span class="p">,</span><span class="s">&#39;/&#39;</span><span class="p">,</span><span class="n">credentials</span><span class="p">))</span>
+</span><span class='line'><span class="n">channel</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">channel</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">channel</span><span class="o">.</span><span class="n">exchange_declare</span><span class="p">(</span><span class="n">exchange</span><span class="o">=</span><span class="s">&#39;Clogs&#39;</span><span class="p">,</span>
+</span><span class='line'>                         <span class="nb">type</span><span class="o">=</span><span class="s">&#39;fanout&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">result</span> <span class="o">=</span> <span class="n">channel</span><span class="o">.</span><span class="n">queue_declare</span><span class="p">(</span><span class="n">exclusive</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>  <span class="c"># 不指定queue名字,rabbit会随机分配一个名字,exclusive=True会在使用此queue的消费者断开后,自动将queue删除</span>
+</span><span class='line'><span class="n">queue_name</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">method</span><span class="o">.</span><span class="n">queue</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">channel</span><span class="o">.</span><span class="n">queue_bind</span><span class="p">(</span><span class="n">exchange</span><span class="o">=</span><span class="s">&#39;Clogs&#39;</span><span class="p">,</span>
+</span><span class='line'>                   <span class="n">queue</span><span class="o">=</span><span class="n">queue_name</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">print</span><span class="p">(</span><span class="s">&#39; [*] Waiting for logs. To exit press CTRL+C&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">callback</span><span class="p">(</span><span class="n">ch</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">properties</span><span class="p">,</span> <span class="n">body</span><span class="p">):</span>
+</span><span class='line'>    <span class="k">print</span><span class="p">(</span><span class="s">&quot; [x] </span><span class="si">%r</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">body</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="n">channel</span><span class="o">.</span><span class="n">basic_consume</span><span class="p">(</span><span class="n">callback</span><span class="p">,</span>
+</span><span class='line'>                      <span class="n">queue</span><span class="o">=</span><span class="n">queue_name</span><span class="p">,</span>
+</span><span class='line'>                      <span class="n">no_ack</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">channel</span><span class="o">.</span><span class="n">start_consuming</span><span class="p">()</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h4>producer生产者</h4>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='python'><span class='line'><span class="kn">import</span> <span class="nn">pika</span>
+</span><span class='line'><span class="kn">import</span> <span class="nn">sys</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">credentials</span> <span class="o">=</span> <span class="n">pika</span><span class="o">.</span><span class="n">PlainCredentials</span><span class="p">(</span><span class="s">&#39;admin&#39;</span><span class="p">,</span><span class="s">&#39;123456&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="n">connection</span> <span class="o">=</span> <span class="n">pika</span><span class="o">.</span><span class="n">BlockingConnection</span><span class="p">(</span><span class="n">pika</span><span class="o">.</span><span class="n">ConnectionParameters</span><span class="p">(</span>
+</span><span class='line'>    <span class="s">&#39;192.168.56.19&#39;</span><span class="p">,</span><span class="mi">5672</span><span class="p">,</span><span class="s">&#39;/&#39;</span><span class="p">,</span><span class="n">credentials</span><span class="p">))</span>
+</span><span class='line'><span class="n">channel</span> <span class="o">=</span> <span class="n">connection</span><span class="o">.</span><span class="n">channel</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">channel</span><span class="o">.</span><span class="n">exchange_declare</span><span class="p">(</span><span class="n">exchange</span><span class="o">=</span><span class="s">&#39;Clogs&#39;</span><span class="p">,</span>
+</span><span class='line'>                         <span class="nb">type</span><span class="o">=</span><span class="s">&#39;fanout&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">message</span> <span class="o">=</span> <span class="s">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="ow">or</span> <span class="s">&quot;info: Hello World!&quot;</span>
+</span><span class='line'><span class="n">channel</span><span class="o">.</span><span class="n">basic_publish</span><span class="p">(</span><span class="n">exchange</span><span class="o">=</span><span class="s">&#39;Clogs&#39;</span><span class="p">,</span>
+</span><span class='line'>                      <span class="n">routing_key</span><span class="o">=</span><span class="s">&#39;&#39;</span><span class="p">,</span>
+</span><span class='line'>                      <span class="n">body</span><span class="o">=</span><span class="n">message</span><span class="p">)</span>
+</span><span class='line'><span class="k">print</span><span class="p">(</span><span class="s">&quot; [x] Sent </span><span class="si">%r</span><span class="s">&quot;</span> <span class="o">%</span> <span class="n">message</span><span class="p">)</span>
+</span><span class='line'><span class="n">connection</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Iskey</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2019-07-13T11:45:27+00:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>13</span><span class='date-suffix'>th</span>, <span class='date-year'>2019</span></span> <span class='time'>11:45 am</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/mq/'>mq</a>, <a class='category' href='/blog/categories/tool/'>tool</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2019/07/13/sample-of-ipsec/" title="Previous Post: usage of IPSec">&laquo; usage of IPSec</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2019/07/13/win-sshfs/" title="Next Post: win sshfs">win sshfs &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2019/07/13/win-sshfs/">Win Sshfs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2019/07/13/simple-example-of-rabbitmq/">Simple_example_of_rabbitmq</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2019/07/13/sample-of-ipsec/">Usage of IPSec</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2019/07/07/simple-example-of-ansible/">Simple Example of Ansible</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2019/07/07/simpe-example-of-kubernetes/">Simpe Example of Kubernetes</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+  <h1>Categories</h1>
+    <ul id="category-list"><li><a href='/blog/categories/ansible/'>ansible (1)</a></li><li><a href='/blog/categories/iptables/'>iptables (2)</a></li><li><a href='/blog/categories/k8s/'>k8s (2)</a></li><li><a href='/blog/categories/kernel/'>kernel (5)</a></li><li><a href='/blog/categories/linux/'>linux (5)</a></li><li><a href='/blog/categories/lvm/'>lvm (1)</a></li><li><a href='/blog/categories/makefile/'>makefile (2)</a></li><li><a href='/blog/categories/mq/'>mq (1)</a></li><li><a href='/blog/categories/netfilter/'>netfilter (1)</a></li><li><a href='/blog/categories/octopress/'>octopress (1)</a></li><li><a href='/blog/categories/ovs/'>ovs (2)</a></li><li><a href='/blog/categories/python/'>python (1)</a></li><li><a href='/blog/categories/regax/'>regax (1)</a></li><li><a href='/blog/categories/shell/'>shell (3)</a></li><li><a href='/blog/categories/socket/'>socket (3)</a></li><li><a href='/blog/categories/sourceinsight/'>sourceinsight (1)</a></li><li><a href='/blog/categories/sysctl/'>sysctl (1)</a></li><li><a href='/blog/categories/systemd/'>systemd (1)</a></li><li><a href='/blog/categories/todo/'>todo (1)</a></li><li><a href='/blog/categories/tool/'>tool (8)</a></li><li><a href='/blog/categories/ubuntu/'>ubuntu (1)</a></li><li><a href='/blog/categories/vim/'>vim (1)</a></li><li><a href='/blog/categories/gong-ju/'>工具 (1)</a></li><li><a href='/blog/categories/shu-tong/'>数通 (1)</a></li><li><a href='/blog/categories/she-ji-mo-shi/'>设计模式 (1)</a></li></ul>
+</section>
+<section>
+  <h1>Tag Cloud</h1>
+    <span id="tag-cloud"><a href='/blog/categories/ansible' style='font-size: 107.5%'>ansible(1)</a> <a href='/blog/categories/iptables' style='font-size: 115.0%'>iptables(2)</a> <a href='/blog/categories/k8s' style='font-size: 115.0%'>k8s(2)</a> <a href='/blog/categories/kernel' style='font-size: 137.5%'>kernel(5)</a> <a href='/blog/categories/linux' style='font-size: 137.5%'>linux(5)</a> <a href='/blog/categories/lvm' style='font-size: 107.5%'>lvm(1)</a> <a href='/blog/categories/makefile' style='font-size: 115.0%'>makefile(2)</a> <a href='/blog/categories/mq' style='font-size: 107.5%'>mq(1)</a> <a href='/blog/categories/netfilter' style='font-size: 107.5%'>netfilter(1)</a> <a href='/blog/categories/octopress' style='font-size: 107.5%'>octopress(1)</a> <a href='/blog/categories/ovs' style='font-size: 115.0%'>ovs(2)</a> <a href='/blog/categories/python' style='font-size: 107.5%'>python(1)</a> <a href='/blog/categories/regax' style='font-size: 107.5%'>regax(1)</a> <a href='/blog/categories/shell' style='font-size: 122.5%'>shell(3)</a> <a href='/blog/categories/socket' style='font-size: 122.5%'>socket(3)</a> <a href='/blog/categories/sourceinsight' style='font-size: 107.5%'>sourceinsight(1)</a> <a href='/blog/categories/sysctl' style='font-size: 107.5%'>sysctl(1)</a> <a href='/blog/categories/systemd' style='font-size: 107.5%'>systemd(1)</a> <a href='/blog/categories/todo' style='font-size: 107.5%'>todo(1)</a> <a href='/blog/categories/tool' style='font-size: 160.0%'>tool(8)</a> <a href='/blog/categories/ubuntu' style='font-size: 107.5%'>ubuntu(1)</a> <a href='/blog/categories/vim' style='font-size: 107.5%'>vim(1)</a> <a href='/blog/categories/gong-ju' style='font-size: 107.5%'>工具(1)</a> <a href='/blog/categories/shu-tong' style='font-size: 107.5%'>数通(1)</a> <a href='/blog/categories/she-ji-mo-shi' style='font-size: 107.5%'>设计模式(1)</a> </span>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2019 - Iskey -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

@@ -9,18 +9,8 @@
   <meta name="author" content="Iskey">
 
   
-  <meta name="description" content="背景：在本地localhost搭建了一个Httpserver，监听在4000端口，现在想通过eth0在不改动代码的情况下对外发布服务。 最先想到的就是端口映射，rinetd服务，使用也很简单，直接配置外部ip到环回地址的映射就可以了: 1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-root@ &hellip;">
+  <meta name="description" content="LD_PRELOAD注入 linux环境变量LD_PRELOAD可以指定程序运行时优先加载的动态链接库，在该环境变量路径下的动态链接库中的符号具有最高优先级。
+通过自己编写malloc/free动态链接库，并在LD_PRELOAD环境变量中指定该路径，就可以替换libc.so中的malloc/ &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -74,6 +64,127 @@ root@ &hellip;">
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2019/05/27/reset-env-for-running-process/">Reset Env for Running Process</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2019-05-27T16:07:38+00:00'><span class='date'><span class='date-month'>May</span> <span class='date-day'>27</span><span class='date-suffix'>th</span>, <span class='date-year'>2019</span></span> <span class='time'>4:07 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h3>LD_PRELOAD注入</h3>
+
+<p>linux环境变量LD_PRELOAD可以指定程序运行时优先加载的动态链接库，在该环境变量路径下的动态链接库中的符号具有最高优先级。
+通过自己编写malloc/free动态链接库，并在LD_PRELOAD环境变量中指定该路径，就可以替换libc.so中的malloc/free函数。</p>
+
+<p>注：该方法对静态链接的程序无效。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>(gdb) attach process_id
+</span><span class='line'>(gdb) call putenv ("LD_PRELOAD=/mylib.so")
+</span><span class='line'>(gdb) detach</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>使用libc库的装饰器</h3>
+
+<h3>使用宏/函数替换malloc/free</h3>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2018/04/27/iptables-with-time/">Iptables时间规则匹配</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2018-04-27T11:25:48+00:00'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>27</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>11:25 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>1、每天固定时间段匹配</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">iptables</span> <span class="o">-</span><span class="n">I</span> <span class="n">FORWARD</span> <span class="o">-</span><span class="n">s</span> <span class="mf">172.17</span><span class="o">.</span><span class="mf">1.132</span> <span class="o">-</span><span class="n">d</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">1.119</span> <span class="o">-</span><span class="n">m</span> <span class="n">time</span> <span class="o">--</span><span class="n">timestart</span> <span class="mi">09</span><span class="o">:</span><span class="mi">40</span> <span class="o">--</span><span class="n">timestop</span> <span class="mi">09</span><span class="o">:</span><span class="mi">59</span> <span class="o">-</span><span class="n">j</span> <span class="n">DROP</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>2、按周固定时间段匹配</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">iptables</span> <span class="o">-</span><span class="n">I</span> <span class="n">FORWARD</span> <span class="o">-</span><span class="n">s</span> <span class="mf">172.17</span><span class="o">.</span><span class="mf">1.132</span> <span class="o">-</span><span class="n">d</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">1.119</span> <span class="o">-</span><span class="n">m</span> <span class="n">time</span> <span class="o">--</span><span class="n">timestart</span> <span class="mi">09</span><span class="o">:</span><span class="mi">40</span> <span class="o">--</span><span class="n">timestop</span> <span class="mi">09</span><span class="o">:</span><span class="mi">59</span> <span class="o">--</span><span class="n">weekdays</span> <span class="n">Wed</span><span class="o">,</span><span class="n">Thu</span> <span class="o">-</span><span class="n">j</span> <span class="n">DROP</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>3、按固定日期匹配，注这里比较特殊，可以看见下面的时间是17点不是9点，是因为时区的原因，要差8小时。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">iptables</span> <span class="o">-</span><span class="n">I</span> <span class="n">FORWARD</span> <span class="o">-</span><span class="n">s</span> <span class="mf">172.17</span><span class="o">.</span><span class="mf">1.132</span> <span class="o">-</span><span class="n">d</span> <span class="mf">192.168</span><span class="o">.</span><span class="mf">1.119</span> <span class="o">-</span><span class="n">m</span> <span class="n">time</span> <span class="o">--</span><span class="n">datestart</span> <span class="mi">2014</span><span class="o">-</span><span class="mi">3</span><span class="o">-</span><span class="mi">19</span><span class="nl">T17:</span><span class="mi">40</span><span class="o">:</span><span class="mi">08</span> <span class="o">--</span><span class="n">datestop</span> <span class="mi">2014</span><span class="o">-</span><span class="mi">3</span><span class="o">-</span><span class="mi">19</span><span class="nl">T17:</span><span class="mi">59</span><span class="o">:</span><span class="mi">50</span> <span class="o">-</span><span class="n">j</span> <span class="n">DROP</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>附上帮助说明：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">time</span> <span class="n">match</span> <span class="nl">options:</span>
+</span><span class='line'>    <span class="o">--</span><span class="n">datestart</span> <span class="n">time</span>     <span class="n">Start</span> <span class="n">and</span> <span class="n">stop</span> <span class="n">time</span><span class="o">,</span> <span class="n">to</span> <span class="n">be</span> <span class="n">given</span> <span class="n">in</span> <span class="n">ISO</span> <span class="mi">8601</span>
+</span><span class='line'>    <span class="o">--</span><span class="n">datestop</span> <span class="nf">time</span>      <span class="o">(</span><span class="n">YYYY</span><span class="o">[-</span><span class="n">MM</span><span class="o">[-</span><span class="n">DD</span><span class="o">[</span><span class="n">Thh</span><span class="o">[:</span><span class="n">mm</span><span class="o">[:</span><span class="n">ss</span><span class="o">]]]]])</span>
+</span><span class='line'>    <span class="o">--</span><span class="n">timestart</span> <span class="n">time</span>     <span class="n">Start</span> <span class="n">and</span> <span class="n">stop</span> <span class="nf">daytime</span> <span class="o">(</span><span class="nl">hh:</span><span class="n">mm</span><span class="o">[:</span><span class="n">ss</span><span class="o">])</span>
+</span><span class='line'>    <span class="o">--</span><span class="n">timestop</span> <span class="nf">time</span>      <span class="o">(</span><span class="n">between</span> <span class="mi">00</span><span class="o">:</span><span class="mi">00</span><span class="o">:</span><span class="mi">00</span> <span class="n">and</span> <span class="mi">23</span><span class="o">:</span><span class="mi">59</span><span class="o">:</span><span class="mi">59</span><span class="o">)</span>
+</span><span class='line'><span class="o">[!]</span> <span class="o">--</span><span class="n">monthdays</span> <span class="n">value</span>    <span class="n">List</span> <span class="n">of</span> <span class="n">days</span> <span class="n">on</span> <span class="n">which</span> <span class="n">to</span> <span class="n">match</span><span class="o">,</span> <span class="n">separated</span> <span class="n">by</span> <span class="nf">comma</span>
+</span><span class='line'>                         <span class="o">(</span><span class="n">Possible</span> <span class="nl">days:</span> <span class="mi">1</span> <span class="n">to</span> <span class="mi">31</span><span class="o">;</span> <span class="n">defaults</span> <span class="n">to</span> <span class="n">all</span><span class="o">)</span>
+</span><span class='line'><span class="o">[!]</span> <span class="o">--</span><span class="n">weekdays</span> <span class="n">value</span>     <span class="n">List</span> <span class="n">of</span> <span class="n">weekdays</span> <span class="n">on</span> <span class="n">which</span> <span class="n">to</span> <span class="n">match</span><span class="o">,</span> <span class="n">sep</span><span class="o">.</span> <span class="n">by</span> <span class="nf">comma</span>
+</span><span class='line'>                         <span class="o">(</span><span class="n">Possible</span> <span class="nl">days:</span> <span class="n">Mon</span><span class="o">,</span><span class="n">Tue</span><span class="o">,</span><span class="n">Wed</span><span class="o">,</span><span class="n">Thu</span><span class="o">,</span><span class="n">Fri</span><span class="o">,</span><span class="n">Sat</span><span class="o">,</span><span class="n">Sun</span> <span class="n">or</span> <span class="mi">1</span> <span class="n">to</span> <span class="mi">7</span>
+</span><span class='line'>                         <span class="n">Defaults</span> <span class="n">to</span> <span class="n">all</span> <span class="n">weekdays</span><span class="o">.)</span>
+</span><span class='line'>    <span class="o">--</span><span class="n">localtz</span><span class="o">/--</span><span class="n">utc</span>      <span class="n">Time</span> <span class="n">is</span> <span class="n">interpreted</span> <span class="n">as</span> <span class="n">UTC</span><span class="o">/</span><span class="n">local</span> <span class="n">time</span>
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1352,405 +1463,6 @@ word一般写一个已经打开的并且用来作为输入的描述符数字，�
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2017/01/02/ctom_of_SourceInsight_for_kernel/">c.tom of SourceInsight for Kernel</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2017-01-02T15:32:00+00:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>2</span><span class='date-suffix'>nd</span>, <span class='date-year'>2017</span></span> <span class='time'>3:32 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-<span class='line-number'>63</span>
-<span class='line-number'>64</span>
-<span class='line-number'>65</span>
-<span class='line-number'>66</span>
-<span class='line-number'>67</span>
-<span class='line-number'>68</span>
-<span class='line-number'>69</span>
-<span class='line-number'>70</span>
-<span class='line-number'>71</span>
-<span class='line-number'>72</span>
-<span class='line-number'>73</span>
-<span class='line-number'>74</span>
-<span class='line-number'>75</span>
-<span class='line-number'>76</span>
-<span class='line-number'>77</span>
-<span class='line-number'>78</span>
-<span class='line-number'>79</span>
-<span class='line-number'>80</span>
-<span class='line-number'>81</span>
-<span class='line-number'>82</span>
-<span class='line-number'>83</span>
-<span class='line-number'>84</span>
-<span class='line-number'>85</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>
-</span><span class='line'>;For Linux Kernel Code
-</span><span class='line'>SYSCALL_DEFINE0(name) long sys_##name(void)
-</span><span class='line'>SYSCALL_DEFINE1(name, t1, v1) long sys_##name(t1 v1)
-</span><span class='line'>SYSCALL_DEFINE2(name, t1, v1, t2, v2) long sys_##name(t1 v1, t2 v2)
-</span><span class='line'>SYSCALL_DEFINE3(name, t1, v1, t2, v2, t3, v3) long sys_##name(t1 v1, t2 v2, t3 v3)
-</span><span class='line'>SYSCALL_DEFINE4(name, t1, v1, t2, v2, t3, v3, t4, v4) long sys_##name(t1 v1, t2 v2, t3 v3, t4 v4)
-</span><span class='line'>SYSCALL_DEFINE5(name, t1, v1, t2, v2, t3, v3, t4, v4, t5, v5) long sys_##name(t1 v1, t2 v2, t3 v3, t4 v4, t5 v5)
-</span><span class='line'>__init
-</span><span class='line'>__initdata
-</span><span class='line'>__initconst
-</span><span class='line'>__exitdata
-</span><span class='line'>__exit_call
-</span><span class='line'>__ref
-</span><span class='line'>__refdata
-</span><span class='line'>__refconst
-</span><span class='line'>__init_refok
-</span><span class='line'>__initdata_refok
-</span><span class='line'>__exit_refok
-</span><span class='line'>__exitused
-</span><span class='line'>__exit
-</span><span class='line'>__devinit
-</span><span class='line'>__devinitdata
-</span><span class='line'>__devinitconst
-</span><span class='line'>__devexit
-</span><span class='line'>__devexitdata
-</span><span class='line'>__devexitconst
-</span><span class='line'>__used
-</span><span class='line'>__must_check
-</span><span class='line'>__compiler_offsetof(a,b)
-</span><span class='line'>__always_inline
-</span><span class='line'>__attribute__
-</span><span class='line'>__user
-</span><span class='line'>__kernel
-</span><span class='line'>__safe
-</span><span class='line'>__force
-</span><span class='line'>__nocast
-</span><span class='line'>__iomem
-</span><span class='line'>__chk_user_ptr(x)
-</span><span class='line'>__chk_io_ptr(x)
-</span><span class='line'>__builtin_warning
-</span><span class='line'>__acquires(x)
-</span><span class='line'>__releases(x)
-</span><span class='line'>__acquire(x)
-</span><span class='line'>__release(x)
-</span><span class='line'>__cond_lock(x,c)
-</span><span class='line'>__percpu
-</span><span class='line'>likely(x)
-</span><span class='line'>unlikely(x)
-</span><span class='line'>__read_mostly
-</span><span class='line'>____cacheline_aligned
-</span><span class='line'>____cacheline_aligned_in_smp
-</span><span class='line'>__cacheline_aligned
-</span><span class='line'>__cacheline_aligned_in_smp
-</span><span class='line'>____cacheline_internodealigned_in_smp
-</span><span class='line'>__cacheline_internodealigned_in_smp
-</span><span class='line'>__rcu
-</span><span class='line'>__refconst
-</span><span class='line'>__refdata
-</span><span class='line'>__reg_oper0
-</span><span class='line'>__reg_oper1
-</span><span class='line'>__bitwise
-</span><span class='line'>__bitwise__
-</span><span class='line'>__aligned_u64
-</span><span class='line'>__aligned_be64
-</span><span class='line'>__aligned_le64
-</span><span class='line'>__naked
-</span><span class='line'>__noreturn
-</span><span class='line'>__pure
-</span><span class='line'>__always_inline
-</span><span class='line'>DRIVER_ATTR(_name, _mode, _show, _store) struct driver_attribute driver_attr_##_name
-</span><span class='line'>CLASS_ATTR(_name, _mode, _show, _store) struct class_attribute class_attr_##_name
-</span><span class='line'>LIST_HEAD(name) struct list_head name
-</span><span class='line'>DEFINE_MUTEX(mutexname) struct mutex mutexname
-</span><span class='line'>DEFINE_TIMER(_name, _function, _expires, _data) struct timer_list _name
-</span><span class='line'>DECLARE_WORK(n, f) struct work_struct n
-</span><span class='line'>DEFINE_SPINLOCK(x) spinlock_t x
-</span><span class='line'>EXPORT_SYMBOL(sym)
-</span><span class='line'>EXPORT_SYMBOL_GPL(sym)
-</span><span class='line'>EXPORT_SYMBOL_GPL_FUTURE(sym)
-</span><span class='line'>DEFINE_IDA(name) struct ida name
-</span><span class='line'>DECLARE_RWSEM(name) struct rw_semaphore name
-</span><span class='line'>DECLARE_BITMAP(name,bits) unsigned long name[bits/32]
-</span><span class='line'>DEFINE_RWLOCK(x) rwlock_t x
-</span><span class='line'> </span></code></pre></td></tr></table></div></figure>
-
-
-<p>.</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/06/18/Kernel_Defines_for_ARM/">Kernel Defines for ARM</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2016-06-18T20:21:00+00:00'><span class='date'><span class='date-month'>Jun</span> <span class='date-day'>18</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>8:21 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>Initial definitions</h2>
-
-<p>The following symbol definitions rely on you knowing the translation that
-<code>__virt_to_phys()</code> does for your machine.  This macro converts the passed
-virtual address to a physical address.  Normally, it is simply:</p>
-
-<pre><code>    phys = virt - PAGE_OFFSET + PHYS_OFFSET
-</code></pre>
-
-<h2>Decompressor Symbols</h2>
-
-<hr />
-
-<h4>ZTEXTADDR</h4>
-
-<pre><code>Start address of decompressor.  There's no point in talking about
-virtual or physical addresses here, since the MMU will be off at
-the time when you call the decompressor code.  You normally call
-the kernel at this address to start it booting.  This doesn't have
-to be located in RAM, it can be in flash or other read-only or
-read-write addressable medium.
-</code></pre>
-
-<h4>ZBSSADDR</h4>
-
-<pre><code>Start address of zero-initialised work area for the decompressor.
-This must be pointing at RAM.  The decompressor will zero initialise
-this for you.  Again, the MMU will be off.
-</code></pre>
-
-<h4>ZRELADDR</h4>
-
-<pre><code>This is the address where the decompressed kernel will be written,
-and eventually executed.  The following constraint must be valid:
-
-    __virt_to_phys(TEXTADDR) == ZRELADDR
-
-The initial part of the kernel is carefully coded to be position
-independent.
-</code></pre>
-
-<h4>INITRD_PHYS</h4>
-
-<pre><code>Physical address to place the initial RAM disk.  Only relevant if
-you are using the bootpImage stuff (which only works on the old
-struct param_struct).
-</code></pre>
-
-<h4>INITRD_VIRT</h4>
-
-<pre><code>Virtual address of the initial RAM disk.  The following  constraint
-must be valid:
-
-    __virt_to_phys(INITRD_VIRT) == INITRD_PHYS
-</code></pre>
-
-<h4>PARAMS_PHYS</h4>
-
-<pre><code>Physical address of the struct param_struct or tag list, giving the
-kernel various parameters about its execution environment.
-</code></pre>
-
-<h2>Kernel Symbols</h2>
-
-<hr />
-
-<h4>PHYS_OFFSET</h4>
-
-<pre><code>Physical start address of the first bank of RAM.
-</code></pre>
-
-<h4>PAGE_OFFSET</h4>
-
-<pre><code>Virtual start address of the first bank of RAM.  During the kernel
-boot phase, virtual address PAGE_OFFSET will be mapped to physical
-address PHYS_OFFSET, along with any other mappings you supply.
-This should be the same value as TASK_SIZE.
-</code></pre>
-
-<h4>TASK_SIZE</h4>
-
-<pre><code>The maximum size of a user process in bytes.  Since user space
-always starts at zero, this is the maximum address that a user
-process can access+1.  The user space stack grows down from this
-address.
-
-Any virtual address below TASK_SIZE is deemed to be user process
-area, and therefore managed dynamically on a process by process
-basis by the kernel.  I'll call this the user segment.
-
-Anything above TASK_SIZE is common to all processes.  I'll call
-this the kernel segment.
-
-(In other words, you can't put IO mappings below TASK_SIZE, and
-hence PAGE_OFFSET).
-</code></pre>
-
-<h4>TEXTADDR</h4>
-
-<pre><code>Virtual start address of kernel, normally PAGE_OFFSET + 0x8000.
-This is where the kernel image ends up.  With the latest kernels,
-it must be located at 32768 bytes into a 128MB region.  Previous
-kernels placed a restriction of 256MB here.
-</code></pre>
-
-<h4>DATAADDR</h4>
-
-<pre><code>Virtual address for the kernel data segment.  Must not be defined
-when using the decompressor.
-</code></pre>
-
-<h4>VMALLOC_START</h4>
-
-<h4>VMALLOC_END</h4>
-
-<pre><code>Virtual addresses bounding the vmalloc() area.  There must not be
-any static mappings in this area; vmalloc will overwrite them.
-The addresses must also be in the kernel segment (see above).
-Normally, the vmalloc() area starts VMALLOC_OFFSET bytes above the
-last virtual RAM address (found using variable high_memory).
-</code></pre>
-
-<h4>VMALLOC_OFFSET</h4>
-
-<pre><code>Offset normally incorporated into VMALLOC_START to provide a hole
-between virtual RAM and the vmalloc area.  We do this to allow
-out of bounds memory accesses (eg, something writing off the end
-of the mapped memory map) to be caught.  Normally set to 8MB.
-</code></pre>
-
-<h2>Architecture Specific Macros</h2>
-
-<hr />
-
-<h4>BOOT_MEM(pram,pio,vio)</h4>
-
-<pre><code>`pram' specifies the physical start address of RAM.  Must always
-be present, and should be the same as PHYS_OFFSET.
-
-`pio' is the physical address of an 8MB region containing IO for
-use with the debugging macros in arch/arm/kernel/debug-armv.S.
-
-`vio' is the virtual address of the 8MB debugging region.
-
-It is expected that the debugging region will be re-initialised
-by the architecture specific code later in the code (via the
-MAPIO function).
-</code></pre>
-
-<h4>BOOT_PARAMS</h4>
-
-<pre><code>Same as, and see PARAMS_PHYS.
-</code></pre>
-
-<h4>FIXUP(func)</h4>
-
-<pre><code>Machine specific fixups, run before memory subsystems have been
-initialised.
-</code></pre>
-
-<h4>MAPIO(func)</h4>
-
-<pre><code>Machine specific function to map IO areas (including the debug
-region above).
-</code></pre>
-
-<h4>INITIRQ(func)</h4>
-
-<pre><code>Machine specific function to initialise interrupts.
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/3">&larr; Older</a>
@@ -1768,6 +1480,14 @@ region above).
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2019/07/13/win-sshfs/">Win Sshfs</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2019/07/13/simple-example-of-rabbitmq/">Simple_example_of_rabbitmq</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2019/07/13/sample-of-ipsec/">Usage of IPSec</a>
       </li>
     
@@ -1779,23 +1499,15 @@ region above).
         <a href="/blog/2019/07/07/simpe-example-of-kubernetes/">Simpe Example of Kubernetes</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/2019/07/07/helloworld-of-systemd/">Simple Example of Systemd</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2019/07/07/use-lvm-to-expend-root-partition/">Use Lvm to Expend Root Partition</a>
-      </li>
-    
   </ul>
 </section>
 <section>
   <h1>Categories</h1>
-    <ul id="category-list"><li><a href='/blog/categories/ansible/'>ansible (1)</a></li><li><a href='/blog/categories/iptables/'>iptables (2)</a></li><li><a href='/blog/categories/k8s/'>k8s (2)</a></li><li><a href='/blog/categories/kernel/'>kernel (5)</a></li><li><a href='/blog/categories/linux/'>linux (5)</a></li><li><a href='/blog/categories/lvm/'>lvm (1)</a></li><li><a href='/blog/categories/makefile/'>makefile (2)</a></li><li><a href='/blog/categories/netfilter/'>netfilter (1)</a></li><li><a href='/blog/categories/octopress/'>octopress (1)</a></li><li><a href='/blog/categories/ovs/'>ovs (2)</a></li><li><a href='/blog/categories/python/'>python (1)</a></li><li><a href='/blog/categories/regax/'>regax (1)</a></li><li><a href='/blog/categories/shell/'>shell (3)</a></li><li><a href='/blog/categories/socket/'>socket (3)</a></li><li><a href='/blog/categories/sourceinsight/'>sourceinsight (1)</a></li><li><a href='/blog/categories/sysctl/'>sysctl (1)</a></li><li><a href='/blog/categories/systemd/'>systemd (1)</a></li><li><a href='/blog/categories/todo/'>todo (1)</a></li><li><a href='/blog/categories/tool/'>tool (6)</a></li><li><a href='/blog/categories/ubuntu/'>ubuntu (1)</a></li><li><a href='/blog/categories/vim/'>vim (1)</a></li><li><a href='/blog/categories/gong-ju/'>工具 (1)</a></li><li><a href='/blog/categories/shu-tong/'>数通 (1)</a></li><li><a href='/blog/categories/she-ji-mo-shi/'>设计模式 (1)</a></li></ul>
+    <ul id="category-list"><li><a href='/blog/categories/ansible/'>ansible (1)</a></li><li><a href='/blog/categories/iptables/'>iptables (2)</a></li><li><a href='/blog/categories/k8s/'>k8s (2)</a></li><li><a href='/blog/categories/kernel/'>kernel (5)</a></li><li><a href='/blog/categories/linux/'>linux (5)</a></li><li><a href='/blog/categories/lvm/'>lvm (1)</a></li><li><a href='/blog/categories/makefile/'>makefile (2)</a></li><li><a href='/blog/categories/mq/'>mq (1)</a></li><li><a href='/blog/categories/netfilter/'>netfilter (1)</a></li><li><a href='/blog/categories/octopress/'>octopress (1)</a></li><li><a href='/blog/categories/ovs/'>ovs (2)</a></li><li><a href='/blog/categories/python/'>python (1)</a></li><li><a href='/blog/categories/regax/'>regax (1)</a></li><li><a href='/blog/categories/shell/'>shell (3)</a></li><li><a href='/blog/categories/socket/'>socket (3)</a></li><li><a href='/blog/categories/sourceinsight/'>sourceinsight (1)</a></li><li><a href='/blog/categories/sysctl/'>sysctl (1)</a></li><li><a href='/blog/categories/systemd/'>systemd (1)</a></li><li><a href='/blog/categories/todo/'>todo (1)</a></li><li><a href='/blog/categories/tool/'>tool (8)</a></li><li><a href='/blog/categories/ubuntu/'>ubuntu (1)</a></li><li><a href='/blog/categories/vim/'>vim (1)</a></li><li><a href='/blog/categories/gong-ju/'>工具 (1)</a></li><li><a href='/blog/categories/shu-tong/'>数通 (1)</a></li><li><a href='/blog/categories/she-ji-mo-shi/'>设计模式 (1)</a></li></ul>
 </section>
 <section>
   <h1>Tag Cloud</h1>
-    <span id="tag-cloud"><a href='/blog/categories/ansible' style='font-size: 110.0%'>ansible(1)</a> <a href='/blog/categories/iptables' style='font-size: 120.0%'>iptables(2)</a> <a href='/blog/categories/k8s' style='font-size: 120.0%'>k8s(2)</a> <a href='/blog/categories/kernel' style='font-size: 150.0%'>kernel(5)</a> <a href='/blog/categories/linux' style='font-size: 150.0%'>linux(5)</a> <a href='/blog/categories/lvm' style='font-size: 110.0%'>lvm(1)</a> <a href='/blog/categories/makefile' style='font-size: 120.0%'>makefile(2)</a> <a href='/blog/categories/netfilter' style='font-size: 110.0%'>netfilter(1)</a> <a href='/blog/categories/octopress' style='font-size: 110.0%'>octopress(1)</a> <a href='/blog/categories/ovs' style='font-size: 120.0%'>ovs(2)</a> <a href='/blog/categories/python' style='font-size: 110.0%'>python(1)</a> <a href='/blog/categories/regax' style='font-size: 110.0%'>regax(1)</a> <a href='/blog/categories/shell' style='font-size: 130.0%'>shell(3)</a> <a href='/blog/categories/socket' style='font-size: 130.0%'>socket(3)</a> <a href='/blog/categories/sourceinsight' style='font-size: 110.0%'>sourceinsight(1)</a> <a href='/blog/categories/sysctl' style='font-size: 110.0%'>sysctl(1)</a> <a href='/blog/categories/systemd' style='font-size: 110.0%'>systemd(1)</a> <a href='/blog/categories/todo' style='font-size: 110.0%'>todo(1)</a> <a href='/blog/categories/tool' style='font-size: 160.0%'>tool(6)</a> <a href='/blog/categories/ubuntu' style='font-size: 110.0%'>ubuntu(1)</a> <a href='/blog/categories/vim' style='font-size: 110.0%'>vim(1)</a> <a href='/blog/categories/gong-ju' style='font-size: 110.0%'>工具(1)</a> <a href='/blog/categories/shu-tong' style='font-size: 110.0%'>数通(1)</a> <a href='/blog/categories/she-ji-mo-shi' style='font-size: 110.0%'>设计模式(1)</a> </span>
+    <span id="tag-cloud"><a href='/blog/categories/ansible' style='font-size: 107.5%'>ansible(1)</a> <a href='/blog/categories/iptables' style='font-size: 115.0%'>iptables(2)</a> <a href='/blog/categories/k8s' style='font-size: 115.0%'>k8s(2)</a> <a href='/blog/categories/kernel' style='font-size: 137.5%'>kernel(5)</a> <a href='/blog/categories/linux' style='font-size: 137.5%'>linux(5)</a> <a href='/blog/categories/lvm' style='font-size: 107.5%'>lvm(1)</a> <a href='/blog/categories/makefile' style='font-size: 115.0%'>makefile(2)</a> <a href='/blog/categories/mq' style='font-size: 107.5%'>mq(1)</a> <a href='/blog/categories/netfilter' style='font-size: 107.5%'>netfilter(1)</a> <a href='/blog/categories/octopress' style='font-size: 107.5%'>octopress(1)</a> <a href='/blog/categories/ovs' style='font-size: 115.0%'>ovs(2)</a> <a href='/blog/categories/python' style='font-size: 107.5%'>python(1)</a> <a href='/blog/categories/regax' style='font-size: 107.5%'>regax(1)</a> <a href='/blog/categories/shell' style='font-size: 122.5%'>shell(3)</a> <a href='/blog/categories/socket' style='font-size: 122.5%'>socket(3)</a> <a href='/blog/categories/sourceinsight' style='font-size: 107.5%'>sourceinsight(1)</a> <a href='/blog/categories/sysctl' style='font-size: 107.5%'>sysctl(1)</a> <a href='/blog/categories/systemd' style='font-size: 107.5%'>systemd(1)</a> <a href='/blog/categories/todo' style='font-size: 107.5%'>todo(1)</a> <a href='/blog/categories/tool' style='font-size: 160.0%'>tool(8)</a> <a href='/blog/categories/ubuntu' style='font-size: 107.5%'>ubuntu(1)</a> <a href='/blog/categories/vim' style='font-size: 107.5%'>vim(1)</a> <a href='/blog/categories/gong-ju' style='font-size: 107.5%'>工具(1)</a> <a href='/blog/categories/shu-tong' style='font-size: 107.5%'>数通(1)</a> <a href='/blog/categories/she-ji-mo-shi' style='font-size: 107.5%'>设计模式(1)</a> </span>
 </section>
 
 
