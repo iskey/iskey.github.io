@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Mq | Iskey's Blog]]></title>
   <link href="http://iskey.github.io/blog/categories/mq/atom.xml" rel="self"/>
   <link href="http://iskey.github.io/"/>
-  <updated>2019-07-13T11:48:46+00:00</updated>
+  <updated>2019-07-13T11:50:33+00:00</updated>
   <id>http://iskey.github.io/</id>
   <author>
     <name><![CDATA[Iskey]]></name>
@@ -18,9 +18,7 @@
     <link href="http://iskey.github.io/blog/2019/07/13/simple-example-of-rabbitmq/"/>
     <updated>2019-07-13T11:45:27+00:00</updated>
     <id>http://iskey.github.io/blog/2019/07/13/simple-example-of-rabbitmq</id>
-    <content type="html"><![CDATA[<h1>simple example of rabbitmq</h1>
-
-<p>关于python的queue介绍
+    <content type="html"><![CDATA[<p>关于python的queue介绍
 关于python的队列，内置的有两种，一种是线程queue，另一种是进程queue，但是这两种queue都是只能在同一个进程下的线程间或者父进程与子进程之间进行队列通讯，并不能进行程序与程序之间的信息交换，这时候我们就需要一个中间件，来实现程序之间的通讯。</p>
 
 <h2>RabbitMQ</h2>
