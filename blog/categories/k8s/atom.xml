@@ -1,0 +1,402 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: K8s | Iskey's Blog]]></title>
+  <link href="http://iskey.github.io/blog/categories/k8s/atom.xml" rel="self"/>
+  <link href="http://iskey.github.io/"/>
+  <updated>2019-07-13T11:41:37+00:00</updated>
+  <id>http://iskey.github.io/</id>
+  <author>
+    <name><![CDATA[Iskey]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Simpe Example of Kubernetes]]></title>
+    <link href="http://iskey.github.io/blog/2019/07/07/simpe-example-of-kubernetes/"/>
+    <updated>2019-07-07T15:32:37+00:00</updated>
+    <id>http://iskey.github.io/blog/2019/07/07/simpe-example-of-kubernetes</id>
+    <content type="html"><![CDATA[<p>在使用kubernetes之前，最好需要知道一些docker的基本指令，这样对整个过程的理解会更深刻一些，这是我第一次使用实际操作kubernetes，基本上是参照网上的教程操作的，这里加上一些自己的理解记录一下。
+本实验基于minikube。</p>
+
+<h4>docker命令基本用法</h4>
+
+<p>首先用docker启动一个nginx服务器，命令如下:</p>
+
+<pre><code>docker container run \
+-d \
+-p 127.0.0.2:8080:80 \
+--rm \
+--name mynginx \
+nginx
+</code></pre>
+
+<p>各参数的含义如下：</p>
+
+<pre><code>-d：在后台运行
+-p ：容器的80端口映射到127.0.0.2:8080
+--rm：容器停止运行后，自动删除容器文件
+--name：容器的名字为mynginx
+</code></pre>
+
+<p>容器启动成功后，就可以通过curl <a href="http://127.0.0.2:8080%E6%9D%A5%E8%AE%BF%E9%97%AEnginx%E7%9A%84%E9%BB%98%E8%AE%A4%E9%A1%B5%E9%9D%A2%E4%BA%86%E3%80%82">http://127.0.0.2:8080%E6%9D%A5%E8%AE%BF%E9%97%AEnginx%E7%9A%84%E9%BB%98%E8%AE%A4%E9%A1%B5%E9%9D%A2%E4%BA%86%E3%80%82</a></p>
+
+<p>这里有个疑问，那127.0.0.2的地址在哪里呢？ 秘密就在iptables的规则列表里</p>
+
+<pre><code># iptables -S -t nat
+-A OUTPUT ! -d 127.0.0.0/8 -m addrtype --dst-type LOCAL -j DOCKER
+-A DOCKER -d 127.0.0.2/32 ! -i docker0 -p tcp -m tcp --dport 8080 -j DNAT --to-destination 172.17.0.7:80
+</code></pre>
+
+<p>目的地址是127网段的数据包被重定向到了DOCKER链表，DOCKER链表里把目的是127.0.0.2地址的报文发到了172.17.0.7:80端口，通过这两条规则，我们就能通过curl命令直接访问nginx服务器的80端口了。
+第二条iptables规则有一个条件很有意思<code>! -i docker0</code>要求不是从docker0接口进来的包，docker0是个虚拟网桥设备，所有的容器都被挂在这个桥设备下，也就是说如果是容器之间互相访问的包，不应该被重定向到172.17.0.7这个地址上。</p>
+
+<p>小提示：我们可以通过&ndash;volume命令把本地的文件目录映射到容器内</p>
+
+<pre><code>docker container run \
+-d \
+-p 127.0.0.2:8080:80 \
+--rm \
+--name mynginx \
+--volume "$PWD/html":/usr/share/nginx/html \
+nginx
+</code></pre>
+
+<h4>使用kubernetes创建nginx服务器集群</h4>
+
+<p>新建一个部署配置文件，内容如下：</p>
+
+<ul>
+<li>deployment.yaml文件</li>
+</ul>
+
+
+<pre><code class="yaml">apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+spec:
+  replicas: 3 # tells deployment to run 2 pods matching the template
+  template: # create pods using pod definition in this template
+    metadata:
+      # unlike pod-nginx.yaml, the name is not included in the meta data as a unique name is
+      # generated from the deployment name
+      labels:
+        app: iskey_nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.7.9
+        ports:
+        - containerPort: 80
+</code></pre>
+
+<p>这个配置文件的意思是要创建3个POD副本，每个副本是以nginx:1.7.9的镜像创建的容器，容器的服务端口是80</p>
+
+<pre><code># kubectl create -f deployment.yaml
+</code></pre>
+
+<p>查看一下服务状态,可以看到三个副本已经都起来了。</p>
+
+<pre><code># kubectl get pods -o wide -l app=nginx
+NAME                                READY   STATUS    RESTARTS   AGE   IP           NODE
+nginx-deployment-75675f5897-27hs9   1/1     Running   0          1d    172.17.0.5   ecs-xxx
+nginx-deployment-75675f5897-5trcf   1/1     Running   0          1d    172.17.0.6   ecs-xxx
+nginx-deployment-79cb98c794-7whjg   1/1     Running   0          21h   172.17.0.4   ecs-xxx
+</code></pre>
+
+<h4>创建Service服务来访问nginx集群</h4>
+
+<p>我看可以通过这三个IP地址来分别方位三个副本上的nginx服务，但是这里的地址是随机的，而且如果服务故障重启了，kubernetes会重新拉起一个POD，这时地址就又变化了，如何使用这几个副本的服务呢，kubernetes提供了一种类型为Service的对象，创建如下的service.yaml文件：</p>
+
+<ul>
+<li>service.yaml</li>
+</ul>
+
+
+<pre><code class="yaml">apiVersion: v1
+kind: Service
+metadata:
+  name: my-nginx
+spec:
+  ports:
+  - port: 8125
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: iskey_nginx
+</code></pre>
+
+<p>该配置文件将创建一个名为‘my-nginx’的Service对象，他开放了端口8125，往该端口发送的请求将被路由到端口为80的，且标签具有"app=iskey_nginx"的Pod上。这个Service将被指派一个IP地址（通常称为'Cluester IP'），通常我们的说法是该请求会被路由到一个名称为‘my-nginx’的Endpoints对象上，由该Endpoints对象来负责负载均衡，并路由到实际的Pod的服务端口80上。</p>
+
+<p>创建命令如下：</p>
+
+<pre><code># kubectl create -f service.yaml
+</code></pre>
+
+<p>可以看到创建了一个Service对象</p>
+
+<pre><code># kubectl get services -o wide
+NAME         TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE   SELECTOR
+kubernetes   ClusterIP   10.96.0.1       &lt;none&gt;        443/TCP    2d    &lt;none&gt;
+my-nginx     ClusterIP   10.97.126.137   &lt;none&gt;        8125/TCP   18h   app=nginx
+</code></pre>
+
+<h4>Service和Endpoints对象</h4>
+
+<p>在使用如上命令文件创建Service的同时，也创建了一个name与Service相同的Endpoints对象，Endpoints对象与Service通过名字关联</p>
+
+<pre><code># kubectl get endpoints -o wide
+NAME         ENDPOINTS                                   AGE
+kubernetes   192.168.0.29:8443                           2d
+my-nginx     172.17.0.4:80,172.17.0.5:80,172.17.0.6:80   18h
+</code></pre>
+
+<p>思考：如果Service和Endpoints可以通过名字进行管理，就可以灵活的自己分开创建Service和Endpoints，而不是通过Service的selector字段来自动关联Pods。比如我们外部有一个mysql集群，我们需要创建一个服务把他们发布出去，这时候就需要手动创建Service和Endpoints了。如下所示：</p>
+
+<ul>
+<li><p>mysql-service.yaml
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="l-Scalar-Plain">apiVersion</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">v1</span>
+</span><span class='line'><span class="l-Scalar-Plain">kind</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">Service</span>
+</span><span class='line'><span class="l-Scalar-Plain">metadata</span><span class="p-Indicator">:</span>
+</span><span class='line'><span class="l-Scalar-Plain">name</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">mysql-production</span>
+</span><span class='line'><span class="l-Scalar-Plain">spec</span><span class="p-Indicator">:</span>
+</span><span class='line'><span class="l-Scalar-Plain">ports:&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="l-Scalar-Plain">&lt;ul&gt;</span>
+</span><span class='line'><span class="l-Scalar-Plain">&lt;li&gt;port</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">3306</span>
+</span></code></pre></td></tr></table></div></figure></li>
+</ul>
+</li>
+<li><p>mysql-endpoints.yaml
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="l-Scalar-Plain">kind</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">Endpoints</span>
+</span><span class='line'><span class="l-Scalar-Plain">apiVersion</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">v1</span>
+</span><span class='line'><span class="l-Scalar-Plain">metadata</span><span class="p-Indicator">:</span>
+</span><span class='line'><span class="l-Scalar-Plain">name</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">mysql-production</span>
+</span><span class='line'><span class="l-Scalar-Plain">namespace</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">default</span>
+</span><span class='line'><span class="l-Scalar-Plain">subsets:&lt;/p&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="l-Scalar-Plain">&lt;ul&gt;</span>
+</span><span class='line'><span class="l-Scalar-Plain">&lt;li&gt;addresses</span><span class="p-Indicator">:</span>
+</span><span class='line'>
+</span><span class='line'><span class="l-Scalar-Plain">&lt;ul&gt;</span>
+</span><span class='line'><span class="l-Scalar-Plain">&lt;li&gt;ip</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">192.168.1.25</span>
+</span><span class='line'><span class="l-Scalar-Plain">ports:&lt;/li&gt;</span>
+</span><span class='line'><span class="l-Scalar-Plain">&lt;li&gt;port</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">3306</span>
+</span></code></pre></td></tr></table></div></figure></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<h4>Service服务iptables原理</h4>
+
+<p>另外一个问题是，Service如何提供负载均衡的呢？答案还是在iptables的链表里</p>
+
+<pre><code># iptables -S -t nat
+-A KUBE-SVC-BEPXDJBUHFCSYIC3 -m comment --comment "default/my-nginx:" -m statistic --mode random --probability 0.33332999982 -j KUBE-SEP-DYSISBZG5TN7BHVN
+-A KUBE-SVC-BEPXDJBUHFCSYIC3 -m comment --comment "default/my-nginx:" -m statistic --mode random --probability 0.50000000000 -j KUBE-SEP-BLX3X6UTIG6UGCA2
+-A KUBE-SVC-BEPXDJBUHFCSYIC3 -m comment --comment "default/my-nginx:" -j KUBE-SEP-J5WBW7HEOGAHN6ZG
+-A KUBE-SEP-BLX3X6UTIG6UGCA2 -s 172.17.0.5/32 -m comment --comment "default/my-nginx:" -j KUBE-MARK-MASQ
+-A KUBE-SEP-BLX3X6UTIG6UGCA2 -p tcp -m comment --comment "default/my-nginx:" -m tcp -j DNAT --to-destination 172.17.0.5:80
+-A KUBE-SEP-DYSISBZG5TN7BHVN -s 172.17.0.4/32 -m comment --comment "default/my-nginx:" -j KUBE-MARK-MASQ
+-A KUBE-SEP-DYSISBZG5TN7BHVN -p tcp -m comment --comment "default/my-nginx:" -m tcp -j DNAT --to-destination 172.17.0.4:80
+-A KUBE-SEP-J5WBW7HEOGAHN6ZG -s 172.17.0.6/32 -m comment --comment "default/my-nginx:" -j KUBE-MARK-MASQ
+-A KUBE-SEP-J5WBW7HEOGAHN6ZG -p tcp -m comment --comment "default/my-nginx:" -m tcp -j DNAT --to-destination 172.17.0.6:80
+</code></pre>
+
+<p>通过iptables的statistic模块，&ndash;mode random &ndash;probability ，按照如下算法被路由到3个endpoints</p>
+
+<pre><code>1th endpoint: 1/3
+2th endpoint: 2/3 * 1/2 = 1/3
+3th endpoint: 2/3 * 1/2 * 1 = 1/3
+</code></pre>
+
+<p>可见，每个endpoint都承担了3/1的访问请求。</p>
+
+<p>但是有些情况下，可能希望来自于某一个客户端的请求都落在某一个特定的endpoint上，这时候就不能使用默认的负载均衡策略，这时候可以通过sessionAffinity属性来把来自同一个Client的请求亲和到同一个服务器，配置如下：</p>
+
+<pre><code class="yaml">apiVersion: v1
+kind: Service
+metadata:
+  name: my-nginx
+  labels:
+    app: nginx
+spec:
+  ports:
+  - port: 8125
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: nginx
+  sessionAffinity: ClientIP
+</code></pre>
+
+<p>当前仅支持ClientIP和None两个选项：</p>
+
+<pre><code>kubectl explain service.spec.sessionAffinity
+KIND:     Service
+VERSION:  v1
+
+FIELD:    sessionAffinity &lt;string&gt;
+
+DESCRIPTION:
+     Supports "ClientIP" and "None". Used to maintain session affinity. Enable
+     client IP based session affinity. Must be ClientIP or None. Defaults to
+     None. More info:
+     https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies
+</code></pre>
+
+<h5>Service服务userspace原理</h5>
+
+<p>此模式下，kube-proxy进程从服务(Kubernetes master)进程那边拿到Service和Endpoint对象的变化。对每一个Service, 它在本地打开一个port(随机选择)。任何连接这个本地port的请求都会转到backend后的随机一个pod，service中的字段SessionAffinity决定了使用backend的哪个pod。最后在本地建立一些iptables规则，这样访问service的cluster ip以及对应的port时，就能将请求映射到后端的pod中。</p>
+
+<h5>Service服务iptables原理</h5>
+
+<p>此模式下，kube-proxy进程从服务(Kubernetes master)进程那边拿到Service和Endpoint对象的变化。为每个Service创建一个iptables规则，把访问Service的Cluster IP和端口的流量重定向到后端Pod中的一个。为每个选择后端Pod的Endpoints对象都创建iptables规则。</p>
+
+<p>TIP:userspace的方式和iptables方式不同点在于，userspace的模式是外部的服务会被重定向到kube-proxy，然后由kube-proxy重定向到后端的POD，而iptables的重定向请求是不需要kube-proxy参与的，完全由iptables规则链来处理。</p>
+
+<h4>服务发现(Discovering services)</h4>
+
+<p>Kubernetes支持两种方式来发现一个Service，环境变量和DNS。</p>
+
+<ul>
+<li>环境变量</li>
+</ul>
+
+
+<p>POD被创建时，当前环境所有的Service环境变量都会被注入到新建的POD中</p>
+
+<pre><code class="shell">/# env
+HOSTNAME=nginx-new-7fb6bcff7f-dkvrc
+KUBERNETES_PORT_443_TCP_PORT=443
+KUBERNETES_PORT=tcp://10.96.0.1:443
+TERM=xterm
+MY_NGINX_SERVICE_PORT=8125
+KUBERNETES_SERVICE_PORT=443
+MY_NGINX_PORT_8125_TCP=tcp://10.97.126.137:8125
+KUBERNETES_SERVICE_HOST=10.96.0.1
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+PWD=/
+NGINX_VERSION=1.7.9-1~wheezy
+MY_NGINX_PORT=tcp://10.97.126.137:8125
+MY_NGINX_PORT_8125_TCP_ADDR=10.97.126.137
+SHLVL=1
+HOME=/root
+KUBERNETES_PORT_443_TCP_PROTO=tcp
+KUBERNETES_SERVICE_PORT_HTTPS=443
+MY_NGINX_PORT_8125_TCP_PORT=8125
+KUBERNETES_PORT_443_TCP_ADDR=10.96.0.1
+KUBERNETES_PORT_443_TCP=tcp://10.96.0.1:443
+MY_NGINX_SERVICE_HOST=10.97.126.137
+MY_NGINX_PORT_8125_TCP_PROTO=tcp
+_=/usr/bin/env
+</code></pre>
+
+<ul>
+<li>DNS</li>
+</ul>
+
+
+<p>DNS server通过kubernetes api server来观测是否有新service建立，并为其建立对应的dns记录。如果集群已经enable DNS，那么pod可以自动对service做name解析。
+比如说我们在Kubernetes 名字空间”my-ns”中有个叫my-service的服务，DNS服务会创建一条”my-service.my-ns”的DNS记录。同在这个命名空间的Pod就可以通过”my-service”来得到这个Service分配到的Cluster IP，在其它命名空间的Pod则可以用全限定名”my-service.my-ns”来获得这个Service的地址</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Minikube Install]]></title>
+    <link href="http://iskey.github.io/blog/2019/05/30/minikube-install/"/>
+    <updated>2019-05-30T14:51:48+00:00</updated>
+    <id>http://iskey.github.io/blog/2019/05/30/minikube-install</id>
+    <content type="html"><![CDATA[<h2>单机minikube安装</h2>
+
+<h3>安装kubectl</h3>
+
+<p>要安装minikube需要先安装kubectl
+下载后，把kubectl的执行文件拷贝到本地的PATH目录</p>
+
+<hr />
+
+<h3>安装minikube</h3>
+
+<p>下载minikube,并拷贝到本地的PATH目录</p>
+
+<pre><code>curl -Lo minikube http://kubernetes.oss-cn-hangzhou.aliyuncs.com/minikube/releases/v0.25.2/minikube-linux-amd64 &amp;&amp; chmod +x minikube &amp;&amp; sudo mv minikube /usr/local/bin/
+</code></pre>
+
+<p>也可以自己构建(<code>需要本地已经安装配置好 Golang 开发环境和Docker引擎</code>):</p>
+
+<pre><code>git clone https://github.com/AliyunContainerService/minikube
+cd minikube
+git checkout aliyun-v0.25.0
+make
+sudo cp out/minikube /usr/local/bin/
+</code></pre>
+
+<h3>启动minikube</h3>
+
+<p>缺省Minikube使用VirtualBox驱动来创建Kubernetes本地环境</p>
+
+<pre><code>minikube start --registry-mirror=https://registry.docker-cn.com
+</code></pre>
+
+<p>支持不同的Kubernetes版本</p>
+
+<h3>安装Kubernetes v1.12.1</h3>
+
+<pre><code>minikube start --registry-mirror=https://registry.docker-cn.com --kubernetes-version v1.12.1
+</code></pre>
+
+<h3>安装Kubernetes v1.11.3</h3>
+
+<pre><code>minikube start --registry-mirror=https://registry.docker-cn.com --kubernetes-version v1.11.3
+</code></pre>
+
+<p>不使用virtualbox启动</p>
+
+<pre><code># minikube start --registry-mirror=https://registry.docker-cn.com --kubernetes-version v1.12.1 --vm-driver=none
+# kubectl get pods --all-namespaces 
+NAMESPACE NAME READY STATUS RESTARTS AGE 
+kube-system kube-addon-manager-minikube 1/1 Running 0 2h 
+kube-system kube-dns-910330662-pkvj6 3/3 Running 0 2h
+kube-system kubernetes-dashboard-mg5jt 1/1 Running 0 2h
+</code></pre>
+
+<h3>打开Kubernetes控制台</h3>
+
+<pre><code>minikube dashboard
+</code></pre>
+
+<p><a href="https://yq.aliyun.com/articles/221687">引用</a></p>
+]]></content>
+  </entry>
+  
+</feed>

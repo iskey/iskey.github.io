@@ -1,0 +1,736 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Tool | Iskey's Blog]]></title>
+  <link href="http://iskey.github.io/blog/categories/tool/atom.xml" rel="self"/>
+  <link href="http://iskey.github.io/"/>
+  <updated>2019-07-13T11:41:37+00:00</updated>
+  <id>http://iskey.github.io/</id>
+  <author>
+    <name><![CDATA[Iskey]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Simple Example of Ansible]]></title>
+    <link href="http://iskey.github.io/blog/2019/07/07/simple-example-of-ansible/"/>
+    <updated>2019-07-07T15:34:11+00:00</updated>
+    <id>http://iskey.github.io/blog/2019/07/07/simple-example-of-ansible</id>
+    <content type="html"><![CDATA[<p>Ansible 是一个自动化运维工具，相似的工具还有SaltStack、Puppet、Chef、Fabric，其中Ansible、SaltStack、Fabri都是用Python实现的，现在使用Python的同学比较多，维护起来也比较顺手，而Puppet、Chef是用ruby写的，各有各的拥趸。</p>
+
+<p>各个工具的对比:</p>
+
+<table>
+<thead>
+<tr>
+<th style="text-align:center;">工具 </th>
+<th style="text-align:center;">    语言 </th>
+<th style="text-align:center;">  架构 </th>
+<th style="text-align:center;">  协议</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center;">Puppet </td>
+<td style="text-align:center;">    Ruby </td>
+<td style="text-align:center;">  C/S </td>
+<td style="text-align:center;">   HTTP</td>
+</tr>
+<tr>
+<td style="text-align:center;">Chef </td>
+<td style="text-align:center;">  Ruby </td>
+<td style="text-align:center;">  C/S </td>
+<td style="text-align:center;">   HTTP</td>
+</tr>
+<tr>
+<td style="text-align:center;">Ansible </td>
+<td style="text-align:center;">   Python </td>
+<td style="text-align:center;"> 无Client </td>
+<td style="text-align:center;">    SSH</td>
+</tr>
+<tr>
+<td style="text-align:center;">Saltstack </td>
+<td style="text-align:center;"> Python </td>
+<td style="text-align:center;">    C/S(可无Client) </td>
+<td style="text-align:center;"> SSH/ZMQ/RAET</td>
+</tr>
+</tbody>
+</table>
+
+
+<hr />
+
+<h3>一个简单的使用ansible的例子</h3>
+
+<p>我们的例子里，在当前目录有三个文件：<code>ansible.cfg</code>,<code>first.yml</code>,<code>hosts</code></p>
+
+<h4>ansible.cfg</h4>
+
+<p>其中<code>ansible.cfg</code>文件是我们例子的ansible命令的配置文件，这里主要修改inventory字段，指定我们需要使用当前目录的hosts文件作为主机列表配置文件</p>
+
+<pre><code class="C">[defaults]
+
+# some basic default values...
+
+inventory      = ./hosts
+#inventory      = /root/work/ansible/hosts
+#library        = /usr/share/my_modules/
+#remote_tmp     = $HOME/.ansible/tmp
+#forks          = 5
+#poll_interval  = 15
+#sudo_user      = root
+#ask_sudo_pass = True
+#ask_pass      = True
+#transport      = smart
+#remote_port    = 22
+#module_lang    = C
+</code></pre>
+
+<p>ansible命令执行的时候，会按照如下顺序搜索配置文件:</p>
+
+<ul>
+<li>ANSIBLE_CONFIG (an environment variable)</li>
+<li>ansible.cfg (in the current directory)</li>
+<li>.ansible.cfg (in the home directory)</li>
+<li>/etc/ansible/ansible.cfg</li>
+</ul>
+
+
+<h4>hosts</h4>
+
+<p>hosts文件指定了我们需要的管理的主机列表：</p>
+
+<pre><code class="C"># cat hosts
+[host_iskey]
+x.x.x.1
+x.x.x.2
+
+
+[host_iskey:vars]
+ansible_ssh_pass='xxxxxxxx'
+ansible_ssh_user='root'
+</code></pre>
+
+<h4>first.yml</h4>
+
+<p>first.yml是我们的playbook，运行了一个很简单的命令，<code>touch /iskey</code></p>
+
+<pre><code class="C  "># cat first.yml
+- hosts: host_iskey
+  gather_facts: smart
+  remote_user: root
+  tasks:
+    - name: touch_iskey
+      command: "/usr/bin/touch /iskey &amp;&amp; sleep 3"
+</code></pre>
+
+<ul>
+<li>hosts:host_iskey</li>
+</ul>
+
+
+<p>说明要对hosts文件中的host_iskey组的主机列表进行操作</p>
+
+<ul>
+<li>gater_facts:smart</li>
+</ul>
+
+
+<p>ansible执行过程中，会收集远程主机的信息，如果每次都收集的话，非常浪费时间，可以设置facts缓存为smart，这样第一次收集之后，后边就不会再收集了，如果不需要收集可以直接设置为<code>no</code>来关掉主机信息收集</p>
+
+<h4>鉴权方式</h4>
+
+<h5>密码</h5>
+
+<p>ansible可以使用密码方式进行鉴权，前提是需要安装<code>sshpass</code>工具，<code>apt install sshpass</code>, ssh命令本身不提供参数来支持密码登陆，一般都是通过<code>sshpass</code>工具来实现。</p>
+
+<p>需要在hosts文件中，添加用户的密码，如下<code>host_iskey:vars</code>字段</p>
+
+<pre><code class="C"># cat hosts
+[host_iskey]
+x.x.x.1
+x.x.x.2
+
+[host_iskey:vars]
+ansible_ssh_pass='xxxxxxxx'
+ansible_ssh_user='root'
+</code></pre>
+
+<h5>秘钥</h5>
+
+<p>如果使用秘钥的话，可以用ssh-keygen生成秘钥，在当前目录生成名为ansible的秘钥</p>
+
+<pre><code>ssh-keygen -f ansible
+</code></pre>
+
+<p>把生成的公钥，追加到host主机的<code>.ssh/authorized_keys</code>文件中去，</p>
+
+<pre><code class="C"># cat hosts
+[host_iskey]
+x.x.x.1
+x.x.x.2
+
+[host_iskey:vars]
+ansible_ssh_user='root'
+ansible_ssh_private_key_file='./ansible'
+</code></pre>
+
+<p>执行ansible-playbook，</p>
+
+<pre><code class="C"># ansible-playbook  first.yml
+
+PLAY [host_iskey] ****************************************************************************************************************************
+
+TASK [touch_iskey] ***************************************************************************************************************************
+insufficient you can add 'warn: false' to this command task or set 'command_warnings=False' in ansible.cfg to get rid of this message.
+
+changed: [x.x.x.1]
+changed: [x.x.x.2]
+
+PLAY RECAP ***********************************************************************************************************************************
+x.x.x.1              : ok=1    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+x.x.x.2               : ok=1    changed=1    unreachable=0    failed=0    skipped=0    rescued=0    ignored=0
+****
+</code></pre>
+
+<h4>当然，可以通过ansible命令来执行一些简单的命令</h4>
+
+<pre><code class="C">ansible -i ./hosts all -m command  -a "touch /xxxx"  --private-key=./key/ansible
+</code></pre>
+
+<p>如果密钥的权限不是700，可能会提醒如下错误</p>
+
+<pre><code class="C"># ansible -i ./ansible/hosts all -m command  -a "touch /isno"  --private-key=./ansible/ansible
+x.x.x.1 | UNREACHABLE! =&gt; {
+    "changed": false,
+    "msg": "Failed to connect to the host via ssh: @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\r\n@         WARNING: UNPROTECTED PRIVATE KEY FILE!          @\r\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\r\nPermissions 0755 for './ansible' are too open.\r\nIt is required that your private key files are NOT accessible by others.\r\nThis private key will be ignored.\r\nLoad key \"./ansible\": bad permissions\r\nPermission denied (publickey,password).",
+    "unreachable": true
+}
+x.x.x.2 | UNREACHABLE! =&gt; {
+    "changed": false,
+    "msg": "Failed to connect to the host via ssh: @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\r\n@         WARNING: UNPROTECTED PRIVATE KEY FILE!          @\r\n@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@\r\nPermissions 0755 for './ansible' are too open.\r\nIt is required that your private key files are NOT accessible by others.\r\nThis private key will be ignored.\r\nLoad key \"./ansible\": bad permissions\r\nPermission denied (publickey,password).",
+    "unreachable": true
+}
+</code></pre>
+
+<p>当然，如果不想用密钥的方式，也可以把密码直接写在hosts文件里。</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Use Lvm to Expend Root Partition]]></title>
+    <link href="http://iskey.github.io/blog/2019/07/07/use-lvm-to-expend-root-partition/"/>
+    <updated>2019-07-07T15:28:26+00:00</updated>
+    <id>http://iskey.github.io/blog/2019/07/07/use-lvm-to-expend-root-partition</id>
+    <content type="html"><![CDATA[<p>装完Linux系统后，如果当时规划的根分区太小了，有几种方法：
+- 新挂一个盘，挂着到某个目录，比如<code>/usr1</code>,后续所有的大文件尽量放到/usr1
+- 对跟分区进行扩容</p>
+
+<p>新挂磁盘，比较简单，这里主要介绍一下如何对根分区进行扩容，对根分区进行扩容分两种情况：
+- 根分区是非Linux LVM格式
+- 根分区是Linux LVM格式</p>
+
+<h2>扩容Linux LVM格式的分区</h2>
+
+<p>查看当前分区，根分区挂的是<code>/dev/mapper/rhel-root</code>卷</p>
+
+<pre><code>[root@bms-slave-0001 ~]# df -h
+Filesystem             Size  Used Avail Use% Mounted on
+/dev/mapper/rhel-root  8G  6.5G  8G   80% /
+</code></pre>
+
+<p>查看当前磁盘:</p>
+
+<pre><code>root@bms-slave-0001 ~]# fdisk -l
+
+Disk /dev/sda: 599.0 GB, 598999040000 bytes, 1169920000 sectors
+Units = sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 262144 bytes / 262144 bytes
+Disk label type: dos
+Disk identifier: 0x000afd24
+
+Device Boot      Start         End      Blocks   Id  System
+/dev/sda1   *        2048     2099199     1048576   83  Linux
+/dev/sda2         2099200    20479999     9190400   8e  Linux LVM
+/dev/sda3      1169788928  1169919999       65536   83  Linux
+</code></pre>
+
+<p>发现磁盘上还有很多空间，用fdisk，新建一个分区</p>
+
+<pre><code>[root@bms-slave-0001 ~]# fdisk -l
+
+Disk /dev/sda: 599.0 GB, 598999040000 bytes, 1169920000 sectors
+Units = sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 262144 bytes / 262144 bytes
+Disk label type: dos
+Disk identifier: 0x000afd24
+
+Device Boot      Start         End      Blocks   Id  System
+/dev/sda1   *        2048     2099199     1048576   83  Linux
+/dev/sda2         2099200    20479999     9190400   8e  Linux LVM
+/dev/sda3      1169788928  1169919999       65536   83  Linux
+/dev/sda4        20480000  1169788927   574654464    5  Extended
+/dev/sda5        20482048  1169788927   574653440   8e  Linux LVM
+</code></pre>
+
+<p>新建分区保存退出之后，执行一下<code>partprobe</code>命令，这样不用重启系统就可以重新加载分区表了。</p>
+
+<p>这里有个小知识，如果硬盘的分区模式是BIOS+MBR，受限于MBR的容量，只能有4个主分区
+如果采用ELF+GPT模式，则不受此限制。</p>
+
+<p>我的主机是BIOS+MBR模式，所以就新建一个扩展分区，然后在扩展分区里新建一个分区格式是Linux LVM的分区<code>/dev/sda5</code></p>
+
+<p>现在基于<code>/dev/sda5</code>，创建一个物理卷</p>
+
+<pre><code># pvcreate /dev/sda5
+</code></pre>
+
+<p>把<code>/dev/sda5</code>加入到根分区卷组，但是首先要查看根分区卷组</p>
+
+<pre><code># vgdisplay
+--- Volume group ---
+VG Name               rhel
+System ID
+Format                lvm2
+Metadata Areas        2
+Metadata Sequence No  5
+VG Access             read/write
+VG Status             resizable
+MAX LV                0
+Cur LV                2
+Open LV               1
+Max PV                0
+Cur PV                2
+Act PV                2
+VG Size               556.79 GiB
+PE Size               4.00 MiB
+Total PE              142539
+Alloc PE / Size       130243 / 508.76 GiB
+Free  PE / Size       12296 / 48.03 GiB
+VG UUID               1KHMUX-rlrd-Pypj-ucQZ-zPwA-TZd2-5oeHzv
+
+# vgextend rhel /dev/sda5
+</code></pre>
+
+<p>扩容卷组之后，对根分区逻辑卷进行扩容</p>
+
+<pre><code># lvextend -L +500G /dev/mapper/rhel-root
+
+[root@bms-slave-0001 ~]# df -h
+Filesystem             Size  Used Avail Use% Mounted on
+/dev/mapper/rhel-root  508G  6.5G  502G   2% /
+devtmpfs               126G     0  126G   0% /dev
+tmpfs                  126G     0  126G   0% /dev/shm
+tmpfs                  126G   19M  126G   1% /run
+tmpfs                  126G     0  126G   0% /sys/fs/cgroup
+</code></pre>
+
+<p>卷扩容之后，需要用re-size对文件系统进行扩容</p>
+
+<pre><code># resize2fs /dev/mapper/rhel-root
+</code></pre>
+
+<p>如果在centos/redhat上的话，可以用如下命令进行扩容</p>
+
+<pre><code># xfs_growfs /dev/mapper/rhel-root
+</code></pre>
+
+<h2>扩容非Lininx LVM格式的分区</h2>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Install Octopress on Windows]]></title>
+    <link href="http://iskey.github.io/blog/2019/07/07/install-octopress-on-windows/"/>
+    <updated>2019-07-07T00:45:05+00:00</updated>
+    <id>http://iskey.github.io/blog/2019/07/07/install-octopress-on-windows</id>
+    <content type="html"><![CDATA[<p>最近在windows上安装了octopress（在linux的步骤差不多），简单记录一下，防止以后自己忘了</p>
+
+<h2>安装git</h2>
+
+<p>因为我们需要用github来存放我们生成的pages</p>
+
+<h2>安装ruby</h2>
+
+<ul>
+<li>下载安装包</li>
+</ul>
+
+
+<p>这里要注意一下octopress要求的ruby版本，我自己fork的octpress分支的readme.markdown里有如下字样</p>
+
+<pre><code>Note: Octopress requires a minimum Ruby version of 1.9.3-p0
+</code></pre>
+
+<p>到ruby的官方网站下载最接近的ruby版本就可以了，<a href="https://rubyinstaller.org/downloads/">Ruby</a>,
+我选用的是<a href="https://dl.bintray.com/oneclick/rubyinstaller/rubyinstaller-2.2.6-x64.exe">Ruby 2.2.6(x64)</a>.</p>
+
+<p>对应的Developmenet Kit是<a href="DevKit-mingw64-64-4.7.2-20130224-1432-sfx.exe">DevKit-mingw64-64-4.7.2-20130224-1432-sfx.exe</a>
+(<code>注:Developmenet Kit是Ruby的开发工具集，安装octopress过程中，有些库需要编译</code>)</p>
+
+<ul>
+<li><p>安装Ruby（运行安装包，把Ruby安装到<code>D:/Ruby23-64</code>目录）</p></li>
+<li><p>安装DevKit</p></li>
+</ul>
+
+
+<p>解压安装包到<code>D:/DevKit</code>，命令行进到<code>D:/DevKit</code>目录，执行</p>
+
+<pre><code>ruby dk.rb init
+</code></pre>
+
+<p>执行完成后，打开<code>D:/DevKit</code>目录下的<code>config.yml</code>,查看里边有没有<code>- D:\Ruby23-64</code>字样，如果没有需要手动加上，继续执行命令</p>
+
+<pre><code>ruby dk.rb install
+</code></pre>
+
+<p>另外记得把ruby的bin目录添加到系统环境变量</p>
+
+<h3>安装Python</h3>
+
+<p>安装Python2.7,不要用Python3</p>
+
+<h3>安装octopress</h3>
+
+<ul>
+<li>下载octopress，我这里用自己的fork的repo，<a href="https://github.com/iskey/iskey.github.io">My octopres</a></li>
+</ul>
+
+
+<p>新建一个目录，<code>D:/octopress</code>,在该目录下用git</p>
+
+<pre><code>git clone https://github.com/iskey/iskey.github.io
+</code></pre>
+
+<p>切换到<code>D:/octopress</code>，然后执行如下命令，切换一下gem的源（国内访问国外的源比较慢）</p>
+
+<pre><code>gem sources -a https://ruby.taobao.org/
+gem sources -r http://rubygems.org/
+gem sources -l
+</code></pre>
+
+<p>然后，执行如下命令，安装gem库</p>
+
+<pre><code>gem install bundler
+bundle install
+</code></pre>
+
+<p>安装Octopress主题</p>
+
+<pre><code>rake install
+</code></pre>
+
+<h2>octopress使用</h2>
+
+<ul>
+<li><p>编写新文章</p>
+
+<p>  rake new_post</p></li>
+</ul>
+
+
+<p>根据提示输入标题，或者直接使用如下命令</p>
+
+<pre><code>rake new_post['welcome']
+</code></pre>
+
+<ul>
+<li>发布、预览</li>
+</ul>
+
+
+<p>运行命令，设置github的pages地址</p>
+
+<pre><code>rake setup_Github_pages 
+</code></pre>
+
+<p>发布文章到Github</p>
+
+<pre><code>rake generate 
+rake deploy
+</code></pre>
+
+<p>本地预览</p>
+
+<pre><code>rake preview
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[10 Tips to Push Your Git Skills to the Next Level]]></title>
+    <link href="http://iskey.github.io/blog/2018/04/26/10-tips-to-push-your-git-skills-to-the-next-level/"/>
+    <updated>2018-04-26T15:38:05+00:00</updated>
+    <id>http://iskey.github.io/blog/2018/04/26/10-tips-to-push-your-git-skills-to-the-next-level</id>
+    <content type="html"><![CDATA[<p>Recently we published a couple of tutorials to get you familiar with Git basics and using Git in a team environment. The commands that we discussed were about enough to help a developer survive in the Git world. In this post, we will try to explore how to manage your time effectively and make full use of the features that Git provides.</p>
+
+<p>Note: Some commands in this article include part of the command in square brackets (e.g. git add -p [file_name]). In those examples, you would insert the necessary number, identifier, etc. without the square brackets.</p>
+
+<h3>1.  Git Auto Completion</h3>
+
+<p>If you run Git commands through the command line, it’s a tiresome task to type in the commands manually every single time. To help with this, you can enable auto completion of Git commands within a few minutes.
+To get the script, run the following in a Unix system:</p>
+
+<pre><code class="c">cd ~
+curl https://raw.github.com/git/git/master/contrib/completion/git-completion.bash -o ~/.git-completion.bash
+</code></pre>
+
+<p>Next, add the following lines to your ~/.bash_profile file:</p>
+
+<pre><code>if [ -f ~/.git-completion.bash ]; then
+    . ~/.git-completion.bash
+fi
+</code></pre>
+
+<p>Although I have mentioned this earlier, I can not stress it enough: If you want to use the features of Git fully, you should definitely shift to the command line interface!</p>
+
+<h3>2.  Ignoring Files in Git</h3>
+
+<p>Are you tired of compiled files (like .pyc) appearing in your Git repository? Or are you so fed up that you have added them to Git? Look no further, there is a way through which you can tell Git to ignore certain files and directories altogether. Simply create a file with the name .gitignore and list the files and directories that you don’t want Git to track. You can make exceptions using the exclamation mark(!).</p>
+
+<pre><code>*.pyc
+*.exe
+my_db_config/
+</code></pre>
+
+<p>!main.pyc</p>
+
+<h3>3.  Who Messed With My Code?</h3>
+
+<p>It’s the natural instinct of human beings to blame others when something goes wrong. If your production server is broke, it’s very easy to find out the culprit — just do a git blame. This command shows you the author of every line in a file, the commit that saw the last change in that line, and the timestamp of the commit.</p>
+
+<pre><code>git blame [file_name]
+git blame demonstration
+</code></pre>
+
+<p>And in the screenshot below, you can see how this command would look on a bigger repository:</p>
+
+<p>git blame on the ATutor repository</p>
+
+<h3>4. Review History of the Repository</h3>
+
+<p>We had a look at the use of git log in a previous tutorial, however, there are three options that you should know about.</p>
+
+<pre><code>    --oneline – Compresses the information shown beside each commit to a reduced commit hash and the commit message, all shown in a single line.
+    --graph – This option draws a text-based graphical representation of the history on the left hand side of the output. It’s of no use if you are viewing the history for a single branch.
+    --all – Shows the history of all branches.
+</code></pre>
+
+<p>Here’s what a combination of the options looks like:
+Use of git log with all, graph and oneline</p>
+
+<h3>5. Never Lose Track of a Commit</h3>
+
+<p>Let’s say you committed something you didn’t want to and ended up doing a hard reset to come back to your previous state. Later, you realize you lost some other information in the process and want to get it back, or at least view it. This is where git reflog can help.</p>
+
+<p>A simple git log shows you the latest commit, its parent, its parent’s parent, and so on. However, git reflog is a list of commits that the head was pointed to. Remember that it’s local to your system; it’s not a part of your repository and not included in pushes or merges.</p>
+
+<p>If I run git log, I get the commits that are a part of my repository:</p>
+
+<p>Project history</p>
+
+<p>However, a git reflog shows a commit (b1b0ee9 – HEAD@{4}) that was lost when I did a hard reset:</p>
+
+<p>Git reflog</p>
+
+<h3>6. Staging Parts of a Changed File for a Commit</h3>
+
+<p>It is generally a good practice to make feature-based commits, that is, each commit must represent a feature or a bug fix. Consider what would happen if you fixed two bugs, or added multiple features without committing the changes. In such a situation situation, you could put the changes in a single commit. But there is a better way: Stage the files individually and commit them separately.</p>
+
+<p>Let’s say you’ve made multiple changes to a single file and want them to appear in separate commits. In that case, we add files by prefixing -p to our add commands.</p>
+
+<pre><code>git add -p [file_name]
+</code></pre>
+
+<p>Let’s try to demonstrate the same. I have added three new lines to file_name and I want only the first and third lines to appear in my commit. Let’s see what a git diff shows us.</p>
+
+<p>Changes in repo</p>
+
+<p>And let’s see what happes when we prefix a -p to our add command.</p>
+
+<p>Running add with -p</p>
+
+<p>It seems that Git assumed that all the changes were a part of the same idea, thereby grouping it into a single hunk. You have the following options:</p>
+
+<pre><code>    Enter y to stage that hunk
+    Enter n to not stage that hunk
+    Enter e to manually edit the hunk
+    Enter d to exit or go to the next file.
+    Enter s to split the hunk.
+</code></pre>
+
+<p>In our case, we definitely want to split it into smaller parts to selectively add some and ignore the rest.</p>
+
+<p>Adding all hunks</p>
+
+<p>As you can see, we have added the first and third lines and ignored the second. You can then view the status of the repository and make a commit.</p>
+
+<p>Repository after selectively adding a file</p>
+
+<h3>7. Squash Multiple Commits</h3>
+
+<p>When you submit your code for review and create a pull request (which happens often in open source projects), you might be asked to make a change to your code before it’s accepted. You make the change, only to be asked to change it yet again in the next review. Before you know it, you have a few extra commits. Ideally, you could squash them into one using the rebase command.</p>
+
+<pre><code>git rebase -i HEAD~[number_of_commits]
+</code></pre>
+
+<p>If you want to squash the last two commits, the command that you run is the following.</p>
+
+<pre><code>git rebase -i HEAD~2
+</code></pre>
+
+<p>On running this command, you are taken to an interactive interface listing the commits and asking you which ones to squash. Ideally, you pick the latest commit and squash the old ones.</p>
+
+<p>Git squash interactive</p>
+
+<p>You are then asked to provide a commit message to the new commit. This process essentially re-writes your commit history.</p>
+
+<p>Adding a commit message</p>
+
+<h3>8. Stash Uncommitted Changes</h3>
+
+<p>Let’s say you are working on a certain bug or a feature, and you are suddenly asked to demonstrate your work. Your current work is not complete enough to be committed, and you can’t give a demonstration at this stage (without reverting the changes). In such a situation, git stash comes to the rescue. Stash essentially takes all your changes and stores them for further use. To stash your changes, you simply run the following-</p>
+
+<pre><code>git stash
+</code></pre>
+
+<p>To check the list of stashes, you can run the following:</p>
+
+<pre><code>git stash list
+</code></pre>
+
+<p>Stash list</p>
+
+<p>If you want to un-stash and recover the uncommitted changes, you apply the stash:</p>
+
+<pre><code>git stash apply
+</code></pre>
+
+<p>In the last screenshot, you can see that each stash has an indentifier, a unique number (although we have only one stash in this case). In case you want to apply only selective stashes, you add the specific identifier to the apply command:</p>
+
+<pre><code>git stash apply stash@{2}
+</code></pre>
+
+<p>After un-stashing changes</p>
+
+<h3>9. Check for Lost Commits</h3>
+
+<p>Although reflog is one way of checking for lost commits, it’s not feasible in large repositories. That is when the fsck (file system check) command comes into play.</p>
+
+<pre><code>git fsck --lost-found
+</code></pre>
+
+<p>Git fsck results</p>
+
+<p>Here you can see a lost commit. You can check the changes in the commit by running git show [commit_hash] or recover it by running git merge [commit_hash].</p>
+
+<p>git fsck has an advantage over reflog. Let’s say you deleted a remote branch and then cloned the repository. With fsck you can search for and recover the deleted remote branch.</p>
+
+<h3>10. Cherry Pick</h3>
+
+<p>I have saved the most elegant Git command for the last. The cherry-pick command is by far my favorite Git command, because of its literal meaning as well as its utility!</p>
+
+<p>In the simplest of terms, cherry-pick is picking a single commit from a different branch and merging it with your current one. If you are working in a parallel fashion on two or more branches, you might notice a bug that is present in all branches. If you solve it in one, you can cherry pick the commit into the other branches, without messing with other files or commits.</p>
+
+<p>Let’s consider a scenario where we can apply this. I have two branches and I want to cherry-pick the commit b20fd14: Cleaned junk into another one.</p>
+
+<p>Before cherry pick</p>
+
+<p>I switch to the branch into which I want to cherry-pick the commit, and run the following:</p>
+
+<pre><code>git cherry-pick [commit_hash]
+</code></pre>
+
+<p>After cherry pick</p>
+
+<p>Although we had a clean cherry-pick this time, you should know that this command can often lead to conflicts, so use it with care.
+Conclusion</p>
+
+<p>With this, we come to the end of our list of tips that I think can help you take your Git skills to a new level. Git is the best out there and it can accomplish anything you can imagine. Therefore, always try to challenge yourself with Git. Chances are, you will end up learning something new!</p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[调试串口转应用串口]]></title>
+    <link href="http://iskey.github.io/blog/2016/04/22/debug-serial-to-general/"/>
+    <updated>2016-04-22T20:36:00+00:00</updated>
+    <id>http://iskey.github.io/blog/2016/04/22/debug-serial-to-general</id>
+    <content type="html"><![CDATA[<h2>调试串口转应用串口</h2>
+
+<pre><code>#include "stdio.h"
+#include "sys/ioctl.h"
+#include "fcntl.h"
+
+#include "termios.h"
+#include "unistd.h"
+
+#define ECHOFLAGS (ECHO | ECHOE | ECHOK | ECHONL)
+
+int main()
+{
+    int fd;
+    int ret;
+    char buf[100];
+    struct termios term;
+
+    fd= open("/dev/pts/0",O_RDONLY);
+    if(fd&lt;=0){
+        printf("Error. open /dev/pts/0.\n");
+        goto err;
+    }
+    ioctl(fd, TIOCCONS);
+    close(fd);
+
+    fd= open("/dev/ttyS0",O_RDONLY);
+    if(fd&lt;=0){
+    fd= open("/dev/ttyS0",O_RDONLY);
+    if(fd&lt;=0){
+        printf("Error. open /dev/console.\n");
+        goto err;
+    }
+
+    ret= tcgetattr(fd, &amp;term);
+    if(-1== ret){
+        printf("tcgetattr error.\n");
+        goto err;
+    }
+    cfmakeraw(&amp;term);
+    term.c_lflag&amp;= ~ECHOFLAGS;
+    tcsetattr(fd, TCSAFLUSH, &amp;term);
+    tcsetattr(fd, TCSANOW, &amp;term);
+    if(-1== ret){
+        printf("tcsetattr error.\n");
+        goto err;
+    }
+
+    ret= read(fd, buf, 1);
+    if(ret== -1){
+        perror("read error.\n");    
+        goto err;
+    }
+
+    while(*buf!='\n')
+    {
+        ret= read(fd, buf, 1);
+        if(ret== -1){
+            perror("read error1.\n");
+            goto err;
+        }
+        printf("%02x\n",*buf);
+    }
+    ioctl(fd, TIOCCONS);
+    close(fd);
+
+    return 0;
+err:
+    return -1;
+}
+</code></pre>
+]]></content>
+  </entry>
+  
+</feed>

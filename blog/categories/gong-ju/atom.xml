@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 工具 | Iskey's Blog]]></title>
   <link href="http://iskey.github.io/blog/categories/gong-ju/atom.xml" rel="self"/>
   <link href="http://iskey.github.io/"/>
-  <updated>2019-07-13T11:33:54+00:00</updated>
+  <updated>2019-07-13T11:41:37+00:00</updated>
   <id>http://iskey.github.io/</id>
   <author>
     <name><![CDATA[Iskey]]></name>
@@ -12,80 +12,6 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
-  
-  <entry>
-    <title type="html"><![CDATA[远程数据同步及操作方法]]></title>
-    <link href="http://iskey.github.io/blog/2016/03/28/sync-data/"/>
-    <updated>2016-03-28T23:44:31+00:00</updated>
-    <id>http://iskey.github.io/blog/2016/03/28/sync-data</id>
-    <content type="html"><![CDATA[<h1>python fabric</h1>
-
-<pre><code>待补充
-</code></pre>
-
-<h1>Winscp远程同步数据脚本</h1>
-
-<pre><code># winscp.exe /console /script=sample.txt 
-
-# Automatically answer all prompts negatively not to stall
-# the script on errors
-# option echo  on|off
-option echo off
-
-# option batch on|off|abort|continue
-option batch on
-
-# option confirm  on|off
-option confirm off
-
-# option transfer  binary|ascii|automatic
-# option synchdelete  on|off
-# option exclude clear | &lt;mask&gt;[;&lt;mask2&gt;...]
-# option include clear | &lt;mask&gt;[;&lt;mask2&gt;...]
-
-# open [ sftp|ftp|scp:// ][ &lt;user&gt; [ :password ] @ ] &lt;host&gt; [ :&lt;port&gt; ]
-# open user:password@example.com
-# Connect   FTP地址
-open sftp://root:password#@42.xx.xx.xxx:22
-
-# Change remote directory
-cd /root/iskey/work/enzo2   
-#如果同步到远程FTP时,可用此命令转到远程某个目录下.
-
-# Change local directory
-# set to Self's working dir  设置需要同步到远程FTP的本地文件目录
-lcd F:\vms\vagrant_work\Django\enzo
-
-# Force binary mode transfer
-option transfer ascii
-
-# Download file to the local directory d:\
-# get examplefile.txt d:\
-
-# option synchdelete  on|off
-option synchdelete off
-
-# option include clear | &lt;mask&gt;[;&lt;mask2&gt;...]
-synchronize remote -filemask="|*.pyc; .git\; .idea\; .cache\; .autojump\; .\idea\; .local\; .ipython\; venv\"
-
-
-# synchronize local|remote|both [ &lt;local directory&gt; [ &lt;remote directory&gt; ] ]  从远程同步到本地用Local;从本地同步到远程用Remote
-#synchronize remote  
-
-# Disconnect
-close
-
-# Exit WinSCP
-exit
-</code></pre>
-
-<ul>
-<li>使用命令：
-<code>C:\...\winscp577\WinSCP.exe /console /script=C:\...\enzo2.txt</code></li>
-</ul>
-
-]]></content>
-  </entry>
   
   <entry>
     <title type="html"><![CDATA[Svn源码树快照生成工具]]></title>

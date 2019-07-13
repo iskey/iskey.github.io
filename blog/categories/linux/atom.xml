@@ -1,0 +1,414 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Linux | Iskey's Blog]]></title>
+  <link href="http://iskey.github.io/blog/categories/linux/atom.xml" rel="self"/>
+  <link href="http://iskey.github.io/"/>
+  <updated>2019-07-13T11:41:37+00:00</updated>
+  <id>http://iskey.github.io/</id>
+  <author>
+    <name><![CDATA[Iskey]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Simple Example of Systemd]]></title>
+    <link href="http://iskey.github.io/blog/2019/07/07/helloworld-of-systemd/"/>
+    <updated>2019-07-07T15:31:20+00:00</updated>
+    <id>http://iskey.github.io/blog/2019/07/07/helloworld-of-systemd</id>
+    <content type="html"><![CDATA[<h2>init系统.</h2>
+
+<p>linux操作系统首先从BIOS启动开始，接下来进入bootloader（桌面系统现在一般用Grub），bootloader载入内核并进行初始化。内核初始化的最好一步就是启动PID为1的init进程。init进程是以守护进程的方式存在，是所有其他进程的祖先。</p>
+
+<p>init系统的演进路线经历了sysvinit->upstart->systemd。</p>
+
+<h2>systemd系统简介</h2>
+
+<p>借用一下帮助文档里的关系图(man bootup)</p>
+
+<pre><code>       local-fs-pre.target
+                |
+                v
+       (various mounts and   (various swap   (various cryptsetup
+        fsck services...)     devices...)        devices...)       (various low-level   (various low-level
+                |                  |                  |             services: udevd,     API VFS mounts:
+                v                  v                  v             tmpfiles, random     mqueue, configfs,
+         local-fs.target      swap.target     cryptsetup.target    seed, sysctl, ...)      debugfs, ...)
+                |                  |                  |                    |                    |
+                \__________________|_________________ | ___________________|____________________/
+                                                     \|/
+                                                      v
+                                               sysinit.target
+                                                      |
+                 ____________________________________/|\________________________________________
+                /                  |                  |                    |                    \
+                |                  |                  |                    |                    |
+                v                  v                  |                    v                    v
+            (various           (various               |                (various          rescue.service
+           timers...)          paths...)              |               sockets...)               |
+                |                  |                  |                    |                    v
+                v                  v                  |                    v              rescue.target
+          timers.target      paths.target             |             sockets.target
+                |                  |                  |                    |
+                \__________________|_________________ | ___________________/
+                                                     \|/
+                                                      v
+                                                basic.target
+                                                      |
+                 ____________________________________/|                                 emergency.service
+                /                  |                  |                                         |
+                |                  |                  |                                         v
+                v                  v                  v                                 emergency.target
+            display-        (various system    (various system
+        manager.service         services           services)
+                |             required for            |
+                |            graphical UIs)           v
+                |                  |           multi-user.target
+                |                  |                  |
+                \_________________ | _________________/
+                                  \|/
+                                   v
+                         graphical.target
+</code></pre>
+
+<h2>systemd 使用</h2>
+
+<ul>
+<li>显示某个服务的实时日志</li>
+</ul>
+
+
+<pre><code class="java">journalctl --no-pager -f -u hello.service   
+</code></pre>
+
+<ul>
+<li>编写服务配置文件</li>
+</ul>
+
+
+<pre><code class="java"># cat /root/hello
+NAME=xxxxyyyyzzz
+</code></pre>
+
+<ul>
+<li>编写服务脚本</li>
+</ul>
+
+
+<pre><code class="java"># cat /usr//local/bin/hello.sh
+#!/bin/bash
+
+name=$1
+while true
+do
+    echo Hello World $name
+    echo "*" &gt;&gt; /root/hello.log
+    sleep 1
+done
+</code></pre>
+
+<ul>
+<li>编写服务的systemd配置文件
+可以放到<code>/lib/systemd/system</code>目录，也可以放到<code>/etc/systemd/system</code>目录下，<code>/etc/systemd/system</code>的优先级更高</li>
+</ul>
+
+
+<pre><code class="java">[Unit]
+Description=Hello world Service
+
+[Service]
+EnvironmentFile=/root/hello
+ExecStartPre=-/usr/bin/touch /root/hello.start
+ExecStartPre=-/usr/bin/pkill hello.sh
+ExecStart=/usr/local/bin/hello.sh ${NAME}
+#Type=forking
+Restart=on-success
+RestartSec=5
+</code></pre>
+
+<ul>
+<li>设置服务的cgroups参数</li>
+</ul>
+
+
+<pre><code>systemctl set-property hello CPUShares=1600 MemoryLimit=600M --runtime
+</code></pre>
+
+<ul>
+<li>systemd-run examples</li>
+</ul>
+
+
+<pre><code>systemd-run --user --on-calendar '2017-08-12 14:46' /bin/bash -c 'echo done &gt;/tmp/done'
+</code></pre>
+
+<h2>service/socket example</h2>
+
+<ul>
+<li>with golang <a href="https://github.com/coreos/go-systemd/tree/v14/examples/activation/httpserver">Httpserver</a></li>
+<li>with python <a href="https://gist.github.com/drmalex07/333d8a88c4918954e8e4">Httpserver</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Use Lvm to Expend Root Partition]]></title>
+    <link href="http://iskey.github.io/blog/2019/07/07/use-lvm-to-expend-root-partition/"/>
+    <updated>2019-07-07T15:28:26+00:00</updated>
+    <id>http://iskey.github.io/blog/2019/07/07/use-lvm-to-expend-root-partition</id>
+    <content type="html"><![CDATA[<p>装完Linux系统后，如果当时规划的根分区太小了，有几种方法：
+- 新挂一个盘，挂着到某个目录，比如<code>/usr1</code>,后续所有的大文件尽量放到/usr1
+- 对跟分区进行扩容</p>
+
+<p>新挂磁盘，比较简单，这里主要介绍一下如何对根分区进行扩容，对根分区进行扩容分两种情况：
+- 根分区是非Linux LVM格式
+- 根分区是Linux LVM格式</p>
+
+<h2>扩容Linux LVM格式的分区</h2>
+
+<p>查看当前分区，根分区挂的是<code>/dev/mapper/rhel-root</code>卷</p>
+
+<pre><code>[root@bms-slave-0001 ~]# df -h
+Filesystem             Size  Used Avail Use% Mounted on
+/dev/mapper/rhel-root  8G  6.5G  8G   80% /
+</code></pre>
+
+<p>查看当前磁盘:</p>
+
+<pre><code>root@bms-slave-0001 ~]# fdisk -l
+
+Disk /dev/sda: 599.0 GB, 598999040000 bytes, 1169920000 sectors
+Units = sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 262144 bytes / 262144 bytes
+Disk label type: dos
+Disk identifier: 0x000afd24
+
+Device Boot      Start         End      Blocks   Id  System
+/dev/sda1   *        2048     2099199     1048576   83  Linux
+/dev/sda2         2099200    20479999     9190400   8e  Linux LVM
+/dev/sda3      1169788928  1169919999       65536   83  Linux
+</code></pre>
+
+<p>发现磁盘上还有很多空间，用fdisk，新建一个分区</p>
+
+<pre><code>[root@bms-slave-0001 ~]# fdisk -l
+
+Disk /dev/sda: 599.0 GB, 598999040000 bytes, 1169920000 sectors
+Units = sectors of 1 * 512 = 512 bytes
+Sector size (logical/physical): 512 bytes / 512 bytes
+I/O size (minimum/optimal): 262144 bytes / 262144 bytes
+Disk label type: dos
+Disk identifier: 0x000afd24
+
+Device Boot      Start         End      Blocks   Id  System
+/dev/sda1   *        2048     2099199     1048576   83  Linux
+/dev/sda2         2099200    20479999     9190400   8e  Linux LVM
+/dev/sda3      1169788928  1169919999       65536   83  Linux
+/dev/sda4        20480000  1169788927   574654464    5  Extended
+/dev/sda5        20482048  1169788927   574653440   8e  Linux LVM
+</code></pre>
+
+<p>新建分区保存退出之后，执行一下<code>partprobe</code>命令，这样不用重启系统就可以重新加载分区表了。</p>
+
+<p>这里有个小知识，如果硬盘的分区模式是BIOS+MBR，受限于MBR的容量，只能有4个主分区
+如果采用ELF+GPT模式，则不受此限制。</p>
+
+<p>我的主机是BIOS+MBR模式，所以就新建一个扩展分区，然后在扩展分区里新建一个分区格式是Linux LVM的分区<code>/dev/sda5</code></p>
+
+<p>现在基于<code>/dev/sda5</code>，创建一个物理卷</p>
+
+<pre><code># pvcreate /dev/sda5
+</code></pre>
+
+<p>把<code>/dev/sda5</code>加入到根分区卷组，但是首先要查看根分区卷组</p>
+
+<pre><code># vgdisplay
+--- Volume group ---
+VG Name               rhel
+System ID
+Format                lvm2
+Metadata Areas        2
+Metadata Sequence No  5
+VG Access             read/write
+VG Status             resizable
+MAX LV                0
+Cur LV                2
+Open LV               1
+Max PV                0
+Cur PV                2
+Act PV                2
+VG Size               556.79 GiB
+PE Size               4.00 MiB
+Total PE              142539
+Alloc PE / Size       130243 / 508.76 GiB
+Free  PE / Size       12296 / 48.03 GiB
+VG UUID               1KHMUX-rlrd-Pypj-ucQZ-zPwA-TZd2-5oeHzv
+
+# vgextend rhel /dev/sda5
+</code></pre>
+
+<p>扩容卷组之后，对根分区逻辑卷进行扩容</p>
+
+<pre><code># lvextend -L +500G /dev/mapper/rhel-root
+
+[root@bms-slave-0001 ~]# df -h
+Filesystem             Size  Used Avail Use% Mounted on
+/dev/mapper/rhel-root  508G  6.5G  502G   2% /
+devtmpfs               126G     0  126G   0% /dev
+tmpfs                  126G     0  126G   0% /dev/shm
+tmpfs                  126G   19M  126G   1% /run
+tmpfs                  126G     0  126G   0% /sys/fs/cgroup
+</code></pre>
+
+<p>卷扩容之后，需要用re-size对文件系统进行扩容</p>
+
+<pre><code># resize2fs /dev/mapper/rhel-root
+</code></pre>
+
+<p>如果在centos/redhat上的话，可以用如下命令进行扩容</p>
+
+<pre><code># xfs_growfs /dev/mapper/rhel-root
+</code></pre>
+
+<h2>扩容非Lininx LVM格式的分区</h2>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Reset Env for Running Process]]></title>
+    <link href="http://iskey.github.io/blog/2019/05/27/reset-env-for-running-process/"/>
+    <updated>2019-05-27T16:07:38+00:00</updated>
+    <id>http://iskey.github.io/blog/2019/05/27/reset-env-for-running-process</id>
+    <content type="html"><![CDATA[<h3>LD_PRELOAD注入</h3>
+
+<p>linux环境变量LD_PRELOAD可以指定程序运行时优先加载的动态链接库，在该环境变量路径下的动态链接库中的符号具有最高优先级。
+通过自己编写malloc/free动态链接库，并在LD_PRELOAD环境变量中指定该路径，就可以替换libc.so中的malloc/free函数。</p>
+
+<p>注：该方法对静态链接的程序无效。</p>
+
+<pre><code>(gdb) attach process_id
+(gdb) call putenv ("LD_PRELOAD=/mylib.so")
+(gdb) detach
+</code></pre>
+
+<h3>使用libc库的装饰器</h3>
+
+<h3>使用宏/函数替换malloc/free</h3>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Linux sysctl.conf 优化]]></title>
+    <link href="http://iskey.github.io/blog/2018/04/27/linux-sysctl-dot-conf-you-hua/"/>
+    <updated>2018-04-27T01:32:43+00:00</updated>
+    <id>http://iskey.github.io/blog/2018/04/27/linux-sysctl-dot-conf-you-hua</id>
+    <content type="html"><![CDATA[<p>可以通过/etc/sysctl.conf控制和配置Linux内核及网络设置。</p>
+
+<ul>
+<li>避免放大攻击
+<code>java
+net.ipv4.icmp_echo_ignore_broadcasts = 1
+</code></li>
+<li>开启恶意icmp错误消息保护
+<code>
+net.ipv4.icmp_ignore_bogus_error_responses = 1
+</code></li>
+<li><p>开启SYN洪水攻击保护
+<code>
+net.ipv4.tcp_syncookies = 1
+</code></p></li>
+<li><p>开启并记录欺骗，源路由和重定向包
+<code>
+net.ipv4.conf.all.log_martians = 1
+net.ipv4.conf.default.log_martians = 1
+</code></p></li>
+<li><p>处理无源路由的包
+<code>
+net.ipv4.conf.all.accept_source_route = 0
+net.ipv4.conf.default.accept_source_route = 0
+</code></p></li>
+<li><p>开启反向路径过滤
+<code>
+net.ipv4.conf.all.rp_filter = 1
+net.ipv4.conf.default.rp_filter = 1
+</code></p></li>
+<li><p>确保无人能修改路由表
+<code>
+net.ipv4.conf.all.accept_redirects = 0
+net.ipv4.conf.default.accept_redirects = 0
+net.ipv4.conf.all.secure_redirects = 0
+net.ipv4.conf.default.secure_redirects = 0
+</code></p></li>
+<li><p>不充当路由器
+<code>
+net.ipv4.ip_forward = 0
+net.ipv4.conf.all.send_redirects = 0
+net.ipv4.conf.default.send_redirects = 0
+</code></p></li>
+<li><p>开启execshild
+<code>
+kernel.exec-shield = 1
+kernel.randomize_va_space = 1
+</code></p></li>
+<li><p>IPv6设置
+<code>
+net.ipv6.conf.default.router_solicitations = 0
+net.ipv6.conf.default.accept_ra_rtr_pref = 0
+net.ipv6.conf.default.accept_ra_pinfo = 0
+net.ipv6.conf.default.accept_ra_defrtr = 0
+net.ipv6.conf.default.autoconf = 0
+net.ipv6.conf.default.dad_transmits = 0
+net.ipv6.conf.default.max_addresses = 1
+</code></p></li>
+<li><p>优化LB使用的端口</p></li>
+<li><p>增加系统文件描述符限制
+<code>
+fs.file-max = 65535
+</code></p></li>
+<li><p>允许更多的PIDs (减少滚动翻转问题); may break some programs 32768
+<code>
+kernel.pid_max = 65536
+</code></p></li>
+<li><p>增加系统IP端口限制
+<code>
+net.ipv4.ip_local_port_range = 2000 65000
+</code></p></li>
+<li><p>增加TCP最大缓冲区大小
+<code>
+net.ipv4.tcp_rmem = 4096 87380 8388608
+net.ipv4.tcp_wmem = 4096 87380 8388608
+</code></p></li>
+<li>增加Linux自动调整TCP缓冲区限制</li>
+<li>最小，默认和最大可使用的字节数</li>
+<li><p>最大值不低于4MB，如果你使用非常高的BDP路径可以设置得更高</p></li>
+<li><p>Tcp窗口等
+<code>
+net.core.rmem_max = 8388608
+net.core.wmem_max = 8388608
+net.core.netdev_max_backlog = 5000
+net.ipv4.tcp_window_scaling = 1
+</code></p></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[如何修改运行程序的环境变量]]></title>
+    <link href="http://iskey.github.io/blog/2016/05/13/change-env-for-running-program/"/>
+    <updated>2016-05-13T20:31:00+00:00</updated>
+    <id>http://iskey.github.io/blog/2016/05/13/change-env-for-running-program</id>
+    <content type="html"><![CDATA[<p>linux修改环境变量的API有<code>putenv()</code>,<code>getenv()</code>,<code>setenv()</code>。如果在程序已经运行的情况下，尝试修改环境可以通过gdb来实现。</p>
+
+<pre><code>(gdb) attach process_id
+(gdb) call putenv ("LD_PRELOAD=/mylib.so")
+(gdb) detach
+</code></pre>
+]]></content>
+  </entry>
+  
+</feed>

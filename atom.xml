@@ -4,7 +4,7 @@
   <title><![CDATA[Iskey's Blog]]></title>
   <link href="http://iskey.github.io/atom.xml" rel="self"/>
   <link href="http://iskey.github.io/"/>
-  <updated>2019-07-13T11:33:54+00:00</updated>
+  <updated>2019-07-13T11:41:37+00:00</updated>
   <id>http://iskey.github.io/</id>
   <author>
     <name><![CDATA[Iskey]]></name>
@@ -14,7 +14,7 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Sample of IPSec]]></title>
+    <title type="html"><![CDATA[Usage of IPSec]]></title>
     <link href="http://iskey.github.io/blog/2019/07/13/sample-of-ipsec/"/>
     <updated>2019-07-13T10:25:17+00:00</updated>
     <id>http://iskey.github.io/blog/2019/07/13/sample-of-ipsec</id>
@@ -69,7 +69,6 @@
 <span class='line-number'>43</span>
 <span class='line-number'>44</span>
 <span class='line-number'>45</span>
-<span class='line-number'>46</span>
 </pre></td><td class='code'><pre><code class=''><span class='line'>interface g 0/0/0
 </span><span class='line'>  ip address 192.168.1.254 24
 </span><span class='line'>interface g 0/0/1
@@ -115,7 +114,7 @@
 </span><span class='line'>####使能端口QoS策略
 </span><span class='line'>interface g 0/0/1
 </span><span class='line'>  ipsec policy mymap
-</span><span class='line'>  </span></code></pre></td></tr></table></div></figure>
+</span></code></pre></td></tr></table></div></figure>
 
 
 
@@ -413,7 +412,7 @@
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Simpe_example_of_kubernetes]]></title>
+    <title type="html"><![CDATA[Simpe Example of Kubernetes]]></title>
     <link href="http://iskey.github.io/blog/2019/07/07/simpe-example-of-kubernetes/"/>
     <updated>2019-07-07T15:32:37+00:00</updated>
     <id>http://iskey.github.io/blog/2019/07/07/simpe-example-of-kubernetes</id>
@@ -804,7 +803,7 @@ my-nginx     172.17.0.4:80,172.17.0.5:80,172.17.0.6:80   18h
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Helloworld_of_systemd]]></title>
+    <title type="html"><![CDATA[Simple Example of Systemd]]></title>
     <link href="http://iskey.github.io/blog/2019/07/07/helloworld-of-systemd/"/>
     <updated>2019-07-07T15:31:20+00:00</updated>
     <id>http://iskey.github.io/blog/2019/07/07/helloworld-of-systemd</id>
@@ -1549,7 +1548,7 @@ kube-system kubernetes-dashboard-mg5jt 1/1 Running 0 2h
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Reset-env-for-running-process]]></title>
+    <title type="html"><![CDATA[Reset Env for Running Process]]></title>
     <link href="http://iskey.github.io/blog/2019/05/27/reset-env-for-running-process/"/>
     <updated>2019-05-27T16:07:38+00:00</updated>
     <id>http://iskey.github.io/blog/2019/05/27/reset-env-for-running-process</id>
