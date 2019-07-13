@@ -4,7 +4,7 @@
   <title><![CDATA[Category: 数通 | Iskey's Blog]]></title>
   <link href="http://iskey.github.io/blog/categories/shu-tong/atom.xml" rel="self"/>
   <link href="http://iskey.github.io/"/>
-  <updated>2019-07-13T11:27:34+00:00</updated>
+  <updated>2019-07-13T11:30:17+00:00</updated>
   <id>http://iskey.github.io/</id>
   <author>
     <name><![CDATA[Iskey]]></name>
@@ -20,7 +20,7 @@
     <id>http://iskey.github.io/blog/2019/07/13/sample-of-ipsec</id>
     <content type="html"><![CDATA[<p>前几天用eNSP模拟的实验了一下IPSec的用法,这里简单记录一下</p>
 
-<p><img src="https://github.com/iskey/iskey.github.io/tree/source/source/images/blogs/IPSec.png" alt="IPSec" /></p>
+<p><img src="https://raw.githubusercontent.com/iskey/iskey.github.io/source/source/images/blogs/IPSec.png" alt="IPSec" /></p>
 ]]></content>
   </entry>
   
