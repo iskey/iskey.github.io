@@ -7,8 +7,6 @@ categories: tool MQ
 ---
 
 
-# simple example of rabbitmq
-
 关于python的queue介绍
 关于python的队列，内置的有两种，一种是线程queue，另一种是进程queue，但是这两种queue都是只能在同一个进程下的线程间或者父进程与子进程之间进行队列通讯，并不能进行程序与程序之间的信息交换，这时候我们就需要一个中间件，来实现程序之间的通讯。
 
