@@ -9,7 +9,8 @@
   <meta name="author" content="Iskey">
 
   
-  <meta name="description" content="Ansible 是一个自动化运维工具，相似的工具还有SaltStack、Puppet、Chef、Fabric，其中Ansible、SaltStack、Fabri都是用Python实现的，现在使用Python的同学比较多，维护起来也比较顺手，而Puppet、Chef是用ruby写的，各有各的拥趸。 &hellip;">
+  <meta name="description" content="前几天用eNSP模拟的实验了一下IPSec的用法,这里简单记录一下 IPSec
+">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -63,6 +64,37 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2019/07/13/sample-of-ipsec/">Sample of IPSec</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2019-07-13T10:25:17+00:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>13</span><span class='date-suffix'>th</span>, <span class='date-year'>2019</span></span> <span class='time'>10:25 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>前几天用eNSP模拟的实验了一下IPSec的用法,这里简单记录一下</p>
+
+<p><a href="https://github.com/iskey/iskey.github.io/tree/source/source/images/blogs/IPSec.png">IPSec</a></p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1751,87 +1783,6 @@ kube-system kubernetes-dashboard-mg5jt 1/1 Running 0 2h
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2018/04/27/redirect-extern-request-to-localhost/">重定向外部连接到本地环回地址</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2018-04-27T09:12:37+00:00'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>27</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>9:12 am</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>背景：在本地<code>localhost</code>搭建了一个Httpserver，监听在<code>4000</code>端口，现在想通过<code>eth0</code>在不改动代码的情况下对外发布服务。</p>
-
-<p>最先想到的就是端口映射，<code>rinetd</code>服务，使用也很简单，直接配置外部ip到环回地址的映射就可以了:</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">root</span><span class="nd">@lfgphicpra39095</span><span class="o">:/</span><span class="n">usr1</span><span class="o">/</span><span class="err">#</span> <span class="n">cat</span> <span class="o">/</span><span class="n">etc</span><span class="o">/</span><span class="n">rinetd</span><span class="o">.</span><span class="na">conf</span>
-</span><span class='line'><span class="o">......</span>
-</span><span class='line'><span class="err">#</span>
-</span><span class='line'><span class="err">#</span> <span class="n">forwarding</span> <span class="n">rules</span> <span class="n">come</span> <span class="n">here</span>
-</span><span class='line'><span class="err">#</span>
-</span><span class='line'><span class="err">#</span> <span class="n">you</span> <span class="n">may</span> <span class="n">specify</span> <span class="n">allow</span> <span class="n">and</span> <span class="n">deny</span> <span class="n">rules</span> <span class="n">after</span> <span class="n">a</span> <span class="n">specific</span> <span class="n">forwarding</span> <span class="n">rule</span>
-</span><span class='line'><span class="err">#</span> <span class="n">to</span> <span class="n">apply</span> <span class="n">to</span> <span class="n">only</span> <span class="n">that</span> <span class="n">forwarding</span> <span class="n">rule</span>
-</span><span class='line'><span class="err">#</span>
-</span><span class='line'><span class="err">#</span> <span class="n">bindadress</span>    <span class="n">bindport</span>  <span class="n">connectaddress</span>  <span class="n">connectport</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">**</span><span class="mf">10.252</span><span class="o">.</span><span class="mf">64.154</span>  <span class="mi">4000</span> <span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span> <span class="mi">4000</span><span class="o">**</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>但是这样一来，一旦eth0的地址发生了改变，就需要再修改配置文件。</p>
-
-<p>另一种方法就是通过iptables就行重定向：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">iptables</span> <span class="o">-</span><span class="n">t</span> <span class="n">nat</span> <span class="o">-</span><span class="n">A</span> <span class="n">PREROUTING</span> <span class="o">-</span><span class="n">i</span> <span class="n">eth0</span> <span class="o">-</span><span class="n">p</span> <span class="n">tcp</span> <span class="o">--</span><span class="n">dport</span> <span class="mi">4000</span> <span class="o">-</span><span class="n">j</span> <span class="n">DNAT</span> <span class="o">--</span><span class="n">to</span><span class="o">-</span><span class="n">destination</span> <span class="mf">127.0</span><span class="o">.</span><span class="mf">0.1</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>配置后，外部访问不通，通过抓包分析，协议栈没有回复<code>syc+ack</code>报文，看来是路由的问题。</p>
-
-<p>内核协议栈会丢弃路由 对于源地址或目的地址为<code>loopback</code>地址的，内核协议栈的认为这是一个<code>martian packet</code>，直接丢弃。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">route_localnet</span> <span class="err">–</span> <span class="nl">BOOLEAN:</span> <span class="n">Do</span> <span class="n">not</span> <span class="n">consider</span> <span class="n">loopback</span> <span class="n">addresses</span> <span class="n">as</span> <span class="n">martian</span> <span class="n">source</span> <span class="n">or</span> <span class="n">destination</span> <span class="k">while</span> <span class="n">routing</span><span class="o">.</span> <span class="n">This</span> <span class="n">enables</span> <span class="n">the</span> <span class="n">use</span> <span class="n">of</span> <span class="mi">127</span><span class="o">/</span><span class="mi">8</span> <span class="k">for</span> <span class="n">local</span> <span class="n">routing</span> <span class="nf">purposes</span> <span class="o">(</span><span class="k">default</span> <span class="n">FALSE</span><span class="o">).</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>这个特性是对每个网卡设备生效的，所以只需要在<code>eth0</code>上开启环回地址路由就可以了</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">echo</span> <span class="mi">1</span> <span class="o">&gt;</span> <span class="o">/</span><span class="n">proc</span><span class="o">/</span><span class="n">sys</span><span class="o">/</span><span class="n">net</span><span class="o">/</span><span class="n">ipv4</span><span class="o">/</span><span class="n">conf</span><span class="o">/</span><span class="n">eth0</span><span class="o">/</span><span class="n">route_localnet</span>
-</span></code></pre></td></tr></table></div></figure>
-
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/2">&larr; Older</a>
@@ -1845,6 +1796,10 @@ kube-system kubernetes-dashboard-mg5jt 1/1 Running 0 2h
     <section>
   <h1>Recent Posts</h1>
   <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2019/07/13/sample-of-ipsec/">Sample of IPSec</a>
+      </li>
     
       <li class="post">
         <a href="/blog/2019/07/07/simple-example-of-ansible/">Simple Example of Ansible</a>
@@ -1862,19 +1817,15 @@ kube-system kubernetes-dashboard-mg5jt 1/1 Running 0 2h
         <a href="/blog/2019/07/07/use-lvm-to-expend-root-partition/">Use Lvm to Expend Root Partition</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/2019/07/07/install-octopress-on-windows/">Install Octopress on Windows</a>
-      </li>
-    
   </ul>
 </section>
 <section>
   <h1>Categories</h1>
-    <ul id="category-list"><li><a href='/blog/categories/ansible/'>ansible (1)</a></li><li><a href='/blog/categories/iptables/'>iptables (1)</a></li><li><a href='/blog/categories/kernel/'>kernel (5)</a></li><li><a href='/blog/categories/linuxc/'>linuxc (1)</a></li><li><a href='/blog/categories/linuxbian-cheng/'>linux编程 (1)</a></li><li><a href='/blog/categories/lvm/'>lvm (1)</a></li><li><a href='/blog/categories/makefile/'>makefile (2)</a></li><li><a href='/blog/categories/netfilter/'>netfilter (1)</a></li><li><a href='/blog/categories/ocp/'>ocp (2)</a></li><li><a href='/blog/categories/octopress/'>octopress (1)</a></li><li><a href='/blog/categories/python/'>python (1)</a></li><li><a href='/blog/categories/regax/'>regax (1)</a></li><li><a href='/blog/categories/shell/'>shell (3)</a></li><li><a href='/blog/categories/sourceinsight/'>sourceinsight (1)</a></li><li><a href='/blog/categories/sysctl/'>sysctl (1)</a></li><li><a href='/blog/categories/systemd/'>systemd (1)</a></li><li><a href='/blog/categories/todo/'>todo (1)</a></li><li><a href='/blog/categories/ubuntu/'>ubuntu (1)</a></li><li><a href='/blog/categories/vim/'>vim (1)</a></li><li><a href='/blog/categories/chuan-kou/'>串口 (1)</a></li><li><a href='/blog/categories/gong-ju/'>工具 (2)</a></li><li><a href='/blog/categories/wang-luo/'>网络 (3)</a></li><li><a href='/blog/categories/she-ji-mo-shi/'>设计模式 (1)</a></li></ul>
+    <ul id="category-list"><li><a href='/blog/categories/ansible/'>ansible (1)</a></li><li><a href='/blog/categories/iptables/'>iptables (1)</a></li><li><a href='/blog/categories/kernel/'>kernel (5)</a></li><li><a href='/blog/categories/linuxc/'>linuxc (1)</a></li><li><a href='/blog/categories/linuxbian-cheng/'>linux编程 (1)</a></li><li><a href='/blog/categories/lvm/'>lvm (1)</a></li><li><a href='/blog/categories/makefile/'>makefile (2)</a></li><li><a href='/blog/categories/netfilter/'>netfilter (1)</a></li><li><a href='/blog/categories/ocp/'>ocp (2)</a></li><li><a href='/blog/categories/octopress/'>octopress (1)</a></li><li><a href='/blog/categories/python/'>python (1)</a></li><li><a href='/blog/categories/regax/'>regax (1)</a></li><li><a href='/blog/categories/shell/'>shell (3)</a></li><li><a href='/blog/categories/sourceinsight/'>sourceinsight (1)</a></li><li><a href='/blog/categories/sysctl/'>sysctl (1)</a></li><li><a href='/blog/categories/systemd/'>systemd (1)</a></li><li><a href='/blog/categories/todo/'>todo (1)</a></li><li><a href='/blog/categories/ubuntu/'>ubuntu (1)</a></li><li><a href='/blog/categories/vim/'>vim (1)</a></li><li><a href='/blog/categories/chuan-kou/'>串口 (1)</a></li><li><a href='/blog/categories/gong-ju/'>工具 (2)</a></li><li><a href='/blog/categories/shu-tong/'>数通 (1)</a></li><li><a href='/blog/categories/wang-luo/'>网络 (3)</a></li><li><a href='/blog/categories/she-ji-mo-shi/'>设计模式 (1)</a></li></ul>
 </section>
 <section>
   <h1>Tag Cloud</h1>
-    <span id="tag-cloud"><a href='/blog/categories/ansible' style='font-size: 112.0%'>ansible(1)</a> <a href='/blog/categories/iptables' style='font-size: 112.0%'>iptables(1)</a> <a href='/blog/categories/kernel' style='font-size: 160.0%'>kernel(5)</a> <a href='/blog/categories/linuxc' style='font-size: 112.0%'>linuxc(1)</a> <a href='/blog/categories/linuxbian-cheng' style='font-size: 112.0%'>linux编程(1)</a> <a href='/blog/categories/lvm' style='font-size: 112.0%'>lvm(1)</a> <a href='/blog/categories/makefile' style='font-size: 124.0%'>makefile(2)</a> <a href='/blog/categories/netfilter' style='font-size: 112.0%'>netfilter(1)</a> <a href='/blog/categories/ocp' style='font-size: 124.0%'>ocp(2)</a> <a href='/blog/categories/octopress' style='font-size: 112.0%'>octopress(1)</a> <a href='/blog/categories/python' style='font-size: 112.0%'>python(1)</a> <a href='/blog/categories/regax' style='font-size: 112.0%'>regax(1)</a> <a href='/blog/categories/shell' style='font-size: 136.0%'>shell(3)</a> <a href='/blog/categories/sourceinsight' style='font-size: 112.0%'>sourceinsight(1)</a> <a href='/blog/categories/sysctl' style='font-size: 112.0%'>sysctl(1)</a> <a href='/blog/categories/systemd' style='font-size: 112.0%'>systemd(1)</a> <a href='/blog/categories/todo' style='font-size: 112.0%'>todo(1)</a> <a href='/blog/categories/ubuntu' style='font-size: 112.0%'>ubuntu(1)</a> <a href='/blog/categories/vim' style='font-size: 112.0%'>vim(1)</a> <a href='/blog/categories/chuan-kou' style='font-size: 112.0%'>串口(1)</a> <a href='/blog/categories/gong-ju' style='font-size: 124.0%'>工具(2)</a> <a href='/blog/categories/wang-luo' style='font-size: 136.0%'>网络(3)</a> <a href='/blog/categories/she-ji-mo-shi' style='font-size: 112.0%'>设计模式(1)</a> </span>
+    <span id="tag-cloud"><a href='/blog/categories/ansible' style='font-size: 112.0%'>ansible(1)</a> <a href='/blog/categories/iptables' style='font-size: 112.0%'>iptables(1)</a> <a href='/blog/categories/kernel' style='font-size: 160.0%'>kernel(5)</a> <a href='/blog/categories/linuxc' style='font-size: 112.0%'>linuxc(1)</a> <a href='/blog/categories/linuxbian-cheng' style='font-size: 112.0%'>linux编程(1)</a> <a href='/blog/categories/lvm' style='font-size: 112.0%'>lvm(1)</a> <a href='/blog/categories/makefile' style='font-size: 124.0%'>makefile(2)</a> <a href='/blog/categories/netfilter' style='font-size: 112.0%'>netfilter(1)</a> <a href='/blog/categories/ocp' style='font-size: 124.0%'>ocp(2)</a> <a href='/blog/categories/octopress' style='font-size: 112.0%'>octopress(1)</a> <a href='/blog/categories/python' style='font-size: 112.0%'>python(1)</a> <a href='/blog/categories/regax' style='font-size: 112.0%'>regax(1)</a> <a href='/blog/categories/shell' style='font-size: 136.0%'>shell(3)</a> <a href='/blog/categories/sourceinsight' style='font-size: 112.0%'>sourceinsight(1)</a> <a href='/blog/categories/sysctl' style='font-size: 112.0%'>sysctl(1)</a> <a href='/blog/categories/systemd' style='font-size: 112.0%'>systemd(1)</a> <a href='/blog/categories/todo' style='font-size: 112.0%'>todo(1)</a> <a href='/blog/categories/ubuntu' style='font-size: 112.0%'>ubuntu(1)</a> <a href='/blog/categories/vim' style='font-size: 112.0%'>vim(1)</a> <a href='/blog/categories/chuan-kou' style='font-size: 112.0%'>串口(1)</a> <a href='/blog/categories/gong-ju' style='font-size: 124.0%'>工具(2)</a> <a href='/blog/categories/shu-tong' style='font-size: 112.0%'>数通(1)</a> <a href='/blog/categories/wang-luo' style='font-size: 136.0%'>网络(3)</a> <a href='/blog/categories/she-ji-mo-shi' style='font-size: 112.0%'>设计模式(1)</a> </span>
 </section>
 
 

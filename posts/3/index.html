@@ -9,8 +9,12 @@
   <meta name="author" content="Iskey">
 
   
-  <meta name="description" content="转载》vim中断零宽断言-正则环视 vim与perl的零宽断言表达式相比，(?换成了\@，并且这个符号应该跟在匹配模式的后边。
-vim Perl 意义 \@= (?= 顺序环视 eg:查找后面是sql的my： /my\(sql\)\@= \@! (?! 顺序否定环视 eg:查找后面不是sql的my &hellip;">
+  <meta name="description" content="linux修改环境变量的API有putenv(),getenv(),setenv()。如果在程序已经运行的情况下，尝试修改环境可以通过gdb来实现。 1
+2
+3
+(gdb) attach process_id
+(gdb) call putenv ("LD_PRELOAD=/mylib.so")
+( &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -64,6 +68,43 @@ vim Perl 意义 \@= (?= 顺序环视 eg:查找后面是sql的my： /my\(sql\)\@=
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2016/05/13/change-env-for-running-program/">如何修改运行程序的环境变量</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2016-05-13T20:31:00+00:00'><span class='date'><span class='date-month'>May</span> <span class='date-day'>13</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>8:31 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><p>linux修改环境变量的API有<code>putenv()</code>,<code>getenv()</code>,<code>setenv()</code>。如果在程序已经运行的情况下，尝试修改环境可以通过gdb来实现。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>(gdb) attach process_id
+</span><span class='line'>(gdb) call putenv ("LD_PRELOAD=/mylib.so")
+</span><span class='line'>(gdb) detach</span></code></pre></td></tr></table></div></figure>
+
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -3734,172 +3775,6 @@ all：
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2016/03/27/open-switch-ONIE/">开源交换机安装环境ONIE</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2016-03-27T03:46:31+00:00'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>27</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>3:46 am</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h1>Onie 安装及引导流程</h1>
-
-<hr />
-
-<h2>ONIE简要说明</h2>
-
-<hr />
-
-<p>ONIE是The Open Network Install Environment的简写，目的是为裸板网络交换机提供一个开源的安装环境，ONIE提供了一个灵活的白盒交换机生态系统使最终用户可以自主选择不同的网络操作系统。</p>
-
-<p>通常，购买来的交换机都已经预装了一个由厂家自己垄断的操作系统，使得用户把自己的网络架构都限定在一个垂直的供应链上。于是整个行业都开始探索“白盒”交换机的可能，其中一个需要解决的问题就是如何让交换机支持不同的网络操作系统，（这正式ONIE的目标）。</p>
-
-<p>按照惯例，这些交换机包换一个基于不同CPU架构的管理子系统，一般都会包含一个串行控制口，带外以太网口，有时还包含一个可插拔的大容量存储设备。这个子系统可以作为一个独立的功能与交换机的ASIC(s)及前端控制台界面分离开来。</p>
-
-<p>ONIE利用linux/busybox等开源项目定义了一套开源的“安装环境”来驱动这个管理子系统。在此“安装环境”下，终端用户和渠道伙伴可以像安装服务器一样，把NOS作为一个单独的数据中心供应件安装在“白盒”交换机设备上。</p>
-
-<p>ONIE使得交换机硬件供应商、分销商和转销商通过自己的管理来减少自己的库存，这将会在制造商、分销商、库存方面产生规模经济效应。并促进网络设备和网络操作系统的空前繁荣。</p>
-
-<p><strong>ONIE特点</strong></p>
-
-<blockquote><ul>
-<li>组合了bootloader、比较新的Linux 内核和Busybox</li>
-<li>提供了一个可以安装任意NOS的安装环境</li>
-<li>把终端用户从预装的、垄断的Nos中解放出来</li>
-<li>有助于实现数据中心的大规模的交换机需求的自动化维护</li>
-<li>使你可以像管理服务器一样管理你的交换机</li>
-</ul>
-</blockquote>
-
-<h2>制作ONIE镜像</h2>
-
-<hr />
-
-<h3>设备定义文件</h3>
-
-<p>在编译某个特定平台的ONIE镜像时，需要预先定义一些这个平台的设备宏，这些宏位于$ONIE_ROOT/machine/<code>&lt;vender&gt;</code>/<code>&lt;vendor&gt;_&lt;model&gt;</code>.</p>
-
-<p>关于特定平台附件信息可以参考位于machine/<code>&lt;vendor&gt;</code>/<code>&lt;vendor&gt;_&lt;model&gt;</code>下的INSTALL文件</p>
-
-<h3>准备编译环境</h3>
-
-<p>在准备一台新的编译环境时，ONIE依赖一些标准的开发工具包。
-对于<strong>Debian-based System</strong>，我们已经准备好了一个<strong>Makefile</strong>目标，可以帮助你自动安装ONIE所依赖的工具包，ONIE会根据当前稳定版本的Debian系统来维护这个<strong>Makefile</strong>目标，此<strong>Makefile</strong>目标需要使用<strong>sudo(8)</strong>命令并要求当前用户具有<strong>root</strong>权限。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ cd build-config 
-</span><span class='line'>$ sudo apt-get update 
-</span><span class='line'>$ sudo apt-get install build-essential
-</span><span class='line'>$ make debian-prepare-build-host</span></code></pre></td></tr></table></div></figure>
-
-
-<p>对于不同的Linux分发版本，可以参考<strong>Makefile</strong>的<code>(DEBIAN_BUILD_HOST_PACKAGES)</code>变量，使用相应分发版本的包管理工具来安装这些工具包。</p>
-
-<h3>准备一个新的构建用户账号</h3>
-
-<p>构建账号的环境变量<code>$PATH</code>必须包含<code>/sbin</code>和<code>/usr/sbin</code>，如果使用的是<code>bash</code>shell，可以下<code>$HOME/.bashrc</code>文件的末尾添加如下语句：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>export PATH="/sbin:/usr/sbin:$PATH" </span></code></pre></td></tr></table></div></figure>
-
-
-<h3>交叉编译工具链</h3>
-
-<p>ONIE的构建过程会生成并使用一套基于<code>gcc</code>和<code>uClibc</code>的交叉工具链，<code>crosstool-NG</code>是专门用来管理这套工具链的构建的工程。</p>
-
-<p>构建过程，ONIE需要从Ineternet下载一系列的包文件.你可以把这些包文件放到你的本地镜像服务器（本地镜像通过<code>onie/build-config/local.make</code>进行设置）,你可以参考ONIE自带的例子，<code>onie/build-config/local.make.example</code>，和<code>ONIE_MIRROR</code>、<code>CROSSTOOL_ONIE_MIRROR</code>变量。</p>
-
-<p>可以参考FAQ实例<a href="https://github.com/opencomputeproject/onie/wiki/FAQ#can-i-set-up-a-local-cache-of-downloaded-packages-onie-needs">caching downloaded packages</a></p>
-
-<h3>交叉编译ONIE</h3>
-
-<p>编译ONIE,第一步切换到<code>build-config</code>目录，然后输入<code>make MACHINEROOT=../machine/&lt;vendor&gt; MACHINE=&lt;vendor&gt;_&lt;model&gt; all</code>，指定目标设备。</p>
-
-<p>如下：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ cd buid-config
-</span><span class='line'>$ make -j4 MACHINDROOT=../machine/&lt;vendor&gt; MACHINE=&lt;vendor&gt;_&lt;model&gt; all</span></code></pre></td></tr></table></div></figure>
-
-
-<p>编译完成后，在<code>build/images</code>目录下已经生成了ONIE 二进制文件。</p>
-
-<table>
-<thead>
-<tr>
-<th> 文件  </th>
-<th>   目的    </th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>onie-<code>&lt;platform&gt;</code>-<code>&lt;version&gt;</code>.bin</td>
-<td> Raw binary, suitable for NOR flash programming</td>
-</tr>
-<tr>
-<td>onie-updater-<code>&lt;platform&gt;</code>-<code>&lt;revision&gt;</code></td>
-<td>ONIE updater, for use with the ONIE update mechanism</td>
-</tr>
-</tbody>
-</table>
-
-
-<h3>制作ONIE启动安装盘</h3>
-
-<p>详细的关于ONIE启动安装盘制作过程可以进一步阅读<code>machin/&lt;platform&gt;</code>目录下的<code>INSTALL</code>文件。</p>
-
-<p>build目录一般会生成一个iso（或bin）文件，这个iso（或bin）文件可以用来：</p>
-
-<blockquote><ul>
-<li>设备厂商用来初始化安装一个新的空设备。</li>
-<li>修复被损坏的ONIE 操作系统</li>
-</ul>
-</blockquote>
-
-<p>通常会把iso文件烧写到U盘来使用，可以使用如下命令：</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>$ dd if=&lt;machine&gt;.iso of=/dev/sdX bs=10M</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>FAQ</h2>
-
-<hr />
-
-<blockquote><ol>
-<li>ONIE多久发布一次？
-<br>ONIE每三个月会发布一次，详细信息，请移步<strong>代码更新周期</strong>章节。</li>
-<li>我有一台从XYZ厂商购买的交换机，没有安装ONIE，我可以自己安装吗？
-<br>简单的说，不能。</li>
-<li>为什么默认的Console的波特率是115200？
-<br>
-这都21世纪了，为什么不用一个合理的较快的波特率呢?</li>
-</ol>
-</blockquote>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/4">&larr; Older</a>
@@ -3917,6 +3792,10 @@ all：
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2019/07/13/sample-of-ipsec/">Sample of IPSec</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2019/07/07/simple-example-of-ansible/">Simple Example of Ansible</a>
       </li>
     
@@ -3932,19 +3811,15 @@ all：
         <a href="/blog/2019/07/07/use-lvm-to-expend-root-partition/">Use Lvm to Expend Root Partition</a>
       </li>
     
-      <li class="post">
-        <a href="/blog/2019/07/07/install-octopress-on-windows/">Install Octopress on Windows</a>
-      </li>
-    
   </ul>
 </section>
 <section>
   <h1>Categories</h1>
-    <ul id="category-list"><li><a href='/blog/categories/ansible/'>ansible (1)</a></li><li><a href='/blog/categories/iptables/'>iptables (1)</a></li><li><a href='/blog/categories/kernel/'>kernel (5)</a></li><li><a href='/blog/categories/linuxc/'>linuxc (1)</a></li><li><a href='/blog/categories/linuxbian-cheng/'>linux编程 (1)</a></li><li><a href='/blog/categories/lvm/'>lvm (1)</a></li><li><a href='/blog/categories/makefile/'>makefile (2)</a></li><li><a href='/blog/categories/netfilter/'>netfilter (1)</a></li><li><a href='/blog/categories/ocp/'>ocp (2)</a></li><li><a href='/blog/categories/octopress/'>octopress (1)</a></li><li><a href='/blog/categories/python/'>python (1)</a></li><li><a href='/blog/categories/regax/'>regax (1)</a></li><li><a href='/blog/categories/shell/'>shell (3)</a></li><li><a href='/blog/categories/sourceinsight/'>sourceinsight (1)</a></li><li><a href='/blog/categories/sysctl/'>sysctl (1)</a></li><li><a href='/blog/categories/systemd/'>systemd (1)</a></li><li><a href='/blog/categories/todo/'>todo (1)</a></li><li><a href='/blog/categories/ubuntu/'>ubuntu (1)</a></li><li><a href='/blog/categories/vim/'>vim (1)</a></li><li><a href='/blog/categories/chuan-kou/'>串口 (1)</a></li><li><a href='/blog/categories/gong-ju/'>工具 (2)</a></li><li><a href='/blog/categories/wang-luo/'>网络 (3)</a></li><li><a href='/blog/categories/she-ji-mo-shi/'>设计模式 (1)</a></li></ul>
+    <ul id="category-list"><li><a href='/blog/categories/ansible/'>ansible (1)</a></li><li><a href='/blog/categories/iptables/'>iptables (1)</a></li><li><a href='/blog/categories/kernel/'>kernel (5)</a></li><li><a href='/blog/categories/linuxc/'>linuxc (1)</a></li><li><a href='/blog/categories/linuxbian-cheng/'>linux编程 (1)</a></li><li><a href='/blog/categories/lvm/'>lvm (1)</a></li><li><a href='/blog/categories/makefile/'>makefile (2)</a></li><li><a href='/blog/categories/netfilter/'>netfilter (1)</a></li><li><a href='/blog/categories/ocp/'>ocp (2)</a></li><li><a href='/blog/categories/octopress/'>octopress (1)</a></li><li><a href='/blog/categories/python/'>python (1)</a></li><li><a href='/blog/categories/regax/'>regax (1)</a></li><li><a href='/blog/categories/shell/'>shell (3)</a></li><li><a href='/blog/categories/sourceinsight/'>sourceinsight (1)</a></li><li><a href='/blog/categories/sysctl/'>sysctl (1)</a></li><li><a href='/blog/categories/systemd/'>systemd (1)</a></li><li><a href='/blog/categories/todo/'>todo (1)</a></li><li><a href='/blog/categories/ubuntu/'>ubuntu (1)</a></li><li><a href='/blog/categories/vim/'>vim (1)</a></li><li><a href='/blog/categories/chuan-kou/'>串口 (1)</a></li><li><a href='/blog/categories/gong-ju/'>工具 (2)</a></li><li><a href='/blog/categories/shu-tong/'>数通 (1)</a></li><li><a href='/blog/categories/wang-luo/'>网络 (3)</a></li><li><a href='/blog/categories/she-ji-mo-shi/'>设计模式 (1)</a></li></ul>
 </section>
 <section>
   <h1>Tag Cloud</h1>
-    <span id="tag-cloud"><a href='/blog/categories/ansible' style='font-size: 112.0%'>ansible(1)</a> <a href='/blog/categories/iptables' style='font-size: 112.0%'>iptables(1)</a> <a href='/blog/categories/kernel' style='font-size: 160.0%'>kernel(5)</a> <a href='/blog/categories/linuxc' style='font-size: 112.0%'>linuxc(1)</a> <a href='/blog/categories/linuxbian-cheng' style='font-size: 112.0%'>linux编程(1)</a> <a href='/blog/categories/lvm' style='font-size: 112.0%'>lvm(1)</a> <a href='/blog/categories/makefile' style='font-size: 124.0%'>makefile(2)</a> <a href='/blog/categories/netfilter' style='font-size: 112.0%'>netfilter(1)</a> <a href='/blog/categories/ocp' style='font-size: 124.0%'>ocp(2)</a> <a href='/blog/categories/octopress' style='font-size: 112.0%'>octopress(1)</a> <a href='/blog/categories/python' style='font-size: 112.0%'>python(1)</a> <a href='/blog/categories/regax' style='font-size: 112.0%'>regax(1)</a> <a href='/blog/categories/shell' style='font-size: 136.0%'>shell(3)</a> <a href='/blog/categories/sourceinsight' style='font-size: 112.0%'>sourceinsight(1)</a> <a href='/blog/categories/sysctl' style='font-size: 112.0%'>sysctl(1)</a> <a href='/blog/categories/systemd' style='font-size: 112.0%'>systemd(1)</a> <a href='/blog/categories/todo' style='font-size: 112.0%'>todo(1)</a> <a href='/blog/categories/ubuntu' style='font-size: 112.0%'>ubuntu(1)</a> <a href='/blog/categories/vim' style='font-size: 112.0%'>vim(1)</a> <a href='/blog/categories/chuan-kou' style='font-size: 112.0%'>串口(1)</a> <a href='/blog/categories/gong-ju' style='font-size: 124.0%'>工具(2)</a> <a href='/blog/categories/wang-luo' style='font-size: 136.0%'>网络(3)</a> <a href='/blog/categories/she-ji-mo-shi' style='font-size: 112.0%'>设计模式(1)</a> </span>
+    <span id="tag-cloud"><a href='/blog/categories/ansible' style='font-size: 112.0%'>ansible(1)</a> <a href='/blog/categories/iptables' style='font-size: 112.0%'>iptables(1)</a> <a href='/blog/categories/kernel' style='font-size: 160.0%'>kernel(5)</a> <a href='/blog/categories/linuxc' style='font-size: 112.0%'>linuxc(1)</a> <a href='/blog/categories/linuxbian-cheng' style='font-size: 112.0%'>linux编程(1)</a> <a href='/blog/categories/lvm' style='font-size: 112.0%'>lvm(1)</a> <a href='/blog/categories/makefile' style='font-size: 124.0%'>makefile(2)</a> <a href='/blog/categories/netfilter' style='font-size: 112.0%'>netfilter(1)</a> <a href='/blog/categories/ocp' style='font-size: 124.0%'>ocp(2)</a> <a href='/blog/categories/octopress' style='font-size: 112.0%'>octopress(1)</a> <a href='/blog/categories/python' style='font-size: 112.0%'>python(1)</a> <a href='/blog/categories/regax' style='font-size: 112.0%'>regax(1)</a> <a href='/blog/categories/shell' style='font-size: 136.0%'>shell(3)</a> <a href='/blog/categories/sourceinsight' style='font-size: 112.0%'>sourceinsight(1)</a> <a href='/blog/categories/sysctl' style='font-size: 112.0%'>sysctl(1)</a> <a href='/blog/categories/systemd' style='font-size: 112.0%'>systemd(1)</a> <a href='/blog/categories/todo' style='font-size: 112.0%'>todo(1)</a> <a href='/blog/categories/ubuntu' style='font-size: 112.0%'>ubuntu(1)</a> <a href='/blog/categories/vim' style='font-size: 112.0%'>vim(1)</a> <a href='/blog/categories/chuan-kou' style='font-size: 112.0%'>串口(1)</a> <a href='/blog/categories/gong-ju' style='font-size: 124.0%'>工具(2)</a> <a href='/blog/categories/shu-tong' style='font-size: 112.0%'>数通(1)</a> <a href='/blog/categories/wang-luo' style='font-size: 136.0%'>网络(3)</a> <a href='/blog/categories/she-ji-mo-shi' style='font-size: 112.0%'>设计模式(1)</a> </span>
 </section>
 
 

@@ -4,7 +4,7 @@
   <title><![CDATA[Iskey's Blog]]></title>
   <link href="http://iskey.github.io/atom.xml" rel="self"/>
   <link href="http://iskey.github.io/"/>
-  <updated>2019-07-07T15:43:55+00:00</updated>
+  <updated>2019-07-13T11:20:55+00:00</updated>
   <id>http://iskey.github.io/</id>
   <author>
     <name><![CDATA[Iskey]]></name>
@@ -12,6 +12,17 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Sample of IPSec]]></title>
+    <link href="http://iskey.github.io/blog/2019/07/13/sample-of-ipsec/"/>
+    <updated>2019-07-13T10:25:17+00:00</updated>
+    <id>http://iskey.github.io/blog/2019/07/13/sample-of-ipsec</id>
+    <content type="html"><![CDATA[<p>前几天用eNSP模拟的实验了一下IPSec的用法,这里简单记录一下</p>
+
+<p><a href="https://github.com/iskey/iskey.github.io/tree/source/source/images/blogs/IPSec.png">IPSec</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Simple Example of Ansible]]></title>
@@ -2993,23 +3004,6 @@ region above).
 
 <pre><code>Machine specific function to initialise interrupts.
 </code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[如何修改运行程序的环境变量]]></title>
-    <link href="http://iskey.github.io/blog/2016/05/13/change-env-for-running-program/"/>
-    <updated>2016-05-13T20:31:00+00:00</updated>
-    <id>http://iskey.github.io/blog/2016/05/13/change-env-for-running-program</id>
-    <content type="html"><![CDATA[<p>linux修改环境变量的API有<code>putenv()</code>,<code>getenv()</code>,<code>setenv()</code>。如果在程序已经运行的情况下，尝试修改环境可以通过gdb来实现。</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>(gdb) attach process_id
-</span><span class='line'>(gdb) call putenv ("LD_PRELOAD=/mylib.so")
-</span><span class='line'>(gdb) detach</span></code></pre></td></tr></table></div></figure>
-
 ]]></content>
   </entry>
   
