@@ -4,7 +4,7 @@
   <title><![CDATA[Iskey's Blog]]></title>
   <link href="http://iskey.github.io/atom.xml" rel="self"/>
   <link href="http://iskey.github.io/"/>
-  <updated>2019-07-13T12:38:47+00:00</updated>
+  <updated>2019-07-13T12:41:51+00:00</updated>
   <id>http://iskey.github.io/</id>
   <author>
     <name><![CDATA[Iskey]]></name>
@@ -47,7 +47,7 @@
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Simple_example_of_rabbitmq]]></title>
+    <title type="html"><![CDATA[Simple Example of Rabbitmq]]></title>
     <link href="http://iskey.github.io/blog/2019/07/13/simple-example-of-rabbitmq/"/>
     <updated>2019-07-13T11:45:27+00:00</updated>
     <id>http://iskey.github.io/blog/2019/07/13/simple-example-of-rabbitmq</id>
