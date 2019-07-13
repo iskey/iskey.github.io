@@ -2,7 +2,7 @@
 date: 2016-01-23 03:46:31+00:00
 layout: post
 title: OCP开源交换机之ONIE杂记
-categories: OCP
+categories: ovs
 tags: OCP  ONIE
 ---
 

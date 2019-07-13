@@ -3,7 +3,7 @@ layout: post
 title: "install octopress on windows"
 date: 2019-07-07 00:45:05 +0000
 comments: true
-categories: octopress
+categories: octopress tool
 ---
 
 

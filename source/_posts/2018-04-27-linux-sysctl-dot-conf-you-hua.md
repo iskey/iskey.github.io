@@ -3,7 +3,7 @@ layout: post
 title: "Linux sysctl.conf 优化"
 date: 2018-04-27 09:32:43 +0800
 comments: true
-categories: sysctl
+categories: sysctl linux
 ---
 
 可以通过/etc/sysctl.conf控制和配置Linux内核及网络设置。

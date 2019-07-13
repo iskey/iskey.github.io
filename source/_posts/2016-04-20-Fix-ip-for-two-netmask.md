@@ -2,7 +2,7 @@
 date: 2016-04-20 22:36:00+00:00
 layout: post
 title: 跨网段修改ip地址
-categories: 网络
+categories: socket
 tags: 组播
 ---
 

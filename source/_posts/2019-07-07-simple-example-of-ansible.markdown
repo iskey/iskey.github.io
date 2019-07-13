@@ -3,7 +3,7 @@ layout: post
 title: "simple example of ansible"
 date: 2019-07-07 15:34:11 +0000
 comments: true
-categories: ansible
+categories: ansible tool
 ---
 
 Ansible 是一个自动化运维工具，相似的工具还有SaltStack、Puppet、Chef、Fabric，其中Ansible、SaltStack、Fabri都是用Python实现的，现在使用Python的同学比较多，维护起来也比较顺手，而Puppet、Chef是用ruby写的，各有各的拥趸。

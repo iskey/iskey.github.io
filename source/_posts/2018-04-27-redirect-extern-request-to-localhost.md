@@ -3,7 +3,7 @@ layout: post
 title: "重定向外部连接到本地环回地址"
 date: 2018-04-27 17:12:37 +0800
 comments: true
-categories: 
+categories: iptables
 ---
 
 背景：在本地`localhost`搭建了一个Httpserver，监听在`4000`端口，现在想通过`eth0`在不改动代码的情况下对外发布服务。

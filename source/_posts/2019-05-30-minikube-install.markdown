@@ -3,7 +3,7 @@ layout: post
 title: "minikube install"
 date: 2019-05-30 22:51:48 +0800
 comments: true
-categories: 
+categories: k8s
 ---
 
 ## 单机minikube安装

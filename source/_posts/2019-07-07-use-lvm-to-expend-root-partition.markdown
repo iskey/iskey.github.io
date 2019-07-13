@@ -3,7 +3,7 @@ layout: post
 title: "use lvm to expend root partition"
 date: 2019-07-07 15:28:26 +0000
 comments: true
-categories: lvm
+categories: lvm tool linux
 ---
 
 装完Linux系统后，如果当时规划的根分区太小了，有几种方法：

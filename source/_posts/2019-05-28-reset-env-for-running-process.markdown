@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "reset-env-for-running-process"
+title: "reset env for running process"
 date: 2019-05-28 00:07:38 +0800
 comments: true
-categories: LinuxC
+categories: linux
 ---
 
 

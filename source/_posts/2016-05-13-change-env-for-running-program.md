@@ -2,7 +2,7 @@
 date: 2016-5-13 20:31:00+00:00
 layout: post
 title: 如何修改运行程序的环境变量
-categories: linux编程
+categories: linux
 tags: 环境变量
 ---
 

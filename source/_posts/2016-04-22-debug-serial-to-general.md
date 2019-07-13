@@ -2,7 +2,7 @@
 date: 2016-04-22 20:36:00+00:00
 layout: post
 title: 调试串口转应用串口
-categories: 串口
+categories: tool
 tags: 串口
 ---
 

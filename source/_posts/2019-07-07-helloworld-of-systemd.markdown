@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "helloworld_of_systemd"
+title: "simple example of systemd"
 date: 2019-07-07 15:31:20 +0000
 comments: true
-categories: systemd
+categories: systemd linux
 ---
 
 ## init系统.

@@ -2,7 +2,7 @@
 date: 2016-03-03 16:26:00+00:00
 layout: post
 title: 组播通讯实例
-categories: 网络
+categories: socket
 tags: 组播
 ---
 

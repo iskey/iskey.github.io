@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "simpe_example_of_kubernetes"
+title: "simpe example of kubernetes"
 date: 2019-07-07 15:32:37 +0000
 comments: true
-categories: 
+categories: k8s
 ---
 
 在使用kubernetes之前，最好需要知道一些docker的基本指令，这样对整个过程的理解会更深刻一些，这是我第一次使用实际操作kubernetes，基本上是参照网上的教程操作的，这里加上一些自己的理解记录一下。
