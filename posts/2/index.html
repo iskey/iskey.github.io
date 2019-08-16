@@ -9,7 +9,8 @@
   <meta name="author" content="Iskey">
 
   
-  <meta name="description" content="升级ubuntu内核 apt-get upgrade命令进行升级，如果内核有更新，会直接更新 关于boot分区 现在的ubuntu系统，一般都不建议再单独安装/boot分区来存放内核/initrd等文件了，可以直接放到根分区之下，如果要单独划分/boot分区的话,最好设置的大一点（ &hellip;">
+  <meta name="description" content="单机minikube安装 安装kubectl 要安装minikube需要先安装kubectl
+下载后，把kubectl的执行文件拷贝到本地的PATH目录 安装minikube 下载minikube,并拷贝到本地的PATH目录 curl -Lo minikube http://kubernetes. &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -63,6 +64,94 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2019/05/30/minikube-install/">Minikube Install</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2019-05-30T14:51:48+00:00'><span class='date'><span class='date-month'>May</span> <span class='date-day'>30</span><span class='date-suffix'>th</span>, <span class='date-year'>2019</span></span> <span class='time'>2:51 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>单机minikube安装</h2>
+
+<h3>安装kubectl</h3>
+
+<p>要安装minikube需要先安装kubectl
+下载后，把kubectl的执行文件拷贝到本地的PATH目录</p>
+
+<hr />
+
+<h3>安装minikube</h3>
+
+<p>下载minikube,并拷贝到本地的PATH目录</p>
+
+<pre><code>curl -Lo minikube http://kubernetes.oss-cn-hangzhou.aliyuncs.com/minikube/releases/v0.25.2/minikube-linux-amd64 &amp;&amp; chmod +x minikube &amp;&amp; sudo mv minikube /usr/local/bin/
+</code></pre>
+
+<p>也可以自己构建(<code>需要本地已经安装配置好 Golang 开发环境和Docker引擎</code>):</p>
+
+<pre><code>git clone https://github.com/AliyunContainerService/minikube
+cd minikube
+git checkout aliyun-v0.25.0
+make
+sudo cp out/minikube /usr/local/bin/
+</code></pre>
+
+<h3>启动minikube</h3>
+
+<p>缺省Minikube使用VirtualBox驱动来创建Kubernetes本地环境</p>
+
+<pre><code>minikube start --registry-mirror=https://registry.docker-cn.com
+</code></pre>
+
+<p>支持不同的Kubernetes版本</p>
+
+<h3>安装Kubernetes v1.12.1</h3>
+
+<pre><code>minikube start --registry-mirror=https://registry.docker-cn.com --kubernetes-version v1.12.1
+</code></pre>
+
+<h3>安装Kubernetes v1.11.3</h3>
+
+<pre><code>minikube start --registry-mirror=https://registry.docker-cn.com --kubernetes-version v1.11.3
+</code></pre>
+
+<p>不使用virtualbox启动</p>
+
+<pre><code># minikube start --registry-mirror=https://registry.docker-cn.com --kubernetes-version v1.12.1 --vm-driver=none
+# kubectl get pods --all-namespaces 
+NAMESPACE NAME READY STATUS RESTARTS AGE 
+kube-system kube-addon-manager-minikube 1/1 Running 0 2h 
+kube-system kube-dns-910330662-pkvj6 3/3 Running 0 2h
+kube-system kubernetes-dashboard-mg5jt 1/1 Running 0 2h
+</code></pre>
+
+<h3>打开Kubernetes控制台</h3>
+
+<pre><code>minikube dashboard
+</code></pre>
+
+<p><a href="https://yq.aliyun.com/articles/221687">引用</a></p>
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1508,89 +1597,6 @@ word一般写一个已经打开的并且用来作为输入的描述符数字，�
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2017/03/06/user_mode_linux/">User Mode Linux</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2017-03-06T21:12:00+00:00'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>6</span><span class='date-suffix'>th</span>, <span class='date-year'>2017</span></span> <span class='time'>9:12 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>以前研究内核，总是要依靠开发板或者自己编译内核．近来留意到了ＵＭＬ，才发现linux可以像进程一样跑起来，而且跑起来不不难，深感惭愧，以下是简单的使用方法介绍．</p>
-
-<h2>简介</h2>
-
-<p>用户模式Linux（User ModeLinux，UML）不同于其他Linux虚拟化项目，UML尽量将它自己作为一个普通的程序。从Linux2.6.9版本起，用户模式Linux（User mode Linux,UML）已随Linux内核源代码一起发布，它存放于arch/um目录下。编译好UML的内核之后，可直接用gdb运行编译好的内核并进行调试。</p>
-
-<p>参考：<a href="http://uml.devloop.org.uk/howto.html">http://uml.devloop.org.uk/howto.html</a></p>
-
-<h2>编译内核</h2>
-
-<h3>以-O2编译内核</h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>make ARCH=um defconfig
-</span><span class='line'>make menuconfig ARCH=um
-</span><span class='line'>make ARCH=um</span></code></pre></td></tr></table></div></figure>
-
-
-<p><a href="http://user-mode-linux.sourceforge.net/source.html">参考</a></p>
-
-<h3>以-O0编译内核</h3>
-
-<p><a href="http://blog.chinaunix.net/uid-234303-id-2425015.html">参考</a></p>
-
-<h2>根文件系统</h2>
-
-<ul>
-<li><p><a href="http://fs.devloop.org.uk/">下载现成的根文件系统</a></p></li>
-<li><p><a href="http://fancymore.com/reading/linux-kernel-debugging.html">制作根文件系统</a></p></li>
-</ul>
-
-
-<h2>调试</h2>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'># gdb ./linux   
-</span><span class='line'>(gdb) handle SIGSEGV pass nostop noprint   
-</span><span class='line'>(gdb) handle SIGUSR1 pass nostop noprint 
-</span><span class='line'>(gdb) start ubd0=/root/srcpkg/filesystem/CentOS6.x-x86-root_fs mem=256m</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>http://blog.csdn.net/ztz0223/article/details/7874759</code></p>
-
-<p>五、常见问题</p>
-
-<p>1、
-<a href="http://moodlearchive.epfl.ch/2010-2011/mod/forum/discuss.php?d=108781">http://moodlearchive.epfl.ch/2010-2011/mod/forum/discuss.php?d=108781</a></p>
-
-<p>2、
-<a href="http://www.lenky.info/archives/2012/04/1471">http://www.lenky.info/archives/2012/04/1471</a></p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/3">&larr; Older</a>
@@ -1608,6 +1614,10 @@ word一般写一个已经打开的并且用来作为输入的描述符数字，�
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2019/08/16/python-decorators/">Python_decorators</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2019/07/13/iptables-packets-flow/">Iptables Packets Flow</a>
       </li>
     
@@ -1621,10 +1631,6 @@ word一般写一个已经打开的并且用来作为输入的描述符数字，�
     
       <li class="post">
         <a href="/blog/2019/07/13/sample-of-ipsec/">Usage of IPSec</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2019/07/07/simple-example-of-ansible/">Simple Example of Ansible</a>
       </li>
     
   </ul>

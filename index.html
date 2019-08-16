@@ -9,7 +9,19 @@
   <meta name="author" content="Iskey">
 
   
-  <meta name="description" content="之前在网上看到一张iptables的数据包路径决策图,在这里收藏一下,原始地址找不到了^-^,这里就不写转载链接了,如果作者看到,可以提醒我一下,多谢 ">
+  <meta name="description" content="function wrap function 1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+def wrapFun(func): def inner(a, b): print('function name:', func.__name__) r = func(a, b) return r &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -63,6 +75,339 @@
     <div id="content">
       <div class="blog-index">
   
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2019/08/16/python-decorators/">Python_decorators</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2019-08-16T15:00:36+00:00'><span class='date'><span class='date-month'>Aug</span> <span class='date-day'>16</span><span class='date-suffix'>th</span>, <span class='date-year'>2019</span></span> <span class='time'>3:00 pm</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h2>function wrap function</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>def wrapFun(func):
+</span><span class='line'>    def inner(a, b):
+</span><span class='line'>        print('function name:', func.__name__)
+</span><span class='line'>        r = func(a, b)
+</span><span class='line'>        return r
+</span><span class='line'>    return inner
+</span><span class='line'>
+</span><span class='line'>@wrapFun
+</span><span class='line'>def myadd(a, b):
+</span><span class='line'>    return a + b
+</span><span class='line'>
+</span><span class='line'>print(myadd(2, 3))</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>function wrap class</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>def wrapClass(cls):
+</span><span class='line'>    def inner(a):
+</span><span class='line'>        print('class name:', cls.__name__)
+</span><span class='line'>        return cls(a)
+</span><span class='line'>    return inner
+</span><span class='line'>
+</span><span class='line'>@wrapClass
+</span><span class='line'>class Foo():
+</span><span class='line'>    def __init__(self, a):
+</span><span class='line'>        self.a = a
+</span><span class='line'>
+</span><span class='line'>    def fun(self):
+</span><span class='line'>        print('self.a =', self.a)
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>m = Foo('xiemanR')
+</span><span class='line'>m.fun()</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>class wrap function</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>class ShowFunName():
+</span><span class='line'>    def __init__(self, func):
+</span><span class='line'>        self._func = func
+</span><span class='line'>
+</span><span class='line'>    def __call__(self, a):
+</span><span class='line'>        print('function name:', self._func.__name__)
+</span><span class='line'>        return self._func(a)
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>@ShowFunName
+</span><span class='line'>def Bar(a):
+</span><span class='line'>    return a
+</span><span class='line'>
+</span><span class='line'>print(Bar('xiemanR'))
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>class wrap class</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>class ShowClassName(object):
+</span><span class='line'>    def __init__(self, cls):
+</span><span class='line'>        self._cls = cls
+</span><span class='line'>
+</span><span class='line'>    def __call__(self, a):
+</span><span class='line'>        print('class name:', self._cls.__name__)
+</span><span class='line'>        return self._cls(a)
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>@ShowClassName
+</span><span class='line'>class Foobar(object):
+</span><span class='line'>    def __init__(self, a):
+</span><span class='line'>        self.value = a
+</span><span class='line'>
+</span><span class='line'>    def fun(self):
+</span><span class='line'>        print(self.value)
+</span><span class='line'>
+</span><span class='line'>a = Foobar('xiemanR')
+</span><span class='line'>a.fun()
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>decorator with params</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>from functools import wraps
+</span><span class='line'>import logging
+</span><span class='line'>
+</span><span class='line'>def logged(level, name=None, message=None):
+</span><span class='line'>    """
+</span><span class='line'>    Add logging to a function. level is the logging
+</span><span class='line'>    level, name is the logger name, and message is the
+</span><span class='line'>    log message. If name and message aren't specified,
+</span><span class='line'>    they default to the function's module and name.
+</span><span class='line'>    """
+</span><span class='line'>    def decorate(func):
+</span><span class='line'>        logname = name if name else func.__module__
+</span><span class='line'>        log = logging.getLogger(logname)
+</span><span class='line'>        logmsg = message if message else func.__name__
+</span><span class='line'>
+</span><span class='line'>        @wraps(func)
+</span><span class='line'>        def wrapper(*args, **kwargs):
+</span><span class='line'>            log.log(level, logmsg)
+</span><span class='line'>            return func(*args, **kwargs)
+</span><span class='line'>        return wrapper
+</span><span class='line'>    return decorate
+</span><span class='line'>
+</span><span class='line'># Example use
+</span><span class='line'>@logged(logging.DEBUG)
+</span><span class='line'>def add(x, y):
+</span><span class='line'>    return x + y
+</span><span class='line'>
+</span><span class='line'>@logged(logging.CRITICAL, 'example')
+</span><span class='line'>def spam():
+</span><span class='line'>    print('Spam!')</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Hidden function decorator in class</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>class Test(object):
+</span><span class='line'>    def _decorator(foo):
+</span><span class='line'>        def magic( self ) :
+</span><span class='line'>            print "start magic"
+</span><span class='line'>            foo( self )
+</span><span class='line'>            print "end magic"
+</span><span class='line'>        return magic
+</span><span class='line'>
+</span><span class='line'>    @_decorator
+</span><span class='line'>    def bar( self ) :
+</span><span class='line'>        print "normal call"
+</span><span class='line'>
+</span><span class='line'>test = Test()
+</span><span class='line'>
+</span><span class='line'>test.bar()</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Hidden function decorator in another class</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>class Test(object):
+</span><span class='line'>    def _decorator(foo):
+</span><span class='line'>        def magic( self ) :
+</span><span class='line'>            print "start magic"
+</span><span class='line'>            foo( self )
+</span><span class='line'>            print "end magic"
+</span><span class='line'>        return magic
+</span><span class='line'>
+</span><span class='line'>    @_decorator
+</span><span class='line'>    def bar( self ) :
+</span><span class='line'>        print "normal call"
+</span><span class='line'>
+</span><span class='line'>    _decorator = staticmethod( _decorator )
+</span><span class='line'>
+</span><span class='line'>class TestB( Test ):
+</span><span class='line'>    @Test._decorator
+</span><span class='line'>    def bar( self ):
+</span><span class='line'>        print "override bar in"
+</span><span class='line'>        super( TestB, self ).bar()
+</span><span class='line'>        print "override bar out"
+</span><span class='line'>
+</span><span class='line'>print "Normal:"
+</span><span class='line'>test = Test()
+</span><span class='line'>test.bar()
+</span><span class='line'>print
+</span><span class='line'>
+</span><span class='line'>print "Inherited:"
+</span><span class='line'>b = TestB()
+</span><span class='line'>b.bar()
+</span><span class='line'>print</span></code></pre></td></tr></table></div></figure>
+
+
+
+</div>
+  
+  
+
+
+    </article>
   
   
     <article>
@@ -1885,94 +2230,6 @@ rake deploy
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2019/05/30/minikube-install/">Minikube Install</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2019-05-30T14:51:48+00:00'><span class='date'><span class='date-month'>May</span> <span class='date-day'>30</span><span class='date-suffix'>th</span>, <span class='date-year'>2019</span></span> <span class='time'>2:51 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>单机minikube安装</h2>
-
-<h3>安装kubectl</h3>
-
-<p>要安装minikube需要先安装kubectl
-下载后，把kubectl的执行文件拷贝到本地的PATH目录</p>
-
-<hr />
-
-<h3>安装minikube</h3>
-
-<p>下载minikube,并拷贝到本地的PATH目录</p>
-
-<pre><code>curl -Lo minikube http://kubernetes.oss-cn-hangzhou.aliyuncs.com/minikube/releases/v0.25.2/minikube-linux-amd64 &amp;&amp; chmod +x minikube &amp;&amp; sudo mv minikube /usr/local/bin/
-</code></pre>
-
-<p>也可以自己构建(<code>需要本地已经安装配置好 Golang 开发环境和Docker引擎</code>):</p>
-
-<pre><code>git clone https://github.com/AliyunContainerService/minikube
-cd minikube
-git checkout aliyun-v0.25.0
-make
-sudo cp out/minikube /usr/local/bin/
-</code></pre>
-
-<h3>启动minikube</h3>
-
-<p>缺省Minikube使用VirtualBox驱动来创建Kubernetes本地环境</p>
-
-<pre><code>minikube start --registry-mirror=https://registry.docker-cn.com
-</code></pre>
-
-<p>支持不同的Kubernetes版本</p>
-
-<h3>安装Kubernetes v1.12.1</h3>
-
-<pre><code>minikube start --registry-mirror=https://registry.docker-cn.com --kubernetes-version v1.12.1
-</code></pre>
-
-<h3>安装Kubernetes v1.11.3</h3>
-
-<pre><code>minikube start --registry-mirror=https://registry.docker-cn.com --kubernetes-version v1.11.3
-</code></pre>
-
-<p>不使用virtualbox启动</p>
-
-<pre><code># minikube start --registry-mirror=https://registry.docker-cn.com --kubernetes-version v1.12.1 --vm-driver=none
-# kubectl get pods --all-namespaces 
-NAMESPACE NAME READY STATUS RESTARTS AGE 
-kube-system kube-addon-manager-minikube 1/1 Running 0 2h 
-kube-system kube-dns-910330662-pkvj6 3/3 Running 0 2h
-kube-system kubernetes-dashboard-mg5jt 1/1 Running 0 2h
-</code></pre>
-
-<h3>打开Kubernetes控制台</h3>
-
-<pre><code>minikube dashboard
-</code></pre>
-
-<p><a href="https://yq.aliyun.com/articles/221687">引用</a></p>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/2">&larr; Older</a>
@@ -1988,6 +2245,10 @@ kube-system kubernetes-dashboard-mg5jt 1/1 Running 0 2h
   <ul id="recent_posts">
     
       <li class="post">
+        <a href="/blog/2019/08/16/python-decorators/">Python_decorators</a>
+      </li>
+    
+      <li class="post">
         <a href="/blog/2019/07/13/iptables-packets-flow/">Iptables Packets Flow</a>
       </li>
     
@@ -2001,10 +2262,6 @@ kube-system kubernetes-dashboard-mg5jt 1/1 Running 0 2h
     
       <li class="post">
         <a href="/blog/2019/07/13/sample-of-ipsec/">Usage of IPSec</a>
-      </li>
-    
-      <li class="post">
-        <a href="/blog/2019/07/07/simple-example-of-ansible/">Simple Example of Ansible</a>
       </li>
     
   </ul>
