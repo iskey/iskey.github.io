@@ -1,0 +1,283 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Perf-for-python - Iskey's Blog</title>
+  <meta name="author" content="Iskey">
+
+  
+  <meta name="description" content="1. 合适的工具 1.1. pyflame使用 1.1.1. 安装依赖并构建（Debian or Ubuntu）
+1.1.2. 使用pyflame
+1.1.3. 分析结果 当前python程序的调试还是比较方便的，不管是用pdb，还是用pycharm的调试IDE（远程的话 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://iskey.github.io/blog/2020/01/05/perf-for-python/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Iskey's Blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Iskey's Blog</a></h1>
+  
+    <h2>A free place to write something down.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="iskey.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Perf-for-python</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2020-01-05T08:44:00+00:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>5</span><span class='date-suffix'>th</span>, <span class='date-year'>2020</span></span> <span class='time'>8:44 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><!-- TOC -->
+
+
+<ul>
+<li><a href="#1-%E5%90%88%E9%80%82%E7%9A%84%E5%B7%A5%E5%85%B7">1. 合适的工具</a>
+
+<ul>
+<li><a href="#11-pyflame%E4%BD%BF%E7%94%A8">1.1. pyflame使用</a>
+
+<ul>
+<li><a href="#111-%E5%AE%89%E8%A3%85%E4%BE%9D%E8%B5%96%E5%B9%B6%E6%9E%84%E5%BB%BAdebian-or-ubuntu">1.1.1. 安装依赖并构建（Debian or Ubuntu）</a></li>
+<li><a href="#112-%E4%BD%BF%E7%94%A8pyflame">1.1.2. 使用pyflame</a></li>
+<li><a href="#113-%E5%88%86%E6%9E%90%E7%BB%93%E6%9E%9C">1.1.3. 分析结果</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<!-- /TOC -->
+
+
+<p>当前python程序的调试还是比较方便的，不管是用pdb，还是用pycharm的调试IDE（远程的话
+可以用远程的SSH解释器来进行调试）都是非常方便的，但是当涉及到需要快速的了解代码热点流程，多线程
+程序（其实一般是绿线程或协程），用这种调试方法就比较低效了，这时候可以用perf工具，来
+周期性的采集一些python进程的栈信息，从而可以快速的达到上述目的。</p>
+
+<h1>1. 合适的工具</h1>
+
+<p>原始的perf工具，只能跟踪C语言等，或者系统调用等栈信息，如果用来分析python程序的话，
+输出的栈信息，会包含python解释器的一些信息，使得栈信息非常不清晰，难以分析。</p>
+
+<p>我们这里用的pyflame工具，进行python的栈信息采样，<code>https://github.com/uber-archive/pyflame/tree/v1.6.6</code></p>
+
+<h2>1.1. pyflame使用</h2>
+
+<h3>1.1.1. 安装依赖并构建（Debian or Ubuntu）</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo apt-get install autoconf automake autotools-dev g++ pkg-config python-dev python3-dev libtool make
+</span><span class='line'>Once you have the build dependencies installed:
+</span><span class='line'>
+</span><span class='line'>./autogen.sh
+</span><span class='line'>./configure
+</span><span class='line'>make</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>1.1.2. 使用pyflame</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># Attach to PID 12345 and profile it for 1 second
+</span><span class='line'>pyflame -p 12345
+</span><span class='line'>
+</span><span class='line'># Attach to PID 768 and profile it for 5 seconds, sampling every 0.01 seconds
+</span><span class='line'>pyflame -s 5 -r 0.01 -p 768
+</span><span class='line'>
+</span><span class='line'># Run py.test against tests/, emitting sample data to prof.txt
+</span><span class='line'>pyflame -o prof.txt -t py.test tests/</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>1.1.3. 分析结果</h3>
+
+<p>可以使用flamegraph.pl对采集的Prof.txt结果进行解析，flamegraph.pl是一个火焰图生成工具，
+可以从如下地址下载。<code>https://raw.githubusercontent.com/brendangregg/FlameGraph/master/flamegraph.pl</code></p>
+
+<p>利用如下命令可以讲pyflame生成的结果转换为火焰图：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>./flamegraph.pl prof.txt &gt; prof.svg</span></code></pre></td></tr></table></div></figure>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Iskey</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2020-01-05T08:44:00+00:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>5</span><span class='date-suffix'>th</span>, <span class='date-year'>2020</span></span> <span class='time'>8:44 am</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/python/'>python</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2020/01/01/cntlm/" title="Previous Post: cntlm">&laquo; cntlm</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2020/02/02/ansible-stress-scripts/" title="Next Post: ansible-stress">ansible-stress &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2020/02/08/ovs-qos/">QoS</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2020/02/02/ansible-stress-scripts/">Ansible-stress</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2020/01/05/perf-for-python/">Perf-for-python</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2020/01/01/cntlm/">Cntlm</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2019/12/26/iptables-examples-port-forward/">Iptables Examples</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+  <h1>Categories</h1>
+    <ul id="category-list"><li><a href='/blog/categories/ansible/'>ansible (2)</a></li><li><a href='/blog/categories/iptables/'>iptables (4)</a></li><li><a href='/blog/categories/k8s/'>k8s (2)</a></li><li><a href='/blog/categories/kernel/'>kernel (5)</a></li><li><a href='/blog/categories/linux/'>linux (5)</a></li><li><a href='/blog/categories/lvm/'>lvm (1)</a></li><li><a href='/blog/categories/makefile/'>makefile (2)</a></li><li><a href='/blog/categories/mq/'>mq (1)</a></li><li><a href='/blog/categories/netfilter/'>netfilter (1)</a></li><li><a href='/blog/categories/octopress/'>octopress (1)</a></li><li><a href='/blog/categories/ovs/'>ovs (3)</a></li><li><a href='/blog/categories/powershell/'>powershell (1)</a></li><li><a href='/blog/categories/proxy/'>proxy (1)</a></li><li><a href='/blog/categories/python/'>python (2)</a></li><li><a href='/blog/categories/regax/'>regax (1)</a></li><li><a href='/blog/categories/sdn/'>sdn (1)</a></li><li><a href='/blog/categories/shell/'>shell (4)</a></li><li><a href='/blog/categories/socket/'>socket (3)</a></li><li><a href='/blog/categories/sourceinsight/'>sourceinsight (1)</a></li><li><a href='/blog/categories/sysctl/'>sysctl (1)</a></li><li><a href='/blog/categories/systemd/'>systemd (1)</a></li><li><a href='/blog/categories/todo/'>todo (1)</a></li><li><a href='/blog/categories/tool/'>tool (8)</a></li><li><a href='/blog/categories/ubuntu/'>ubuntu (1)</a></li><li><a href='/blog/categories/vim/'>vim (1)</a></li><li><a href='/blog/categories/gong-ju/'>工具 (1)</a></li><li><a href='/blog/categories/shu-tong/'>数通 (1)</a></li><li><a href='/blog/categories/she-ji-mo-shi/'>设计模式 (1)</a></li></ul>
+</section>
+<section>
+  <h1>Tag Cloud</h1>
+    <span id="tag-cloud"><a href='/blog/categories/ansible' style='font-size: 115.0%'>ansible(2)</a> <a href='/blog/categories/iptables' style='font-size: 130.0%'>iptables(4)</a> <a href='/blog/categories/k8s' style='font-size: 115.0%'>k8s(2)</a> <a href='/blog/categories/kernel' style='font-size: 137.5%'>kernel(5)</a> <a href='/blog/categories/linux' style='font-size: 137.5%'>linux(5)</a> <a href='/blog/categories/lvm' style='font-size: 107.5%'>lvm(1)</a> <a href='/blog/categories/makefile' style='font-size: 115.0%'>makefile(2)</a> <a href='/blog/categories/mq' style='font-size: 107.5%'>mq(1)</a> <a href='/blog/categories/netfilter' style='font-size: 107.5%'>netfilter(1)</a> <a href='/blog/categories/octopress' style='font-size: 107.5%'>octopress(1)</a> <a href='/blog/categories/ovs' style='font-size: 122.5%'>ovs(3)</a> <a href='/blog/categories/powershell' style='font-size: 107.5%'>powershell(1)</a> <a href='/blog/categories/proxy' style='font-size: 107.5%'>proxy(1)</a> <a href='/blog/categories/python' style='font-size: 115.0%'>python(2)</a> <a href='/blog/categories/regax' style='font-size: 107.5%'>regax(1)</a> <a href='/blog/categories/sdn' style='font-size: 107.5%'>sdn(1)</a> <a href='/blog/categories/shell' style='font-size: 130.0%'>shell(4)</a> <a href='/blog/categories/socket' style='font-size: 122.5%'>socket(3)</a> <a href='/blog/categories/sourceinsight' style='font-size: 107.5%'>sourceinsight(1)</a> <a href='/blog/categories/sysctl' style='font-size: 107.5%'>sysctl(1)</a> <a href='/blog/categories/systemd' style='font-size: 107.5%'>systemd(1)</a> <a href='/blog/categories/todo' style='font-size: 107.5%'>todo(1)</a> <a href='/blog/categories/tool' style='font-size: 160.0%'>tool(8)</a> <a href='/blog/categories/ubuntu' style='font-size: 107.5%'>ubuntu(1)</a> <a href='/blog/categories/vim' style='font-size: 107.5%'>vim(1)</a> <a href='/blog/categories/gong-ju' style='font-size: 107.5%'>工具(1)</a> <a href='/blog/categories/shu-tong' style='font-size: 107.5%'>数通(1)</a> <a href='/blog/categories/she-ji-mo-shi' style='font-size: 107.5%'>设计模式(1)</a> </span>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2020 - Iskey -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

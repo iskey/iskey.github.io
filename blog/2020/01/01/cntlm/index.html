@@ -1,0 +1,478 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Cntlm - Iskey's Blog</title>
+  <meta name="author" content="Iskey">
+
+  
+  <meta name="description" content="1. 代理类型
+2. 代理服务器 2.1. 代理服务器主要功能
+2.2. 代理服务器的特性分类 2.2.1. 正向代理服务器
+2.2.2. 反向代理服务器
+2.2.3. 透明代理服务器 2.3. 代理服务器的用途分类 2.3.1. Http代理
+2.3.2. SSL代理
+2.3.3. HTTP &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://iskey.github.io/blog/2020/01/01/cntlm/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Iskey's Blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Iskey's Blog</a></h1>
+  
+    <h2>A free place to write something down.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="iskey.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">Cntlm</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2020-01-01T08:44:00+00:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>1</span><span class='date-suffix'>st</span>, <span class='date-year'>2020</span></span> <span class='time'>8:44 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><!-- TOC -->
+
+
+<ul>
+<li><a href="#1-%E4%BB%A3%E7%90%86%E7%B1%BB%E5%9E%8B">1. 代理类型</a></li>
+<li><a href="#2-%E4%BB%A3%E7%90%86%E6%9C%8D%E5%8A%A1%E5%99%A8">2. 代理服务器</a>
+
+<ul>
+<li><a href="#21-%E4%BB%A3%E7%90%86%E6%9C%8D%E5%8A%A1%E5%99%A8%E4%B8%BB%E8%A6%81%E5%8A%9F%E8%83%BD">2.1. 代理服务器主要功能</a></li>
+<li><a href="#22-%E4%BB%A3%E7%90%86%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E7%89%B9%E6%80%A7%E5%88%86%E7%B1%BB">2.2. 代理服务器的特性分类</a>
+
+<ul>
+<li><a href="#221-%E6%AD%A3%E5%90%91%E4%BB%A3%E7%90%86%E6%9C%8D%E5%8A%A1%E5%99%A8">2.2.1. 正向代理服务器</a></li>
+<li><a href="#222-%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86%E6%9C%8D%E5%8A%A1%E5%99%A8">2.2.2. 反向代理服务器</a></li>
+<li><a href="#223-%E9%80%8F%E6%98%8E%E4%BB%A3%E7%90%86%E6%9C%8D%E5%8A%A1%E5%99%A8">2.2.3. 透明代理服务器</a></li>
+</ul>
+</li>
+<li><a href="#23-%E4%BB%A3%E7%90%86%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E7%94%A8%E9%80%94%E5%88%86%E7%B1%BB">2.3. 代理服务器的用途分类</a>
+
+<ul>
+<li><a href="#231-http%E4%BB%A3%E7%90%86">2.3.1. Http代理</a></li>
+<li><a href="#232-ssl%E4%BB%A3%E7%90%86">2.3.2. SSL代理</a></li>
+<li><a href="#233-http-connect%E4%BB%A3%E7%90%86">2.3.3. HTTP CONNECT代理</a></li>
+<li><a href="#234-ftp%E4%BB%A3%E7%90%86">2.3.4. FTP代理</a></li>
+<li><a href="#235-pop3%E4%BB%A3%E7%90%86">2.3.5. POP3代理</a></li>
+<li><a href="#236-telnet%E4%BB%A3%E7%90%86">2.3.6. Telnet代理</a></li>
+<li><a href="#237-socks%E4%BB%A3%E7%90%86">2.3.7. Socks代理</a></li>
+<li><a href="#238-tunnel%E4%BB%A3%E7%90%86">2.3.8. TUNNEL代理</a></li>
+<li><a href="#239-%E6%96%87%E7%8C%AE%E4%BB%A3%E7%90%86">2.3.9. 文献代理</a></li>
+<li><a href="#2310-%E6%95%99%E8%82%B2%E7%BD%91%E4%BB%A3%E7%90%86">2.3.10. 教育网代理</a></li>
+<li><a href="#2311-%E8%B7%B3%E6%9D%BF%E4%BB%A3%E7%90%86">2.3.11. 跳板代理</a></li>
+<li><a href="#2312-ssso%E4%BB%A3%E7%90%86">2.3.12. Ssso代理</a></li>
+<li><a href="#2313-flat%E4%BB%A3%E7%90%86">2.3.13. Flat代理</a></li>
+<li><a href="#2314-softe%E4%BB%A3%E7%90%86">2.3.14. SoftE代理</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#3-%E5%B8%B8%E7%94%A8%E7%9A%84%E4%BB%A3%E7%90%86%E6%9C%8D%E5%8A%A1%E5%99%A8">3. 常用的代理服务器</a>
+
+<ul>
+<li><a href="#31-shadowsocks">3.1. shadowsocks</a></li>
+<li><a href="#32-shuttle">3.2. shuttle</a></li>
+<li><a href="#33-cntlm">3.3. cntlm</a>
+
+<ul>
+<li><a href="#331-cntlm%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AE">3.3.1. cntlm安装配置</a></li>
+<li><a href="#332-cntlm%E6%9C%8D%E5%8A%A1%E9%87%8D%E5%90%AF">3.3.2. cntlm服务重启</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#4-%E5%B8%B8%E7%94%A8%E7%9A%84%E4%BB%A3%E7%90%86%E5%AE%A2%E6%88%B7%E7%AB%AF">4. 常用的代理客户端</a></li>
+<li><a href="#5-%E5%8F%82%E8%80%83%E9%93%BE%E6%8E%A5">5. 参考链接</a></li>
+</ul>
+
+
+<!-- /TOC -->
+
+
+<h1>1. 代理类型</h1>
+
+<h1>2. 代理服务器</h1>
+
+<h2>2.1. 代理服务器主要功能</h2>
+
+<ul>
+<li><p>设置用户验证和记帐功能，可按用户进行记帐，没有登记的用户无权通过代理服务器访问Internet网。并对用户的访问时间、访问地点、信息流量进行统计。</p></li>
+<li><p>对用户进行分级管理，设置不同用户的访问权限，对外界或内部的Internet地址进行过滤，设置不同的访问权限。</p></li>
+<li><p>增加缓冲器(Cache)，提高访问速度，对经常访问的地址创建缓冲区，大大提高热门站点的访问效率。通常代理服务器都设置一个较大的硬盘缓冲区(可能高达几个GB或更大)，当有外界的信息通过时，同时也将其保存到缓冲区中，当其他用户再访问相同的信息时，则直接由缓冲区中取出信息，传给用户，以提高访问速度。</p></li>
+<li><p>连接Internet与Internet，充当防火墙(Firewall):因为所有内部网的用户通过代理服务器访问外界时，只映射为一个IP地址，所以外界不能直接访问到内部网；同时可以设置IP地址过滤，限制内部网对外部的访问权限。</p></li>
+<li><p>节省IP开销:代理服务器允许使用大量的伪IP地址，节约网上资源，即用代理服务器可以减少对IP地址的需求，对于使用局域网方式接入Internet ，如果为局域网(LAN)内的每一个用户都申请一个IP地址，其费用可想而知。但使用代理服务器后，只需代理服务器上有一个合法的IP地址，LAN内其他用户可以使用10.<em>.</em>.*这样的私有IP地址，这样可以节约大量的IP，降低网络的维护成本。</p></li>
+</ul>
+
+
+<h2>2.2. 代理服务器的特性分类</h2>
+
+<h3>2.2.1. 正向代理服务器</h3>
+
+<p>正向代理服务器位于用户与目标服务器之间，用户通过对代理服务器发送指向目标服务器的请求来获得资源。用户端需要作一些设定才可以使用正向代理服务器，而反向/透明代理服务器是不需要对用户端进行任何设定的。</p>
+
+<h3>2.2.2. 反向代理服务器</h3>
+
+<p>反向代理服务器同样位于用户与目标服务器之间，但对于用户而言，反向代理服务器就相当于目标服务器，即用户直接访问反向代理服务器就可以获得目标服务器的资源。同时，用户不需要知道目标服务器地址，也无需在用户端作任何设定。反向代理服务器通常可用来作Web加速，即使用反向代理作为Web服务器的前置机来降低网络和服务器的负载，提高访问效率。</p>
+
+<h3>2.2.3. 透明代理服务器</h3>
+
+<p>透明代理服务器位于于用户与目标服务器之间.和前两种服务器不同的是，用户即不需要对客户端进行任何设定，也无需知道代理服务器的地址。用户只需要向目标服务器上的资源发起请求即可，然后透明代理服务器会将系统的请求重新定向到代理服务器，然后由代理服务器获得目标资源并返回给用户端。通常，透明代理服务器在局域网中应用。</p>
+
+<h2>2.3. 代理服务器的用途分类</h2>
+
+<h3>2.3.1. Http代理</h3>
+
+<p>代理客户机的http访问，主要代理浏览器访问网页，它的端口一般为80、8080、3128等。</p>
+
+<h3>2.3.2. SSL代理</h3>
+
+<p>支持最高128位加密强度的http代理，可以作为访问加密网站的代理。加密网站是指以<a href="https://%E5%BC%80%E5%A7%8B%E7%9A%84%E7%BD%91%E7%AB%99%E3%80%82ssl%E7%9A%84%E6%A0%87%E5%87%86%E7%AB%AF%E5%8F%A3%E4%B8%BA443%E3%80%82">https://%E5%BC%80%E5%A7%8B%E7%9A%84%E7%BD%91%E7%AB%99%E3%80%82ssl%E7%9A%84%E6%A0%87%E5%87%86%E7%AB%AF%E5%8F%A3%E4%B8%BA443%E3%80%82</a></p>
+
+<h3>2.3.3. HTTP CONNECT代理</h3>
+
+<p>允许用户建立TCP连接到任何端口的代理服务器，这种代理不仅可用于HTTP，还包括FTP、IRC、RM流服务等。</p>
+
+<h3>2.3.4. FTP代理</h3>
+
+<p>代理客户机上的ftp软件访问ftp服务器，其端口一般为21、2121。</p>
+
+<h3>2.3.5. POP3代理</h3>
+
+<p>代理客户机上的邮件软件用pop3方式收邮件，其端口一般为110。</p>
+
+<h3>2.3.6. Telnet代理</h3>
+
+<p>能够代理通信机的telnet，用于远程控制，入侵时经常使用。其端口一般为23。</p>
+
+<h3>2.3.7. Socks代理</h3>
+
+<p>是全能代理，就像有很多跳线的转接板，它只是简单地将一端的系统连接到另外一端。支持多种协议，包括http、ftp请求及其它类型的请求。它分socks 4 和socks 5两种类型，socks 4只支持TCP协议而socks 5支持TCP/UDP协议，还支持各种身份验证机制等协议。其标准端口为1080。</p>
+
+<h3>2.3.8. TUNNEL代理</h3>
+
+<p>经HTTPTunnet程序转换的数据包封装成http请求（Request）来穿透防火墙，允许利用HTTP服务器做任何TCP可以做的事情，功能相当于Socks5。</p>
+
+<h3>2.3.9. 文献代理</h3>
+
+<p>可以用来查询数据库的代理，通过这些代理，可以获得互联网的相关科研学术的数据库资源，例如查询Sciencedirect网站（简称SD）、Academic Press、IEEE，SPRINGER等数据库。</p>
+
+<h3>2.3.10. 教育网代理</h3>
+
+<p>指学术教育机构局域网通过特定的代理服务器可使无出国权限或无访问某IP段权限的计算机访问相关资源。</p>
+
+<h3>2.3.11. 跳板代理</h3>
+
+<p>应用于跳板程序，可以看作一种具有动态加密的特殊socks5代理，，也可直接用于PSD软件。其端口一般为1813。</p>
+
+<h3>2.3.12. Ssso代理</h3>
+
+<p>代理客户机上的ssso程序访问远程网站，具有SSL加密强度的超级代理，支持socks。</p>
+
+<h3>2.3.13. Flat代理</h3>
+
+<p>代理客户机上的flatsurfer程序访问远程网站，具有高强度加密数据流的特殊代理，支持socks，最大可设置三次级联，可以设置穿越代理。其端口一般为6700。</p>
+
+<h3>2.3.14. SoftE代理</h3>
+
+<p>代理客户机上的SoftEther程序访问远程网站，应用虚拟集线器HUB和虚拟网卡技术，具备VPN功能及多种认证方式的代理，符合https协议。</p>
+
+<h1>3. 常用的代理服务器</h1>
+
+<h2>3.1. shadowsocks</h2>
+
+<h2>3.2. shuttle</h2>
+
+<h2>3.3. cntlm</h2>
+
+<p>NTLM是微软开发的http代理鉴权验证协议，只有原生支持NTLMv2鉴权协议的软件才能使用其代理服务，Cntlm是一款C开发的支持NTLM协议鉴权，并作为中间代理服务器，未其它
+软件、OS提供代理服务的软件。</p>
+
+<h3>3.3.1. cntlm安装配置</h3>
+
+<p>常用的代理配置如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Username test_user
+</span><span class='line'>Domain        test_domain
+</span><span class='line'>Password  test_password
+</span><span class='line'>
+</span><span class='line'>Proxy     proxy.xxx.com:8080
+</span><span class='line'>
+</span><span class='line'>NoProxy     127.0.0.1
+</span><span class='line'>
+</span><span class='line'>Listen        3128
+</span><span class='line'>
+</span><span class='line'>Allow     0/0
+</span><span class='line'>
+</span><span class='line'>Deny      0/0</span></code></pre></td></tr></table></div></figure>
+
+
+<p>需要配置鉴权HASH信息，可以通过如下命令获取，</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>C:\Program Files (x86)\Cntlm&gt;cntlm.exe -M  https://www.baidu.com
+</span><span class='line'>      0 [main] cntlm 48032 find_fast_cwd: WARNING: Couldn't compute FAST_CWD pointer.  Please report this problem to
+</span><span class='line'>the public mailing list cygwin@cygwin.com
+</span><span class='line'>cygwin warning:
+</span><span class='line'>  MS-DOS style path detected: C:\Program Files (x86)\Cntlm\cntlm.ini
+</span><span class='line'>  Preferred POSIX equivalent is: /Cntlm/cntlm.ini
+</span><span class='line'>  CYGWIN environment variable option "nodosfilewarning" turns off this warning.
+</span><span class='line'>  Consult the user's guide for more details about POSIX paths:
+</span><span class='line'>    http://cygwin.com/cygwin-ug-net/using.html#using-pathnames
+</span><span class='line'>Password:
+</span><span class='line'>Config profile  1/4... Credentials rejected
+</span><span class='line'>Config profile  2/4... OK (HTTP code: 500)
+</span><span class='line'>----------------------------[ Profile  1 ]------
+</span><span class='line'>Auth            NTLM
+</span><span class='line'>PassNT          454D349D302XXXXXXXXXXXXXXXXXXXX9
+</span><span class='line'>PassLM          052764B974CXXXXXXXXXXXXXXXXXXXXC
+</span><span class='line'>------------------------------------------------</span></code></pre></td></tr></table></div></figure>
+
+
+<p>拷贝如下三行到配置文件</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Auth            NTLM
+</span><span class='line'>PassNT          454D349D302XXXXXXXXXXXXXXXXXXXX9
+</span><span class='line'>PassLM          052764B974CXXXXXXXXXXXXXXXXXXXXC</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>注意：</li>
+</ul>
+
+
+<p>如果配置cntlm代理，需要把ie浏览器里的局域网代理，也切换到cntlm的本地地址上，如127.0.0.1：:3128</p>
+
+<h3>3.3.2. cntlm服务重启</h3>
+
+<ul>
+<li>Windows</li>
+</ul>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>net stop cntlm
+</span><span class='line'>net start cntlm</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>Linux</li>
+</ul>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>apt-get install cntlm
+</span><span class='line'>systemclt restart cntlm</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>4. 常用的代理客户端</h1>
+
+<h1>5. 参考链接</h1>
+
+<p><a href="https://blog.csdn.net/ysdaniel/article/details/6999276">https://blog.csdn.net/ysdaniel/article/details/6999276</a></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Iskey</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2020-01-01T08:44:00+00:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>1</span><span class='date-suffix'>st</span>, <span class='date-year'>2020</span></span> <span class='time'>8:44 am</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/proxy/'>proxy</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2019/12/26/iptables-examples-port-forward/" title="Previous Post: iptables examples">&laquo; iptables examples</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2020/01/05/perf-for-python/" title="Next Post: perf-for-python">perf-for-python &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2020/02/08/ovs-qos/">QoS</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2020/02/02/ansible-stress-scripts/">Ansible-stress</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2020/01/05/perf-for-python/">Perf-for-python</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2020/01/01/cntlm/">Cntlm</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2019/12/26/iptables-examples-port-forward/">Iptables Examples</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+  <h1>Categories</h1>
+    <ul id="category-list"><li><a href='/blog/categories/ansible/'>ansible (2)</a></li><li><a href='/blog/categories/iptables/'>iptables (4)</a></li><li><a href='/blog/categories/k8s/'>k8s (2)</a></li><li><a href='/blog/categories/kernel/'>kernel (5)</a></li><li><a href='/blog/categories/linux/'>linux (5)</a></li><li><a href='/blog/categories/lvm/'>lvm (1)</a></li><li><a href='/blog/categories/makefile/'>makefile (2)</a></li><li><a href='/blog/categories/mq/'>mq (1)</a></li><li><a href='/blog/categories/netfilter/'>netfilter (1)</a></li><li><a href='/blog/categories/octopress/'>octopress (1)</a></li><li><a href='/blog/categories/ovs/'>ovs (3)</a></li><li><a href='/blog/categories/powershell/'>powershell (1)</a></li><li><a href='/blog/categories/proxy/'>proxy (1)</a></li><li><a href='/blog/categories/python/'>python (2)</a></li><li><a href='/blog/categories/regax/'>regax (1)</a></li><li><a href='/blog/categories/sdn/'>sdn (1)</a></li><li><a href='/blog/categories/shell/'>shell (4)</a></li><li><a href='/blog/categories/socket/'>socket (3)</a></li><li><a href='/blog/categories/sourceinsight/'>sourceinsight (1)</a></li><li><a href='/blog/categories/sysctl/'>sysctl (1)</a></li><li><a href='/blog/categories/systemd/'>systemd (1)</a></li><li><a href='/blog/categories/todo/'>todo (1)</a></li><li><a href='/blog/categories/tool/'>tool (8)</a></li><li><a href='/blog/categories/ubuntu/'>ubuntu (1)</a></li><li><a href='/blog/categories/vim/'>vim (1)</a></li><li><a href='/blog/categories/gong-ju/'>工具 (1)</a></li><li><a href='/blog/categories/shu-tong/'>数通 (1)</a></li><li><a href='/blog/categories/she-ji-mo-shi/'>设计模式 (1)</a></li></ul>
+</section>
+<section>
+  <h1>Tag Cloud</h1>
+    <span id="tag-cloud"><a href='/blog/categories/ansible' style='font-size: 115.0%'>ansible(2)</a> <a href='/blog/categories/iptables' style='font-size: 130.0%'>iptables(4)</a> <a href='/blog/categories/k8s' style='font-size: 115.0%'>k8s(2)</a> <a href='/blog/categories/kernel' style='font-size: 137.5%'>kernel(5)</a> <a href='/blog/categories/linux' style='font-size: 137.5%'>linux(5)</a> <a href='/blog/categories/lvm' style='font-size: 107.5%'>lvm(1)</a> <a href='/blog/categories/makefile' style='font-size: 115.0%'>makefile(2)</a> <a href='/blog/categories/mq' style='font-size: 107.5%'>mq(1)</a> <a href='/blog/categories/netfilter' style='font-size: 107.5%'>netfilter(1)</a> <a href='/blog/categories/octopress' style='font-size: 107.5%'>octopress(1)</a> <a href='/blog/categories/ovs' style='font-size: 122.5%'>ovs(3)</a> <a href='/blog/categories/powershell' style='font-size: 107.5%'>powershell(1)</a> <a href='/blog/categories/proxy' style='font-size: 107.5%'>proxy(1)</a> <a href='/blog/categories/python' style='font-size: 115.0%'>python(2)</a> <a href='/blog/categories/regax' style='font-size: 107.5%'>regax(1)</a> <a href='/blog/categories/sdn' style='font-size: 107.5%'>sdn(1)</a> <a href='/blog/categories/shell' style='font-size: 130.0%'>shell(4)</a> <a href='/blog/categories/socket' style='font-size: 122.5%'>socket(3)</a> <a href='/blog/categories/sourceinsight' style='font-size: 107.5%'>sourceinsight(1)</a> <a href='/blog/categories/sysctl' style='font-size: 107.5%'>sysctl(1)</a> <a href='/blog/categories/systemd' style='font-size: 107.5%'>systemd(1)</a> <a href='/blog/categories/todo' style='font-size: 107.5%'>todo(1)</a> <a href='/blog/categories/tool' style='font-size: 160.0%'>tool(8)</a> <a href='/blog/categories/ubuntu' style='font-size: 107.5%'>ubuntu(1)</a> <a href='/blog/categories/vim' style='font-size: 107.5%'>vim(1)</a> <a href='/blog/categories/gong-ju' style='font-size: 107.5%'>工具(1)</a> <a href='/blog/categories/shu-tong' style='font-size: 107.5%'>数通(1)</a> <a href='/blog/categories/she-ji-mo-shi' style='font-size: 107.5%'>设计模式(1)</a> </span>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2020 - Iskey -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

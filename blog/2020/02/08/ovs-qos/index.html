@@ -1,0 +1,323 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>QoS - Iskey's Blog</title>
+  <meta name="author" content="Iskey">
+
+  
+  <meta name="description" content="ovs command 1
+https://docs.pica8.com/pages/viewpage.action?pageId=3083175 useful command 1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+$ &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://iskey.github.io/blog/2020/02/08/ovs-qos/">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Iskey's Blog" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  
+
+  
+
+</head>
+
+<body   >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Iskey's Blog</a></h1>
+  
+    <h2>A free place to write something down.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscription" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS">RSS</a></li>
+  
+</ul>
+  
+<form action="https://www.google.com/search" method="get">
+  <fieldset role="search">
+    <input type="hidden" name="sitesearch" value="iskey.github.io">
+    <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+  </fieldset>
+</form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      <h1 class="entry-title">QoS</h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2020-02-08T03:28:15+00:00'><span class='date'><span class='date-month'>Feb</span> <span class='date-day'>8</span><span class='date-suffix'>th</span>, <span class='date-year'>2020</span></span> <span class='time'>3:28 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><h2>ovs command</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>https://docs.pica8.com/pages/viewpage.action?pageId=3083175</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>useful command</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ ovs-vsctl list port tap53eeb988-c7
+</span><span class='line'>_uuid               : 4712ae65-bced-4ee3-bf7d-3b7fa1e52bb7
+</span><span class='line'>bond_active_slave   : []
+</span><span class='line'>bond_downdelay      : 0
+</span><span class='line'>bond_fake_iface     : false
+</span><span class='line'>bond_mode           : []
+</span><span class='line'>bond_updelay        : 0
+</span><span class='line'>external_ids        : {}
+</span><span class='line'>fake_bridge         : false
+</span><span class='line'>interfaces          : [1fe8bb0a-6383-45ba-bc86-46e1de03f4e0]
+</span><span class='line'>lacp                : []
+</span><span class='line'>mac                 : []
+</span><span class='line'>name                : "tap53eeb988-c7"
+</span><span class='line'>other_config        : {net_uuid="ea7d53f9-45c6-4027-98b5-23053d10373b", network_type=vlan, physical_network="physnet1", segmentation_id="332", tag="4"}
+</span><span class='line'>qos                 : 82bd0134-4e76-405a-ac1d-22b4ea43e55a
+</span><span class='line'>rstp_statistics     : {}
+</span><span class='line'>rstp_status         : {}
+</span><span class='line'>statistics          : {}
+</span><span class='line'>status              : {}
+</span><span class='line'>tag                 : 4
+</span><span class='line'>trunks              : []
+</span><span class='line'>vlan_mode           : []</span></code></pre></td></tr></table></div></figure>
+
+
+<p>查看QOS属性</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ ovs-vsctl list qos 82bd0134-4e76-405a-ac1d-22b4ea43e55a
+</span><span class='line'>_uuid               : 82bd0134-4e76-405a-ac1d-22b4ea43e55a
+</span><span class='line'>external_ids        : {}
+</span><span class='line'>other_config        : {max-rate="800000000"}
+</span><span class='line'>queues              : {0=cc4e5d2e-2dbb-4e5b-a682-d6a28bd7b743}
+</span><span class='line'>type                : linux-htb</span></code></pre></td></tr></table></div></figure>
+
+
+<p>删除QOS并清除网卡QOS</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>ovs-vsctl -- destroy QoS 82bd0134-4e76-405a-ac1d-22b4ea43e55a -- clear Port tap53eeb988 qos
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>libvirtd 限速接口</h3>
+
+<p>Libvirtd默认提供domiftune限制网卡流量</p>
+
+<p>查看虚机接口的限速设置</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>virsh  domiftune 4ffbd71f-3324-4500-8636-f9a275b6e479 tap53eeb988</span></code></pre></td></tr></table></div></figure>
+
+
+<p>设置虚机接口限速</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ virsh domiftune 4ffbd71f-3324-4500-8636-f9a275b6e479 tap53eeb988 --inbound 700000,800000,800000 --outbount 700000,800000,800000 --live</span></code></pre></td></tr></table></div></figure>
+
+
+<p>单位如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>average bandwidth   kilobytes/second 
+</span><span class='line'>peak bandwidth      kilobytes/second 
+</span><span class='line'>burst size          kilobytes</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这里要注意的是domiftune只针对网络模式为nat，route等方式，对模型为bridge, passthrough, private,和hostdev是不支持限制的。</p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+<span class="byline author vcard">Posted by <span class="fn">Iskey</span></span>
+
+      
+
+
+
+
+<time class='entry-date' datetime='2020-02-08T03:28:15+00:00'><span class='date'><span class='date-month'>Feb</span> <span class='date-day'>8</span><span class='date-suffix'>th</span>, <span class='date-year'>2020</span></span> <span class='time'>3:28 am</span></time>
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ovs/'>ovs</a>, <a class='category' href='/blog/categories/sdn/'>sdn</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2020/02/02/ansible-stress-scripts/" title="Previous Post: ansible-stress">&laquo; ansible-stress</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+</div>
+
+<aside class="sidebar">
+  
+    <section>
+  <h1>Recent Posts</h1>
+  <ul id="recent_posts">
+    
+      <li class="post">
+        <a href="/blog/2020/02/08/ovs-qos/">QoS</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2020/02/02/ansible-stress-scripts/">Ansible-stress</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2020/01/05/perf-for-python/">Perf-for-python</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2020/01/01/cntlm/">Cntlm</a>
+      </li>
+    
+      <li class="post">
+        <a href="/blog/2019/12/26/iptables-examples-port-forward/">Iptables Examples</a>
+      </li>
+    
+  </ul>
+</section>
+<section>
+  <h1>Categories</h1>
+    <ul id="category-list"><li><a href='/blog/categories/ansible/'>ansible (2)</a></li><li><a href='/blog/categories/iptables/'>iptables (4)</a></li><li><a href='/blog/categories/k8s/'>k8s (2)</a></li><li><a href='/blog/categories/kernel/'>kernel (5)</a></li><li><a href='/blog/categories/linux/'>linux (5)</a></li><li><a href='/blog/categories/lvm/'>lvm (1)</a></li><li><a href='/blog/categories/makefile/'>makefile (2)</a></li><li><a href='/blog/categories/mq/'>mq (1)</a></li><li><a href='/blog/categories/netfilter/'>netfilter (1)</a></li><li><a href='/blog/categories/octopress/'>octopress (1)</a></li><li><a href='/blog/categories/ovs/'>ovs (3)</a></li><li><a href='/blog/categories/powershell/'>powershell (1)</a></li><li><a href='/blog/categories/proxy/'>proxy (1)</a></li><li><a href='/blog/categories/python/'>python (2)</a></li><li><a href='/blog/categories/regax/'>regax (1)</a></li><li><a href='/blog/categories/sdn/'>sdn (1)</a></li><li><a href='/blog/categories/shell/'>shell (4)</a></li><li><a href='/blog/categories/socket/'>socket (3)</a></li><li><a href='/blog/categories/sourceinsight/'>sourceinsight (1)</a></li><li><a href='/blog/categories/sysctl/'>sysctl (1)</a></li><li><a href='/blog/categories/systemd/'>systemd (1)</a></li><li><a href='/blog/categories/todo/'>todo (1)</a></li><li><a href='/blog/categories/tool/'>tool (8)</a></li><li><a href='/blog/categories/ubuntu/'>ubuntu (1)</a></li><li><a href='/blog/categories/vim/'>vim (1)</a></li><li><a href='/blog/categories/gong-ju/'>工具 (1)</a></li><li><a href='/blog/categories/shu-tong/'>数通 (1)</a></li><li><a href='/blog/categories/she-ji-mo-shi/'>设计模式 (1)</a></li></ul>
+</section>
+<section>
+  <h1>Tag Cloud</h1>
+    <span id="tag-cloud"><a href='/blog/categories/ansible' style='font-size: 115.0%'>ansible(2)</a> <a href='/blog/categories/iptables' style='font-size: 130.0%'>iptables(4)</a> <a href='/blog/categories/k8s' style='font-size: 115.0%'>k8s(2)</a> <a href='/blog/categories/kernel' style='font-size: 137.5%'>kernel(5)</a> <a href='/blog/categories/linux' style='font-size: 137.5%'>linux(5)</a> <a href='/blog/categories/lvm' style='font-size: 107.5%'>lvm(1)</a> <a href='/blog/categories/makefile' style='font-size: 115.0%'>makefile(2)</a> <a href='/blog/categories/mq' style='font-size: 107.5%'>mq(1)</a> <a href='/blog/categories/netfilter' style='font-size: 107.5%'>netfilter(1)</a> <a href='/blog/categories/octopress' style='font-size: 107.5%'>octopress(1)</a> <a href='/blog/categories/ovs' style='font-size: 122.5%'>ovs(3)</a> <a href='/blog/categories/powershell' style='font-size: 107.5%'>powershell(1)</a> <a href='/blog/categories/proxy' style='font-size: 107.5%'>proxy(1)</a> <a href='/blog/categories/python' style='font-size: 115.0%'>python(2)</a> <a href='/blog/categories/regax' style='font-size: 107.5%'>regax(1)</a> <a href='/blog/categories/sdn' style='font-size: 107.5%'>sdn(1)</a> <a href='/blog/categories/shell' style='font-size: 130.0%'>shell(4)</a> <a href='/blog/categories/socket' style='font-size: 122.5%'>socket(3)</a> <a href='/blog/categories/sourceinsight' style='font-size: 107.5%'>sourceinsight(1)</a> <a href='/blog/categories/sysctl' style='font-size: 107.5%'>sysctl(1)</a> <a href='/blog/categories/systemd' style='font-size: 107.5%'>systemd(1)</a> <a href='/blog/categories/todo' style='font-size: 107.5%'>todo(1)</a> <a href='/blog/categories/tool' style='font-size: 160.0%'>tool(8)</a> <a href='/blog/categories/ubuntu' style='font-size: 107.5%'>ubuntu(1)</a> <a href='/blog/categories/vim' style='font-size: 107.5%'>vim(1)</a> <a href='/blog/categories/gong-ju' style='font-size: 107.5%'>工具(1)</a> <a href='/blog/categories/shu-tong' style='font-size: 107.5%'>数通(1)</a> <a href='/blog/categories/she-ji-mo-shi' style='font-size: 107.5%'>设计模式(1)</a> </span>
+</section>
+
+
+
+
+
+  
+</aside>
+
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2020 - Iskey -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
+</p>
+
+</footer>
+  
+
+
+
+
+
+
+
+
+
+
+
+</body>
+</html>

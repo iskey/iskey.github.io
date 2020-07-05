@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Powershell | Iskey's Blog]]></title>
+  <link href="http://iskey.github.io/blog/categories/powershell/atom.xml" rel="self"/>
+  <link href="http://iskey.github.io/"/>
+  <updated>2020-07-05T13:10:18+00:00</updated>
+  <id>http://iskey.github.io/</id>
+  <author>
+    <name><![CDATA[Iskey]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Powershell监控脚本]]></title>
+    <link href="http://iskey.github.io/blog/2019/07/13/powershell-monitor-dir/"/>
+    <updated>2019-07-13T11:45:27+00:00</updated>
+    <id>http://iskey.github.io/blog/2019/07/13/powershell-monitor-dir</id>
+    <content type="html"><![CDATA[<h1>Powershell监控实用脚本</h1>
+
+<p>标签（空格分隔）： 未分类</p>
+
+<hr />
+
+<h2>监控文件变化</h2>
+
+<pre><code># 定义要监控的文件夹，这个文件夹必须先存在。
+
+$folder = 'D:\test'
+
+# 定义每次监控的间隔时间，这时定义为1000毫秒，即1秒
+
+$timeout = 1000
+
+# 创建文件系统监视对象
+
+$FileSystemWatcher = New-Object System.IO.FileSystemWatcher $folder
+
+Write-Host ”按 CTRL+C 来退出对文件夹 $folder 的监控”
+
+while ($true) {
+
+  # 监控文件夹内的所有变化
+
+  $result = $FileSystemWatcher.WaitForChanged('all', $timeout)
+
+  if ($result.TimedOut -eq $false)
+
+   {
+
+   # 当文件夹的内容变化时，发出警告提示
+
+   Write-Warning ('File {0} : {1}' -f $result.ChangeType, $result.name)
+
+   }
+
+} 
+
+Write-Host '监控被取消.'
+</code></pre>
+]]></content>
+  </entry>
+  
+</feed>

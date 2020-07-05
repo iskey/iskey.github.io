@@ -9,7 +9,8 @@
   <meta name="author" content="Iskey">
 
   
-  <meta name="description" content="function wrap function 1
+  <meta name="description" content="ovs command 1
+https://docs.pica8.com/pages/viewpage.action?pageId=3083175 useful command 1
 2
 3
 4
@@ -21,7 +22,17 @@
 10
 11
 12
-def wrapFun(func): def inner(a, b): print('function name:', func.__name__) r = func(a, b) return r &hellip;">
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+$ &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -81,7 +92,7 @@ def wrapFun(func): def inner(a, b): print('function name:', func.__name__) r = f
       
   <header>
     
-      <h1 class="entry-title"><a href="/blog/2019/08/16/python-decorators/">Python_decorators</a></h1>
+      <h1 class="entry-title"><a href="/blog/2020/02/08/ovs-qos/">QoS</a></h1>
     
     
       <p class="meta">
@@ -90,113 +101,20 @@ def wrapFun(func): def inner(a, b): print('function name:', func.__name__) r = f
 
 
 
-<time class='entry-date' datetime='2019-08-16T15:00:36+00:00'><span class='date'><span class='date-month'>Aug</span> <span class='date-day'>16</span><span class='date-suffix'>th</span>, <span class='date-year'>2019</span></span> <span class='time'>3:00 pm</span></time>
+<time class='entry-date' datetime='2020-02-08T03:28:15+00:00'><span class='date'><span class='date-month'>Feb</span> <span class='date-day'>8</span><span class='date-suffix'>th</span>, <span class='date-year'>2020</span></span> <span class='time'>3:28 am</span></time>
         
       </p>
     
   </header>
 
 
-  <div class="entry-content"><h2>function wrap function</h2>
+  <div class="entry-content"><h2>ovs command</h2>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>def wrapFun(func):
-</span><span class='line'>    def inner(a, b):
-</span><span class='line'>        print('function name:', func.__name__)
-</span><span class='line'>        r = func(a, b)
-</span><span class='line'>        return r
-</span><span class='line'>    return inner
-</span><span class='line'>
-</span><span class='line'>@wrapFun
-</span><span class='line'>def myadd(a, b):
-</span><span class='line'>    return a + b
-</span><span class='line'>
-</span><span class='line'>print(myadd(2, 3))</span></code></pre></td></tr></table></div></figure>
+</pre></td><td class='code'><pre><code class=''><span class='line'>https://docs.pica8.com/pages/viewpage.action?pageId=3083175</span></code></pre></td></tr></table></div></figure>
 
 
-<h2>function wrap class</h2>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>def wrapClass(cls):
-</span><span class='line'>    def inner(a):
-</span><span class='line'>        print('class name:', cls.__name__)
-</span><span class='line'>        return cls(a)
-</span><span class='line'>    return inner
-</span><span class='line'>
-</span><span class='line'>@wrapClass
-</span><span class='line'>class Foo():
-</span><span class='line'>    def __init__(self, a):
-</span><span class='line'>        self.a = a
-</span><span class='line'>
-</span><span class='line'>    def fun(self):
-</span><span class='line'>        print('self.a =', self.a)
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'>m = Foo('xiemanR')
-</span><span class='line'>m.fun()</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>class wrap function</h2>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>class ShowFunName():
-</span><span class='line'>    def __init__(self, func):
-</span><span class='line'>        self._func = func
-</span><span class='line'>
-</span><span class='line'>    def __call__(self, a):
-</span><span class='line'>        print('function name:', self._func.__name__)
-</span><span class='line'>        return self._func(a)
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'>@ShowFunName
-</span><span class='line'>def Bar(a):
-</span><span class='line'>    return a
-</span><span class='line'>
-</span><span class='line'>print(Bar('xiemanR'))
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>class wrap class</h2>
+<h2>useful command</h2>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -217,29 +135,172 @@ def wrapFun(func): def inner(a, b): print('function name:', func.__name__) r = f
 <span class='line-number'>17</span>
 <span class='line-number'>18</span>
 <span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>class ShowClassName(object):
-</span><span class='line'>    def __init__(self, cls):
-</span><span class='line'>        self._cls = cls
-</span><span class='line'>
-</span><span class='line'>    def __call__(self, a):
-</span><span class='line'>        print('class name:', self._cls.__name__)
-</span><span class='line'>        return self._cls(a)
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'>@ShowClassName
-</span><span class='line'>class Foobar(object):
-</span><span class='line'>    def __init__(self, a):
-</span><span class='line'>        self.value = a
-</span><span class='line'>
-</span><span class='line'>    def fun(self):
-</span><span class='line'>        print(self.value)
-</span><span class='line'>
-</span><span class='line'>a = Foobar('xiemanR')
-</span><span class='line'>a.fun()
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ ovs-vsctl list port tap53eeb988-c7
+</span><span class='line'>_uuid               : 4712ae65-bced-4ee3-bf7d-3b7fa1e52bb7
+</span><span class='line'>bond_active_slave   : []
+</span><span class='line'>bond_downdelay      : 0
+</span><span class='line'>bond_fake_iface     : false
+</span><span class='line'>bond_mode           : []
+</span><span class='line'>bond_updelay        : 0
+</span><span class='line'>external_ids        : {}
+</span><span class='line'>fake_bridge         : false
+</span><span class='line'>interfaces          : [1fe8bb0a-6383-45ba-bc86-46e1de03f4e0]
+</span><span class='line'>lacp                : []
+</span><span class='line'>mac                 : []
+</span><span class='line'>name                : "tap53eeb988-c7"
+</span><span class='line'>other_config        : {net_uuid="ea7d53f9-45c6-4027-98b5-23053d10373b", network_type=vlan, physical_network="physnet1", segmentation_id="332", tag="4"}
+</span><span class='line'>qos                 : 82bd0134-4e76-405a-ac1d-22b4ea43e55a
+</span><span class='line'>rstp_statistics     : {}
+</span><span class='line'>rstp_status         : {}
+</span><span class='line'>statistics          : {}
+</span><span class='line'>status              : {}
+</span><span class='line'>tag                 : 4
+</span><span class='line'>trunks              : []
+</span><span class='line'>vlan_mode           : []</span></code></pre></td></tr></table></div></figure>
+
+
+<p>查看QOS属性</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ ovs-vsctl list qos 82bd0134-4e76-405a-ac1d-22b4ea43e55a
+</span><span class='line'>_uuid               : 82bd0134-4e76-405a-ac1d-22b4ea43e55a
+</span><span class='line'>external_ids        : {}
+</span><span class='line'>other_config        : {max-rate="800000000"}
+</span><span class='line'>queues              : {0=cc4e5d2e-2dbb-4e5b-a682-d6a28bd7b743}
+</span><span class='line'>type                : linux-htb</span></code></pre></td></tr></table></div></figure>
+
+
+<p>删除QOS并清除网卡QOS</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>ovs-vsctl -- destroy QoS 82bd0134-4e76-405a-ac1d-22b4ea43e55a -- clear Port tap53eeb988 qos
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h2>decorator with params</h2>
+<h3>libvirtd 限速接口</h3>
+
+<p>Libvirtd默认提供domiftune限制网卡流量</p>
+
+<p>查看虚机接口的限速设置</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>virsh  domiftune 4ffbd71f-3324-4500-8636-f9a275b6e479 tap53eeb988</span></code></pre></td></tr></table></div></figure>
+
+
+<p>设置虚机接口限速</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>$ virsh domiftune 4ffbd71f-3324-4500-8636-f9a275b6e479 tap53eeb988 --inbound 700000,800000,800000 --outbount 700000,800000,800000 --live</span></code></pre></td></tr></table></div></figure>
+
+
+<p>单位如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>average bandwidth   kilobytes/second 
+</span><span class='line'>peak bandwidth      kilobytes/second 
+</span><span class='line'>burst size          kilobytes</span></code></pre></td></tr></table></div></figure>
+
+
+<p>这里要注意的是domiftune只针对网络模式为nat，route等方式，对模型为bridge, passthrough, private,和hostdev是不支持限制的。</p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2020/02/02/ansible-stress-scripts/">Ansible-stress</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2020-02-02T08:00:00+00:00'><span class='date'><span class='date-month'>Feb</span> <span class='date-day'>2</span><span class='date-suffix'>nd</span>, <span class='date-year'>2020</span></span> <span class='time'>8:00 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><!-- TOC -->
+
+
+<ul>
+<li><a href="#1-%E5%88%A9%E7%94%A8ansiblestress-ng%E8%BF%9B%E8%A1%8C%E5%8E%8B%E5%8A%9B%E6%B5%8B%E8%AF%95">1. 利用ansible、stress-ng进行压力测试</a>
+
+<ul>
+<li><a href="#11-%E5%8E%8B%E6%B5%8B%E5%88%A9%E5%99%A8-stress-ng">1.1. 压测利器-stress-ng</a></li>
+<li><a href="#12-%E6%9C%80%E7%AE%80%E5%8D%95%E7%9A%84%E8%BF%90%E7%BB%B4%E5%B7%A5%E5%85%B7-ansible">1.2. 最简单的运维工具-ansible</a></li>
+<li><a href="#13-%E5%A6%82%E4%BD%95%E7%AE%A1%E7%90%86%E5%8E%8B%E6%B5%8B%E8%BF%9B%E7%A8%8B-%E7%BB%99%E5%8E%8B%E6%B5%8B%E8%BF%9B%E7%A8%8B%E6%89%BE%E4%B8%AA%E7%88%B9">1.3. 如何管理压测进程-给压测进程找个爹</a></li>
+<li><a href="#14-%E8%B4%9F%E8%BD%BD%E5%9C%BA%E6%99%AF%E5%89%A7%E6%9C%AC%E8%AE%BE%E8%AE%A1-playbook">1.4. 负载场景剧本设计-playbook</a></li>
+<li><a href="#15-%E8%87%AA%E5%8A%A8%E9%87%8D%E8%AF%95-ansile%E7%BB%8F%E5%B8%B8%E4%B8%8D%E9%9D%A0%E8%B0%B1">1.5. 自动重试-ansile经常不靠谱</a></li>
+</ul>
+</li>
+</ul>
+
+
+<!-- /TOC -->
+
+
+<h1>1. 利用ansible、stress-ng进行压力测试</h1>
+
+<h2>1.1. 压测利器-stress-ng</h2>
+
+<p>stress-ng是stress的加强版，完全兼容stress，并在此基础上增加了几百个参数，堪称压测工具中的瑞士军刀。</p>
+
+<p>这里列举几个样例场景：</p>
+
+<p>CPU密集型场景：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>stress-ng --cpu 6 --timeout 300</span></code></pre></td></tr></table></div></figure>
+
+
+<p>该命令会尽量占满6个CPU核</p>
+
+<p>IO密集型场景：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>stress-ng  -i 6 --hdd 1 --timeout 300</span></code></pre></td></tr></table></div></figure>
+
+
+<p>该命令会开启1个worker不停的读写临时文件，同时启动6个workers不停的调用sync系统调用提交缓存，</p>
+
+<p>进程密集型场景：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>(( proc_cnt = `nproc`*10 )); stress-ng --cpu $proc_cnt --pthread 1 timeout 300</span></code></pre></td></tr></table></div></figure>
+
+
+<p>该命令会启动N*10个进程，在只有N个核的系统上，会产生大量的进程切换，模拟进程间竞争CPU的场景</p>
+
+<p>线程密集型场景：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>stress-ng --cpu `nproc` --pthread 1024 timeout 300</span></code></pre></td></tr></table></div></figure>
+
+
+<p>该命令会在N个CPU核的系统上，产生N个进程，每个进程1024个线程，模拟线程间竞争CPU的场景</p>
+
+<p>其它常用样例：</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -271,73 +332,216 @@ def wrapFun(func): def inner(a, b): print('function name:', func.__name__) r = f
 <span class='line-number'>28</span>
 <span class='line-number'>29</span>
 <span class='line-number'>30</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>from functools import wraps
-</span><span class='line'>import logging
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>    stress-ng --vm 8 --vm-bytes 80% -t 1h
 </span><span class='line'>
-</span><span class='line'>def logged(level, name=None, message=None):
-</span><span class='line'>    """
-</span><span class='line'>    Add logging to a function. level is the logging
-</span><span class='line'>    level, name is the logger name, and message is the
-</span><span class='line'>    log message. If name and message aren't specified,
-</span><span class='line'>    they default to the function's module and name.
-</span><span class='line'>    """
-</span><span class='line'>    def decorate(func):
-</span><span class='line'>        logname = name if name else func.__module__
-</span><span class='line'>        log = logging.getLogger(logname)
-</span><span class='line'>        logmsg = message if message else func.__name__
+</span><span class='line'>          run 8 virtual memory stressors that combined use 80% of the available memory for  1
+</span><span class='line'>          hour. Thus each stressor uses 10% of the available memory.
 </span><span class='line'>
-</span><span class='line'>        @wraps(func)
-</span><span class='line'>        def wrapper(*args, **kwargs):
-</span><span class='line'>            log.log(level, logmsg)
-</span><span class='line'>            return func(*args, **kwargs)
-</span><span class='line'>        return wrapper
-</span><span class='line'>    return decorate
+</span><span class='line'>   stress-ng --cpu 4 --io 2 --vm 1 --vm-bytes 1G --timeout 60s
 </span><span class='line'>
-</span><span class='line'># Example use
-</span><span class='line'>@logged(logging.DEBUG)
-</span><span class='line'>def add(x, y):
-</span><span class='line'>    return x + y
+</span><span class='line'>          runs  for  60  seconds with 4 cpu stressors, 2 io stressors and 1 vm stressor using
+</span><span class='line'>          1GB of virtual memory.
 </span><span class='line'>
-</span><span class='line'>@logged(logging.CRITICAL, 'example')
-</span><span class='line'>def spam():
-</span><span class='line'>    print('Spam!')</span></code></pre></td></tr></table></div></figure>
+</span><span class='line'>   stress-ng --iomix 2 --iomix-bytes 10% -t 10m
+</span><span class='line'>
+</span><span class='line'>          runs 2 instances of the mixed I/O stressors using a total of 10% of  the  available
+</span><span class='line'>          file  system  space for 10 minutes. Each stressor will use 5% of the available file
+</span><span class='line'>          system space.
+</span><span class='line'>
+</span><span class='line'>   stress-ng  --cyclic  1  --cyclic-dist  2500  --cyclic-method  clock_ns  --cyclic-prio  100
+</span><span class='line'>   --cyclic-sleep 10000 --hdd 0 -t 1m
+</span><span class='line'>
+</span><span class='line'>          measures  real time scheduling latencies created by the hdd stressor. This uses the
+</span><span class='line'>          high resolution nanosecond clock to  measure  latencies  during  sleeps  of  10,000
+</span><span class='line'>          nanoseconds.  At  the  end  of 1 minute of stressing, the latency distribution with
+</span><span class='line'>          2500 ns intervals will be displayed.  NOTE:  this  must  be  run  with  super  user
+</span><span class='line'>          privileges to enable the real time scheduling to get accurate measurements.
+</span><span class='line'>
+</span><span class='line'>   stress-ng --cpu 8 --cpu-ops 800000
+</span><span class='line'>
+</span><span class='line'>          runs 8 cpu stressors and stops after 800000 bogo operations.
+</span><span class='line'>
+</span><span class='line'>   stress-ng --sequential 2 --timeout 2m --metrics
+</span><span class='line'>
+</span><span class='line'>          run 2 simultaneous instances of all the stressors sequentially one by one, each for
+</span><span class='line'>          2 minutes and summarise with performance metrics at the end.
+</span><span class='line'>
+</span><span class='line'>   stress-ng --cpu 4 --cpu-method fft --cpu-ops 10000 --metrics-brief
+</span><span class='line'>
+</span><span class='line'>          run 4 FFT cpu stressors, stop after 10000 bogo operations  and  produce  a  summary
+</span><span class='line'>          just for the FFT results.
+</span><span class='line'>
+</span><span class='line'>   stress-ng --cpu 0 --cpu-method all -t 1h
+</span><span class='line'>
+</span><span class='line'>          run  cpu  stressors  on  all  online  CPUs  working  through  all the available CPU
+</span><span class='line'>          stressors for 1 hour.
+</span><span class='line'>
+</span><span class='line'>   stress-ng --all 4 --timeout 5m
+</span><span class='line'>
+</span><span class='line'>          run 4 instances of all the stressors for 5 minutes.
+</span><span class='line'>
+</span><span class='line'>   stress-ng --random 64
+</span><span class='line'>
+</span><span class='line'>          run 64 stressors that are randomly chosen from all the available stressors.
+</span><span class='line'>
+</span><span class='line'>   stress-ng --cpu 64 --cpu-method all --verify -t 10m --metrics-brief
+</span><span class='line'>
+</span><span class='line'>          run  64  instances  of  all  the  different  cpu  stressors  and  verify  that  the
+</span><span class='line'>          computations are correct for 10 minutes with a bogo operations summary at the end.
+</span><span class='line'>
+</span><span class='line'>   stress-ng --sequential 0 -t 10m
+</span><span class='line'>
+</span><span class='line'>          run  all  the  stressors one by one for 10 minutes, with the number of instances of
+</span><span class='line'>          each stressor matching the number of online CPUs.
+</span><span class='line'>
+</span><span class='line'>   stress-ng --sequential 8 --class io -t 5m --times
+</span><span class='line'>
+</span><span class='line'>          run all the stressors in the io class one  by  one  for  5  minutes  each,  with  8
+</span><span class='line'>          instances  of  each stressor running concurrently and show overall time utilisation
+</span><span class='line'>          statistics at the end of the run.
+</span><span class='line'>
+</span><span class='line'>   stress-ng --all 0 --maximize --aggressive
+</span><span class='line'>
+</span><span class='line'>          run all the stressors (1 instance of each per  CPU)  simultaneously,  maximize  the
+</span><span class='line'>          settings   (memory   sizes,   file   allocations,   etc.)   and   select  the  most
+</span><span class='line'>          demanding/aggressive options.
+</span><span class='line'>
+</span><span class='line'>   stress-ng --random 32 -x numa,hdd,key
+</span><span class='line'>
+</span><span class='line'>          run 32 randomly selected stressors and exclude the numa, hdd and key stressors
+</span><span class='line'>
+</span><span class='line'>   stress-ng --sequential 4 --class vm --exclude bigheap,brk,stack
+</span><span class='line'>
+</span><span class='line'>          run 4 instances of the VM stressors one after each other,  excluding  the  bigheap,
+</span><span class='line'>          brk and stack stressors
+</span><span class='line'>
+</span><span class='line'>   stress-ng --taskset 0,2-3 --cpu 3
+</span><span class='line'>
+</span><span class='line'>          run 3 instances of the CPU stressor and pin them to CPUs 0, 2 and 3.
+</span></code></pre></td></tr></table></div></figure>
 
 
-<h2>Hidden function decorator in class</h2>
+<h2>1.2. 最简单的运维工具-ansible</h2>
+
+<p>在小规模的机器上执行命令，最简单非ansible莫属，因为ansible默认是不需要在待运维的机器上安装额外的服务，
+只要开启了ssh服务就可以了。</p>
+
+<p>一个简单的ansible使用样例，<a href="https://iskey.github.io/blog/2019/07/07/simple-example-of-ansible/">simple-example-of-ansible</a></p>
+
+<h2>1.3. 如何管理压测进程-给压测进程找个爹</h2>
+
+<p>使用ansible进行加压时，如果执行stress-ng命令，然后马上退出，压测工具进程也就被杀死了，这是因为压测工具默认的父进程是ansible的ssh会话
+这时候可以使用nohup、setsid命令让stress-ng命令后台执行。
+在稍微复杂的场景模拟时，stress-ng可能会启动很多的进程，并且有些时候不仅有stress-ng，而且可能还需要sys-bench等工具，
+当需要调整压力时，可能需要杀掉之前的压测进程，再启动新的压测，如果一个一个的找出来并杀掉进程，不仅操作复杂而且经常
+会产生僵尸进程。</p>
+
+<p>这时候就需要screen、tmux这样的会话管理工具了，通过screen来统一管理会话，所有的压测进程都被托管在screen里，这样如果需要
+关掉所有的压力时，只需要杀掉screen进程就可以了。</p>
+
+<p>例：</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>class Test(object):
-</span><span class='line'>    def _decorator(foo):
-</span><span class='line'>        def magic( self ) :
-</span><span class='line'>            print "start magic"
-</span><span class='line'>            foo( self )
-</span><span class='line'>            print "end magic"
-</span><span class='line'>        return magic
-</span><span class='line'>
-</span><span class='line'>    @_decorator
-</span><span class='line'>    def bar( self ) :
-</span><span class='line'>        print "normal call"
-</span><span class='line'>
-</span><span class='line'>test = Test()
-</span><span class='line'>
-</span><span class='line'>test.bar()</span></code></pre></td></tr></table></div></figure>
+</pre></td><td class='code'><pre><code class=''><span class='line'>screen -S stress -d -m stress-ng -c 1 --timeout 300</span></code></pre></td></tr></table></div></figure>
 
 
-<h2>Hidden function decorator in another class</h2>
+<h2>1.4. 负载场景剧本设计-playbook</h2>
+
+<p>在云计算场景下，经常会需要用压测工具来模拟一些业务场景，stress-ng是最常用到的工具之一，通常ansible+stress-ng就能应付绝大多数的压测场景。
+如果需要模拟的CPU、MEM、磁盘IO模型比较多，用命令行就显得不是那么方便了，这时候就可以用playbook。</p>
+
+<p>github上已经有人写好了一个playbook，<a href="https://github.com/CSCfi/ansible-role-stress">ansible-role-stress</a>。</p>
+
+<p>项目已经在CenstOS 7上测试过了，在Ubuntu上应该也是可以正常工作的。</p>
+
+<p>playbook支持如下角色变量：</p>
+
+<ul>
+<li>test_duration: stress-ng 超时时间</li>
+<li>不同类型压测资源的worker数量:
+
+<ul>
+<li>cpu_workers</li>
+<li>vm_workers</li>
+<li>hdd_workers</li>
+</ul>
+</li>
+<li>每个worker的磁盘或内存使用量
+
+<ul>
+<li>bytes_per_hdd_worker</li>
+<li>bytes_per_vm_worker</li>
+</ul>
+</li>
+</ul>
+
+
+<h2>1.5. 自动重试-ansile经常不靠谱</h2>
+
+<p>使用playbook操作大量机器时，经常会出现机器执行命令失败，比如网络不通、网络闪断等，这时候需要对失败的机器重新执行命令，playbook可以如下命令进行重试</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>ansible-playbook -i host stress.yml --extra-vars "host=all" --limit @$playbook_retry</span></code></pre></td></tr></table></div></figure>
+
+
+<p>其中playbook_retry文件里保存的是需要重试的IP列表,可以从执行回显中分析执行结果，通过awk找出执行失败
+的IP列表，通过ansible-playbook进行重试。</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -369,38 +573,820 @@ def wrapFun(func): def inner(a, b): print('function name:', func.__name__) r = f
 <span class='line-number'>28</span>
 <span class='line-number'>29</span>
 <span class='line-number'>30</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>class Test(object):
-</span><span class='line'>    def _decorator(foo):
-</span><span class='line'>        def magic( self ) :
-</span><span class='line'>            print "start magic"
-</span><span class='line'>            foo( self )
-</span><span class='line'>            print "end magic"
-</span><span class='line'>        return magic
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>#!/bin/sh
 </span><span class='line'>
-</span><span class='line'>    @_decorator
-</span><span class='line'>    def bar( self ) :
-</span><span class='line'>        print "normal call"
+</span><span class='line'>hosts=(
+</span><span class='line'>"host1" 
+</span><span class='line'>"host2" 
+</span><span class='line'>"host3"
+</span><span class='line'>)
 </span><span class='line'>
-</span><span class='line'>    _decorator = staticmethod( _decorator )
+</span><span class='line'>cpu_load=(15 15 15 15 15 15)
+</span><span class='line'>mem_load=(5 5 5 5 5 5)
 </span><span class='line'>
-</span><span class='line'>class TestB( Test ):
-</span><span class='line'>    @Test._decorator
-</span><span class='line'>    def bar( self ):
-</span><span class='line'>        print "override bar in"
-</span><span class='line'>        super( TestB, self ).bar()
-</span><span class='line'>        print "override bar out"
+</span><span class='line'>mkdir -p tmp
 </span><span class='line'>
-</span><span class='line'>print "Normal:"
-</span><span class='line'>test = Test()
-</span><span class='line'>test.bar()
-</span><span class='line'>print
+</span><span class='line'>host_file="./hosts"
 </span><span class='line'>
-</span><span class='line'>print "Inherited:"
-</span><span class='line'>b = TestB()
-</span><span class='line'>b.bar()
-</span><span class='line'>print</span></code></pre></td></tr></table></div></figure>
+</span><span class='line'>total_result="./tmp/total_result.log"
+</span><span class='line'>playbook_result="./tmp/playbook_result.log"
+</span><span class='line'>playbook_retry="./tmp/playbook_retry.txt"
+</span><span class='line'>
+</span><span class='line'>echo "" &gt; $total_result
+</span><span class='line'>
+</span><span class='line'>parse_playbook_result()
+</span><span class='line'>{
+</span><span class='line'>  sed '1,/PLAY RECAP/d' $playbook_result | awk -F" *|=|\t" '
+</span><span class='line'>  /unreachable/{
+</span><span class='line'>  ip=$1
+</span><span class='line'>  ok_cnt=$4
+</span><span class='line'>  changed_cnt=$6
+</span><span class='line'>  unreachable_cnt=$8
+</span><span class='line'>  failed_cnt=$10
+</span><span class='line'>  if(unreachable_cnt!=0 || failed_cnt!=0 || rescued_cnt!=0){
+</span><span class='line'>      print ip
+</span><span class='line'>  }
+</span><span class='line'>  }' &gt; $playbook_retry
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>ansible_playbook()
+</span><span class='line'>{
+</span><span class='line'>  echo "playbook Vars: $2"
+</span><span class='line'>  ansible-playbook -i $host_file $1 --extra-vars "$2" &gt;$playbook_result 2&gt;&1
+</span><span class='line'>
+</span><span class='line'>  cat $playbook_result &gt; $total_result
+</span><span class='line'>  
+</span><span class='line'>  while true
+</span><span class='line'>  do
+</span><span class='line'>      parse_playbook_result
+</span><span class='line'>      RETRY_CNT=$(wc -l $playbook_retry | awk '{print $1}')
+</span><span class='line'>      
+</span><span class='line'>      if [[ $RETRY_CNT != 0 ]]; then
+</span><span class='line'>          echo "Some host will retry:"
+</span><span class='line'>          cat $playbook_retry
+</span><span class='line'>          ansible-playbook -i $host_file stress_stop.yml --extra-vars "$2" --limit @$playbook_retry &gt;/dev/null 2&gt;&1
+</span><span class='line'>          ansible-playbook -i $host_file $1 --extra-vars "$2" --limit @$playbook_retry &gt;$playbook_result 2&gt;&1
+</span><span class='line'>          cat $playbook_result &gt; $total_result
+</span><span class='line'>      else
+</span><span class='line'>          return
+</span><span class='line'>      fi
+</span><span class='line'>  done
+</span><span class='line'>}
+</span><span class='line'>
+</span><span class='line'>for(( i=0; i&lt;${#hosts[@]}; i++ ))
+</span><span class='line'>do
+</span><span class='line'>  echo "Stress" ${hosts[i]}
+</span><span class='line'>  ansible_playbook "stress_start.yml" "host=${hosts[i]} cpu_load=${cpu_load[i]} mem_load=${mem_load[i]}"
+</span><span class='line'>done
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>echo "Over zzz"
+</span></code></pre></td></tr></table></div></figure>
+
+</div>
+  
+  
 
 
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2020/01/05/perf-for-python/">Perf-for-python</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2020-01-05T08:44:00+00:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>5</span><span class='date-suffix'>th</span>, <span class='date-year'>2020</span></span> <span class='time'>8:44 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><!-- TOC -->
+
+
+<ul>
+<li><a href="#1-%E5%90%88%E9%80%82%E7%9A%84%E5%B7%A5%E5%85%B7">1. 合适的工具</a>
+
+<ul>
+<li><a href="#11-pyflame%E4%BD%BF%E7%94%A8">1.1. pyflame使用</a>
+
+<ul>
+<li><a href="#111-%E5%AE%89%E8%A3%85%E4%BE%9D%E8%B5%96%E5%B9%B6%E6%9E%84%E5%BB%BAdebian-or-ubuntu">1.1.1. 安装依赖并构建（Debian or Ubuntu）</a></li>
+<li><a href="#112-%E4%BD%BF%E7%94%A8pyflame">1.1.2. 使用pyflame</a></li>
+<li><a href="#113-%E5%88%86%E6%9E%90%E7%BB%93%E6%9E%9C">1.1.3. 分析结果</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<!-- /TOC -->
+
+
+<p>当前python程序的调试还是比较方便的，不管是用pdb，还是用pycharm的调试IDE（远程的话
+可以用远程的SSH解释器来进行调试）都是非常方便的，但是当涉及到需要快速的了解代码热点流程，多线程
+程序（其实一般是绿线程或协程），用这种调试方法就比较低效了，这时候可以用perf工具，来
+周期性的采集一些python进程的栈信息，从而可以快速的达到上述目的。</p>
+
+<h1>1. 合适的工具</h1>
+
+<p>原始的perf工具，只能跟踪C语言等，或者系统调用等栈信息，如果用来分析python程序的话，
+输出的栈信息，会包含python解释器的一些信息，使得栈信息非常不清晰，难以分析。</p>
+
+<p>我们这里用的pyflame工具，进行python的栈信息采样，<code>https://github.com/uber-archive/pyflame/tree/v1.6.6</code></p>
+
+<h2>1.1. pyflame使用</h2>
+
+<h3>1.1.1. 安装依赖并构建（Debian or Ubuntu）</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>sudo apt-get install autoconf automake autotools-dev g++ pkg-config python-dev python3-dev libtool make
+</span><span class='line'>Once you have the build dependencies installed:
+</span><span class='line'>
+</span><span class='line'>./autogen.sh
+</span><span class='line'>./configure
+</span><span class='line'>make</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>1.1.2. 使用pyflame</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># Attach to PID 12345 and profile it for 1 second
+</span><span class='line'>pyflame -p 12345
+</span><span class='line'>
+</span><span class='line'># Attach to PID 768 and profile it for 5 seconds, sampling every 0.01 seconds
+</span><span class='line'>pyflame -s 5 -r 0.01 -p 768
+</span><span class='line'>
+</span><span class='line'># Run py.test against tests/, emitting sample data to prof.txt
+</span><span class='line'>pyflame -o prof.txt -t py.test tests/</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>1.1.3. 分析结果</h3>
+
+<p>可以使用flamegraph.pl对采集的Prof.txt结果进行解析，flamegraph.pl是一个火焰图生成工具，
+可以从如下地址下载。<code>https://raw.githubusercontent.com/brendangregg/FlameGraph/master/flamegraph.pl</code></p>
+
+<p>利用如下命令可以讲pyflame生成的结果转换为火焰图：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>./flamegraph.pl prof.txt &gt; prof.svg</span></code></pre></td></tr></table></div></figure>
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2020/01/01/cntlm/">Cntlm</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2020-01-01T08:44:00+00:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>1</span><span class='date-suffix'>st</span>, <span class='date-year'>2020</span></span> <span class='time'>8:44 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><!-- TOC -->
+
+
+<ul>
+<li><a href="#1-%E4%BB%A3%E7%90%86%E7%B1%BB%E5%9E%8B">1. 代理类型</a></li>
+<li><a href="#2-%E4%BB%A3%E7%90%86%E6%9C%8D%E5%8A%A1%E5%99%A8">2. 代理服务器</a>
+
+<ul>
+<li><a href="#21-%E4%BB%A3%E7%90%86%E6%9C%8D%E5%8A%A1%E5%99%A8%E4%B8%BB%E8%A6%81%E5%8A%9F%E8%83%BD">2.1. 代理服务器主要功能</a></li>
+<li><a href="#22-%E4%BB%A3%E7%90%86%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E7%89%B9%E6%80%A7%E5%88%86%E7%B1%BB">2.2. 代理服务器的特性分类</a>
+
+<ul>
+<li><a href="#221-%E6%AD%A3%E5%90%91%E4%BB%A3%E7%90%86%E6%9C%8D%E5%8A%A1%E5%99%A8">2.2.1. 正向代理服务器</a></li>
+<li><a href="#222-%E5%8F%8D%E5%90%91%E4%BB%A3%E7%90%86%E6%9C%8D%E5%8A%A1%E5%99%A8">2.2.2. 反向代理服务器</a></li>
+<li><a href="#223-%E9%80%8F%E6%98%8E%E4%BB%A3%E7%90%86%E6%9C%8D%E5%8A%A1%E5%99%A8">2.2.3. 透明代理服务器</a></li>
+</ul>
+</li>
+<li><a href="#23-%E4%BB%A3%E7%90%86%E6%9C%8D%E5%8A%A1%E5%99%A8%E7%9A%84%E7%94%A8%E9%80%94%E5%88%86%E7%B1%BB">2.3. 代理服务器的用途分类</a>
+
+<ul>
+<li><a href="#231-http%E4%BB%A3%E7%90%86">2.3.1. Http代理</a></li>
+<li><a href="#232-ssl%E4%BB%A3%E7%90%86">2.3.2. SSL代理</a></li>
+<li><a href="#233-http-connect%E4%BB%A3%E7%90%86">2.3.3. HTTP CONNECT代理</a></li>
+<li><a href="#234-ftp%E4%BB%A3%E7%90%86">2.3.4. FTP代理</a></li>
+<li><a href="#235-pop3%E4%BB%A3%E7%90%86">2.3.5. POP3代理</a></li>
+<li><a href="#236-telnet%E4%BB%A3%E7%90%86">2.3.6. Telnet代理</a></li>
+<li><a href="#237-socks%E4%BB%A3%E7%90%86">2.3.7. Socks代理</a></li>
+<li><a href="#238-tunnel%E4%BB%A3%E7%90%86">2.3.8. TUNNEL代理</a></li>
+<li><a href="#239-%E6%96%87%E7%8C%AE%E4%BB%A3%E7%90%86">2.3.9. 文献代理</a></li>
+<li><a href="#2310-%E6%95%99%E8%82%B2%E7%BD%91%E4%BB%A3%E7%90%86">2.3.10. 教育网代理</a></li>
+<li><a href="#2311-%E8%B7%B3%E6%9D%BF%E4%BB%A3%E7%90%86">2.3.11. 跳板代理</a></li>
+<li><a href="#2312-ssso%E4%BB%A3%E7%90%86">2.3.12. Ssso代理</a></li>
+<li><a href="#2313-flat%E4%BB%A3%E7%90%86">2.3.13. Flat代理</a></li>
+<li><a href="#2314-softe%E4%BB%A3%E7%90%86">2.3.14. SoftE代理</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#3-%E5%B8%B8%E7%94%A8%E7%9A%84%E4%BB%A3%E7%90%86%E6%9C%8D%E5%8A%A1%E5%99%A8">3. 常用的代理服务器</a>
+
+<ul>
+<li><a href="#31-shadowsocks">3.1. shadowsocks</a></li>
+<li><a href="#32-shuttle">3.2. shuttle</a></li>
+<li><a href="#33-cntlm">3.3. cntlm</a>
+
+<ul>
+<li><a href="#331-cntlm%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AE">3.3.1. cntlm安装配置</a></li>
+<li><a href="#332-cntlm%E6%9C%8D%E5%8A%A1%E9%87%8D%E5%90%AF">3.3.2. cntlm服务重启</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#4-%E5%B8%B8%E7%94%A8%E7%9A%84%E4%BB%A3%E7%90%86%E5%AE%A2%E6%88%B7%E7%AB%AF">4. 常用的代理客户端</a></li>
+<li><a href="#5-%E5%8F%82%E8%80%83%E9%93%BE%E6%8E%A5">5. 参考链接</a></li>
+</ul>
+
+
+<!-- /TOC -->
+
+
+<h1>1. 代理类型</h1>
+
+<h1>2. 代理服务器</h1>
+
+<h2>2.1. 代理服务器主要功能</h2>
+
+<ul>
+<li><p>设置用户验证和记帐功能，可按用户进行记帐，没有登记的用户无权通过代理服务器访问Internet网。并对用户的访问时间、访问地点、信息流量进行统计。</p></li>
+<li><p>对用户进行分级管理，设置不同用户的访问权限，对外界或内部的Internet地址进行过滤，设置不同的访问权限。</p></li>
+<li><p>增加缓冲器(Cache)，提高访问速度，对经常访问的地址创建缓冲区，大大提高热门站点的访问效率。通常代理服务器都设置一个较大的硬盘缓冲区(可能高达几个GB或更大)，当有外界的信息通过时，同时也将其保存到缓冲区中，当其他用户再访问相同的信息时，则直接由缓冲区中取出信息，传给用户，以提高访问速度。</p></li>
+<li><p>连接Internet与Internet，充当防火墙(Firewall):因为所有内部网的用户通过代理服务器访问外界时，只映射为一个IP地址，所以外界不能直接访问到内部网；同时可以设置IP地址过滤，限制内部网对外部的访问权限。</p></li>
+<li><p>节省IP开销:代理服务器允许使用大量的伪IP地址，节约网上资源，即用代理服务器可以减少对IP地址的需求，对于使用局域网方式接入Internet ，如果为局域网(LAN)内的每一个用户都申请一个IP地址，其费用可想而知。但使用代理服务器后，只需代理服务器上有一个合法的IP地址，LAN内其他用户可以使用10.<em>.</em>.*这样的私有IP地址，这样可以节约大量的IP，降低网络的维护成本。</p></li>
+</ul>
+
+
+<h2>2.2. 代理服务器的特性分类</h2>
+
+<h3>2.2.1. 正向代理服务器</h3>
+
+<p>正向代理服务器位于用户与目标服务器之间，用户通过对代理服务器发送指向目标服务器的请求来获得资源。用户端需要作一些设定才可以使用正向代理服务器，而反向/透明代理服务器是不需要对用户端进行任何设定的。</p>
+
+<h3>2.2.2. 反向代理服务器</h3>
+
+<p>反向代理服务器同样位于用户与目标服务器之间，但对于用户而言，反向代理服务器就相当于目标服务器，即用户直接访问反向代理服务器就可以获得目标服务器的资源。同时，用户不需要知道目标服务器地址，也无需在用户端作任何设定。反向代理服务器通常可用来作Web加速，即使用反向代理作为Web服务器的前置机来降低网络和服务器的负载，提高访问效率。</p>
+
+<h3>2.2.3. 透明代理服务器</h3>
+
+<p>透明代理服务器位于于用户与目标服务器之间.和前两种服务器不同的是，用户即不需要对客户端进行任何设定，也无需知道代理服务器的地址。用户只需要向目标服务器上的资源发起请求即可，然后透明代理服务器会将系统的请求重新定向到代理服务器，然后由代理服务器获得目标资源并返回给用户端。通常，透明代理服务器在局域网中应用。</p>
+
+<h2>2.3. 代理服务器的用途分类</h2>
+
+<h3>2.3.1. Http代理</h3>
+
+<p>代理客户机的http访问，主要代理浏览器访问网页，它的端口一般为80、8080、3128等。</p>
+
+<h3>2.3.2. SSL代理</h3>
+
+<p>支持最高128位加密强度的http代理，可以作为访问加密网站的代理。加密网站是指以<a href="https://%E5%BC%80%E5%A7%8B%E7%9A%84%E7%BD%91%E7%AB%99%E3%80%82ssl%E7%9A%84%E6%A0%87%E5%87%86%E7%AB%AF%E5%8F%A3%E4%B8%BA443%E3%80%82">https://%E5%BC%80%E5%A7%8B%E7%9A%84%E7%BD%91%E7%AB%99%E3%80%82ssl%E7%9A%84%E6%A0%87%E5%87%86%E7%AB%AF%E5%8F%A3%E4%B8%BA443%E3%80%82</a></p>
+
+<h3>2.3.3. HTTP CONNECT代理</h3>
+
+<p>允许用户建立TCP连接到任何端口的代理服务器，这种代理不仅可用于HTTP，还包括FTP、IRC、RM流服务等。</p>
+
+<h3>2.3.4. FTP代理</h3>
+
+<p>代理客户机上的ftp软件访问ftp服务器，其端口一般为21、2121。</p>
+
+<h3>2.3.5. POP3代理</h3>
+
+<p>代理客户机上的邮件软件用pop3方式收邮件，其端口一般为110。</p>
+
+<h3>2.3.6. Telnet代理</h3>
+
+<p>能够代理通信机的telnet，用于远程控制，入侵时经常使用。其端口一般为23。</p>
+
+<h3>2.3.7. Socks代理</h3>
+
+<p>是全能代理，就像有很多跳线的转接板，它只是简单地将一端的系统连接到另外一端。支持多种协议，包括http、ftp请求及其它类型的请求。它分socks 4 和socks 5两种类型，socks 4只支持TCP协议而socks 5支持TCP/UDP协议，还支持各种身份验证机制等协议。其标准端口为1080。</p>
+
+<h3>2.3.8. TUNNEL代理</h3>
+
+<p>经HTTPTunnet程序转换的数据包封装成http请求（Request）来穿透防火墙，允许利用HTTP服务器做任何TCP可以做的事情，功能相当于Socks5。</p>
+
+<h3>2.3.9. 文献代理</h3>
+
+<p>可以用来查询数据库的代理，通过这些代理，可以获得互联网的相关科研学术的数据库资源，例如查询Sciencedirect网站（简称SD）、Academic Press、IEEE，SPRINGER等数据库。</p>
+
+<h3>2.3.10. 教育网代理</h3>
+
+<p>指学术教育机构局域网通过特定的代理服务器可使无出国权限或无访问某IP段权限的计算机访问相关资源。</p>
+
+<h3>2.3.11. 跳板代理</h3>
+
+<p>应用于跳板程序，可以看作一种具有动态加密的特殊socks5代理，，也可直接用于PSD软件。其端口一般为1813。</p>
+
+<h3>2.3.12. Ssso代理</h3>
+
+<p>代理客户机上的ssso程序访问远程网站，具有SSL加密强度的超级代理，支持socks。</p>
+
+<h3>2.3.13. Flat代理</h3>
+
+<p>代理客户机上的flatsurfer程序访问远程网站，具有高强度加密数据流的特殊代理，支持socks，最大可设置三次级联，可以设置穿越代理。其端口一般为6700。</p>
+
+<h3>2.3.14. SoftE代理</h3>
+
+<p>代理客户机上的SoftEther程序访问远程网站，应用虚拟集线器HUB和虚拟网卡技术，具备VPN功能及多种认证方式的代理，符合https协议。</p>
+
+<h1>3. 常用的代理服务器</h1>
+
+<h2>3.1. shadowsocks</h2>
+
+<h2>3.2. shuttle</h2>
+
+<h2>3.3. cntlm</h2>
+
+<p>NTLM是微软开发的http代理鉴权验证协议，只有原生支持NTLMv2鉴权协议的软件才能使用其代理服务，Cntlm是一款C开发的支持NTLM协议鉴权，并作为中间代理服务器，未其它
+软件、OS提供代理服务的软件。</p>
+
+<h3>3.3.1. cntlm安装配置</h3>
+
+<p>常用的代理配置如下：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Username test_user
+</span><span class='line'>Domain        test_domain
+</span><span class='line'>Password  test_password
+</span><span class='line'>
+</span><span class='line'>Proxy     proxy.xxx.com:8080
+</span><span class='line'>
+</span><span class='line'>NoProxy     127.0.0.1
+</span><span class='line'>
+</span><span class='line'>Listen        3128
+</span><span class='line'>
+</span><span class='line'>Allow     0/0
+</span><span class='line'>
+</span><span class='line'>Deny      0/0</span></code></pre></td></tr></table></div></figure>
+
+
+<p>需要配置鉴权HASH信息，可以通过如下命令获取，</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>C:\Program Files (x86)\Cntlm&gt;cntlm.exe -M  https://www.baidu.com
+</span><span class='line'>      0 [main] cntlm 48032 find_fast_cwd: WARNING: Couldn't compute FAST_CWD pointer.  Please report this problem to
+</span><span class='line'>the public mailing list cygwin@cygwin.com
+</span><span class='line'>cygwin warning:
+</span><span class='line'>  MS-DOS style path detected: C:\Program Files (x86)\Cntlm\cntlm.ini
+</span><span class='line'>  Preferred POSIX equivalent is: /Cntlm/cntlm.ini
+</span><span class='line'>  CYGWIN environment variable option "nodosfilewarning" turns off this warning.
+</span><span class='line'>  Consult the user's guide for more details about POSIX paths:
+</span><span class='line'>    http://cygwin.com/cygwin-ug-net/using.html#using-pathnames
+</span><span class='line'>Password:
+</span><span class='line'>Config profile  1/4... Credentials rejected
+</span><span class='line'>Config profile  2/4... OK (HTTP code: 500)
+</span><span class='line'>----------------------------[ Profile  1 ]------
+</span><span class='line'>Auth            NTLM
+</span><span class='line'>PassNT          454D349D302XXXXXXXXXXXXXXXXXXXX9
+</span><span class='line'>PassLM          052764B974CXXXXXXXXXXXXXXXXXXXXC
+</span><span class='line'>------------------------------------------------</span></code></pre></td></tr></table></div></figure>
+
+
+<p>拷贝如下三行到配置文件</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Auth            NTLM
+</span><span class='line'>PassNT          454D349D302XXXXXXXXXXXXXXXXXXXX9
+</span><span class='line'>PassLM          052764B974CXXXXXXXXXXXXXXXXXXXXC</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>注意：</li>
+</ul>
+
+
+<p>如果配置cntlm代理，需要把ie浏览器里的局域网代理，也切换到cntlm的本地地址上，如127.0.0.1：:3128</p>
+
+<h3>3.3.2. cntlm服务重启</h3>
+
+<ul>
+<li>Windows</li>
+</ul>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>net stop cntlm
+</span><span class='line'>net start cntlm</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>Linux</li>
+</ul>
+
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>apt-get install cntlm
+</span><span class='line'>systemclt restart cntlm</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>4. 常用的代理客户端</h1>
+
+<h1>5. 参考链接</h1>
+
+<p><a href="https://blog.csdn.net/ysdaniel/article/details/6999276">https://blog.csdn.net/ysdaniel/article/details/6999276</a></p>
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
+      <h1 class="entry-title"><a href="/blog/2019/12/26/iptables-examples-port-forward/">Iptables Examples</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2019-12-26T08:44:00+00:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>26</span><span class='date-suffix'>th</span>, <span class='date-year'>2019</span></span> <span class='time'>8:44 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><!-- TOC -->
+
+
+<ul>
+<li><a href="#1-iptables%E5%91%BD%E4%BB%A4%E7%AE%80%E4%BB%8B">1. iptables命令简介</a></li>
+<li><a href="#2-%E8%AF%AD%E6%B3%95">2. 语法</a>
+
+<ul>
+<li><a href="#21-%E9%80%89%E9%A1%B9">2.1. 选项</a></li>
+<li><a href="#22-%E5%91%BD%E4%BB%A4%E8%A7%A3%E9%87%8A">2.2. 命令解释</a>
+
+<ul>
+<li><a href="#221-%E8%A1%A8%E5%90%8D">2.2.1. 表名</a></li>
+</ul>
+</li>
+<li><a href="#23-%E5%A4%87%E4%BB%BD%E7%B3%BB%E7%BB%9F%E7%8E%B0%E6%9C%89%E7%9A%84%E8%A7%84%E5%88%99">2.3. 备份系统现有的规则</a></li>
+<li><a href="#24-%E6%81%A2%E5%A4%8D%E7%B3%BB%E7%BB%9F%E5%A4%87%E4%BB%BD%E7%9A%84%E8%A7%84%E5%88%99">2.4. 恢复系统备份的规则</a></li>
+<li><a href="#25-%E4%BF%9D%E5%AD%98%E8%A7%84%E5%88%99">2.5. 保存规则</a></li>
+<li><a href="#26-%E5%BC%80%E6%94%BE%E6%89%80%E6%9C%89%E7%AB%AF%E5%8F%A3">2.6. 开放所有端口</a></li>
+</ul>
+</li>
+</ul>
+
+
+<!-- /TOC -->
+
+
+<p>linux命令之iptables</p>
+
+<h1>1. iptables命令简介</h1>
+
+<p>iptables命令是Linux上常用的防火墙软件，是netfilter项目的一部分。可以直接配置，也可以通过许多前端和图形界面配置。它可以用来过滤、阻塞不需要的流量，允许正常的网络流浪通行。</p>
+
+<h1>2. 语法</h1>
+
+<p>iptables(选项)(参数)</p>
+
+<h2>2.1. 选项</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>-t&lt;表&gt;：指定要操纵的表；
+</span><span class='line'>-A：向规则链中添加条目；
+</span><span class='line'>-D：从规则链中删除条目；
+</span><span class='line'>-i：向规则链中插入条目；
+</span><span class='line'>-R：替换规则链中的条目；
+</span><span class='line'>-L：显示规则链中已有的条目；
+</span><span class='line'>-F：清楚规则链中已有的条目；
+</span><span class='line'>-Z：清空规则链中的数据包计算器和字节计数器；
+</span><span class='line'>-N：创建新的用户自定义规则链；
+</span><span class='line'>-P：定义规则链中的默认目标；
+</span><span class='line'>-h：显示帮助信息；
+</span><span class='line'>-p：指定要匹配的数据包协议类型；
+</span><span class='line'>-s：指定要匹配的数据包源ip地址；
+</span><span class='line'>-j&lt;目标&gt;：指定要跳转的目标；
+</span><span class='line'>-i&lt;网络接口&gt;：指定数据包进入本机的网络接口；
+</span><span class='line'>-o&lt;网络接口&gt;：指定数据包要离开本机所使用的网络接口。</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>2.2. 命令顺序</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>iptables -t 表名 &lt;-A/I/D/R&gt; 规则链名 [规则号] &lt;-i/o 网卡名&gt; -p 协议名 &lt;-s 源IP/源子网&gt; --sport 源端口 &lt;-d 目标IP/目标子网&gt; --dport 目标端口 -j 动作</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>2.2. 命令解释</h2>
+
+<h3>2.2.1. 表名</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>raw：高级功能，如：网址过滤。
+</span><span class='line'>mangle：数据包修改（QOS），用于实现服务质量。
+</span><span class='line'>net：地址转换，用于网关路由器。
+</span><span class='line'>filter：包过滤，用于防火墙规则。</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>2.3.2. 规则链名</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>INPUT链：处理输入数据包。
+</span><span class='line'>OUTPUT链：处理输出数据包。
+</span><span class='line'>PORWARD链：处理转发数据包。
+</span><span class='line'>PREROUTING链：用于目标地址转换（DNAT）。
+</span><span class='line'>POSTOUTING链：用于源地址转换（SNAT）。</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>2.3.3. 动作</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>accept：接收数据包。
+</span><span class='line'>drop：丢弃数据包。
+</span><span class='line'>redirct：重定向、映射、透明代理。
+</span><span class='line'>snat：源地址转换。
+</span><span class='line'>dnat：目标地址转换。
+</span><span class='line'>masquerade：IP伪装（NAT），用于ADSL。
+</span><span class='line'>log：日志记录。</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>3. 常用命令</h1>
+
+<h2>3.1. 开放指定的端口</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>iptables -A INPUT -s 127.0.0.1 -d 127.0.0.1 -j ACCEPT               #允许本地回环接口(即运行本机访问本机)
+</span><span class='line'>iptables -A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT    #允许已建立的或相关连的通行
+</span><span class='line'>iptables -A OUTPUT -j ACCEPT         #允许所有本机向外的访问
+</span><span class='line'>iptables -A INPUT -p tcp --dport 22 -j ACCEPT    #允许访问22端口
+</span><span class='line'>iptables -A INPUT -p tcp --dport 80 -j ACCEPT    #允许访问80端口
+</span><span class='line'>iptables -A INPUT -p tcp --dport 21 -j ACCEPT    #允许ftp服务的21端口
+</span><span class='line'>iptables -A INPUT -p tcp --dport 20 -j ACCEPT    #允许FTP服务的20端口
+</span><span class='line'>iptables -A INPUT -j reject       #禁止其他未允许的规则访问
+</span><span class='line'>iptables -A FORWARD -j REJECT     #禁止其他未允许的规则访问</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>3.2. 屏蔽IP</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>iptables -I INPUT -s 123.45.6.7 -j DROP       #屏蔽单个IP的命令
+</span><span class='line'>iptables -I INPUT -s 123.0.0.0/8 -j DROP      #封整个段即从123.0.0.1到123.255.255.254的命令
+</span><span class='line'>iptables -I INPUT -s 124.45.0.0/16 -j DROP    #封IP段即从123.45.0.1到123.45.255.254的命令
+</span><span class='line'>iptables -I INPUT -s 123.45.6.0/24 -j DROP    #封IP段即从123.45.6.1到123.45.6.254的命令是</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>3.3. 查看已添加的iptables规则</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>iptables -L -n -v
+</span><span class='line'>
+</span><span class='line'>Chain INPUT (policy DROP 48106 packets, 2690K bytes)
+</span><span class='line'> pkts bytes target     prot opt in     out     source               destination         
+</span><span class='line'> 5075  589K ACCEPT     all  --  lo     *       0.0.0.0/0            0.0.0.0/0           
+</span><span class='line'> 191K   90M ACCEPT     tcp  --  *      *       0.0.0.0/0            0.0.0.0/0           tcp dpt:22
+</span><span class='line'>1499K  133M ACCEPT     tcp  --  *      *       0.0.0.0/0            0.0.0.0/0           tcp dpt:80
+</span><span class='line'>4364K 6351M ACCEPT     all  --  *      *       0.0.0.0/0            0.0.0.0/0           state RELATED,ESTABLISHED
+</span><span class='line'> 6256  327K ACCEPT     icmp --  *      *       0.0.0.0/0            0.0.0.0/0           
+</span><span class='line'>
+</span><span class='line'>Chain FORWARD (policy ACCEPT 0 packets, 0 bytes)
+</span><span class='line'> pkts bytes target     prot opt in     out     source               destination         
+</span><span class='line'>
+</span><span class='line'>Chain OUTPUT (policy ACCEPT 3382K packets, 1819M bytes)
+</span><span class='line'> pkts bytes target     prot opt in     out     source               destination         
+</span><span class='line'> 5075  589K ACCEPT     all  --  *      lo      0.0.0.0/0            0.0.0.0/0  </span></code></pre></td></tr></table></div></figure>
+
+
+<h2>3.4. 删除已添加的iptables规则</h2>
+
+<p>将所有iptables以序号标记显示，执行：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>iptables -L -n --line-numbers</span></code></pre></td></tr></table></div></figure>
+
+
+<p>比如要删除INPUT里序号为8的规则，执行：</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>iptables -D INPUT 8</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>2.3. 备份系统现有的规则</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>iptables-save &gt; iptables.rules</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>2.4. 恢复系统备份的规则</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>iptables-restore &lt; iptables.rules</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>2.5. 保存规则</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>service iptables save</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>2.6. 开放所有端口</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>iptables -P INPUT ACCEPT   
+</span><span class='line'>iptables -P OUTPUT ACCEPT  </span></code></pre></td></tr></table></div></figure>
+
+
+<h2>3.9. 端口转发</h2>
+
+<h3>3.9.1. 同一端口转发</h3>
+
+<p>(192.168.0.132上开通1521端口访问 iptables -A RH-Firewall-1-INPUT -m state &ndash;state NEW -m tcp -p tcp &ndash;dport 1521 -j ACCEPT)</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>iptables -t nat -I PREROUTING -p tcp --dport 1521 -j DNAT --to 192.168.0.211
+</span><span class='line'>iptables -t nat -I POSTROUTING -p tcp --dport 1521 -j MASQUERADE</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>3.9.2. 不同端口转发</h3>
+
+<p>(192.168.0.132上开通21521端口访问 iptables -A RH-Firewall-1-INPUT -m state &ndash;state NEW -m tcp -p tcp &ndash;dport 21521 -j ACCEPT)</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>iptables -t nat -A PREROUTING -p tcp -m tcp --dport21521 -j DNAT --to-destination192.168.0.211:1521
+</span><span class='line'>iptables -t nat -A POSTROUTING -s 192.168.0.0/16 -d 192.168.0.211 -p tcp -m tcp --dport 1521 -j SNAT --to-source 192.168.0.132</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>3.9.3. 以上两条等价配置(更简单[指定网卡]):</h3>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>iptables -t nat -A PREROUTING -p tcp -i eth0 --dport 31521 -j DNAT --to 192.168.0.211:1521
+</span><span class='line'>iptables -t nat -A POSTROUTING -j MASQUERADE</span></code></pre></td></tr></table></div></figure>
 
 </div>
   
@@ -911,6 +1897,113 @@ def wrapFun(func): def inner(a, b): print('function name:', func.__name__) r = f
       
   <header>
     
+      <h1 class="entry-title"><a href="/blog/2019/07/13/powershell-monitor-dir/">Powershell监控脚本</a></h1>
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2019-07-13T11:45:27+00:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>13</span><span class='date-suffix'>th</span>, <span class='date-year'>2019</span></span> <span class='time'>11:45 am</span></time>
+        
+      </p>
+    
+  </header>
+
+
+  <div class="entry-content"><h1>Powershell监控实用脚本</h1>
+
+<p>标签（空格分隔）： 未分类</p>
+
+<hr />
+
+<h2>监控文件变化</h2>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'># 定义要监控的文件夹，这个文件夹必须先存在。
+</span><span class='line'>
+</span><span class='line'>$folder = 'D:\test'
+</span><span class='line'>
+</span><span class='line'># 定义每次监控的间隔时间，这时定义为1000毫秒，即1秒
+</span><span class='line'>
+</span><span class='line'>$timeout = 1000
+</span><span class='line'>
+</span><span class='line'># 创建文件系统监视对象
+</span><span class='line'>
+</span><span class='line'>$FileSystemWatcher = New-Object System.IO.FileSystemWatcher $folder
+</span><span class='line'>
+</span><span class='line'>Write-Host ”按 CTRL+C 来退出对文件夹 $folder 的监控”
+</span><span class='line'>
+</span><span class='line'>while ($true) {
+</span><span class='line'>
+</span><span class='line'>  # 监控文件夹内的所有变化
+</span><span class='line'>
+</span><span class='line'>  $result = $FileSystemWatcher.WaitForChanged('all', $timeout)
+</span><span class='line'>
+</span><span class='line'>  if ($result.TimedOut -eq $false)
+</span><span class='line'>
+</span><span class='line'>   {
+</span><span class='line'>
+</span><span class='line'>   # 当文件夹的内容变化时，发出警告提示
+</span><span class='line'>
+</span><span class='line'>   Write-Warning ('File {0} : {1}' -f $result.ChangeType, $result.name)
+</span><span class='line'>
+</span><span class='line'>   }
+</span><span class='line'>
+</span><span class='line'>} 
+</span><span class='line'>
+</span><span class='line'>Write-Host '监控被取消.'
+</span><span class='line'>    </span></code></pre></td></tr></table></div></figure>
+
+
+
+</div>
+  
+  
+
+
+    </article>
+  
+  
+    <article>
+      
+  <header>
+    
       <h1 class="entry-title"><a href="/blog/2019/07/13/sample-of-ipsec/">Usage of IPSec</a></h1>
     
     
@@ -1034,1202 +2127,6 @@ def wrapFun(func): def inner(a, b): print('function name:', func.__name__) r = f
 
     </article>
   
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2019/07/07/simple-example-of-ansible/">Simple Example of Ansible</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2019-07-07T15:34:11+00:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>7</span><span class='date-suffix'>th</span>, <span class='date-year'>2019</span></span> <span class='time'>3:34 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>Ansible 是一个自动化运维工具，相似的工具还有SaltStack、Puppet、Chef、Fabric，其中Ansible、SaltStack、Fabri都是用Python实现的，现在使用Python的同学比较多，维护起来也比较顺手，而Puppet、Chef是用ruby写的，各有各的拥趸。</p>
-
-<p>各个工具的对比:</p>
-
-<table>
-<thead>
-<tr>
-<th style="text-align:center;">工具 </th>
-<th style="text-align:center;">    语言 </th>
-<th style="text-align:center;">  架构 </th>
-<th style="text-align:center;">  协议</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td style="text-align:center;">Puppet </td>
-<td style="text-align:center;">    Ruby </td>
-<td style="text-align:center;">  C/S </td>
-<td style="text-align:center;">   HTTP</td>
-</tr>
-<tr>
-<td style="text-align:center;">Chef </td>
-<td style="text-align:center;">  Ruby </td>
-<td style="text-align:center;">  C/S </td>
-<td style="text-align:center;">   HTTP</td>
-</tr>
-<tr>
-<td style="text-align:center;">Ansible </td>
-<td style="text-align:center;">   Python </td>
-<td style="text-align:center;"> 无Client </td>
-<td style="text-align:center;">    SSH</td>
-</tr>
-<tr>
-<td style="text-align:center;">Saltstack </td>
-<td style="text-align:center;"> Python </td>
-<td style="text-align:center;">    C/S(可无Client) </td>
-<td style="text-align:center;"> SSH/ZMQ/RAET</td>
-</tr>
-</tbody>
-</table>
-
-
-<hr />
-
-<h3>一个简单的使用ansible的例子</h3>
-
-<p>我们的例子里，在当前目录有三个文件：<code>ansible.cfg</code>,<code>first.yml</code>,<code>hosts</code></p>
-
-<h4>ansible.cfg</h4>
-
-<p>其中<code>ansible.cfg</code>文件是我们例子的ansible命令的配置文件，这里主要修改inventory字段，指定我们需要使用当前目录的hosts文件作为主机列表配置文件</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class='C'><span class='line'><span class="p">[</span><span class="n">defaults</span><span class="p">]</span>
-</span><span class='line'>
-</span><span class='line'><span class="cp"># some basic default values...</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">inventory</span>      <span class="o">=</span> <span class="p">.</span><span class="o">/</span><span class="n">hosts</span>
-</span><span class='line'><span class="cp">#inventory      = /root/work/ansible/hosts</span>
-</span><span class='line'><span class="cp">#library        = /usr/share/my_modules/</span>
-</span><span class='line'><span class="cp">#remote_tmp     = $HOME/.ansible/tmp</span>
-</span><span class='line'><span class="cp">#forks          = 5</span>
-</span><span class='line'><span class="cp">#poll_interval  = 15</span>
-</span><span class='line'><span class="cp">#sudo_user      = root</span>
-</span><span class='line'><span class="cp">#ask_sudo_pass = True</span>
-</span><span class='line'><span class="cp">#ask_pass      = True</span>
-</span><span class='line'><span class="cp">#transport      = smart</span>
-</span><span class='line'><span class="cp">#remote_port    = 22</span>
-</span><span class='line'><span class="cp">#module_lang    = C</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>ansible命令执行的时候，会按照如下顺序搜索配置文件:</p>
-
-<ul>
-<li>ANSIBLE_CONFIG (an environment variable)</li>
-<li>ansible.cfg (in the current directory)</li>
-<li>.ansible.cfg (in the home directory)</li>
-<li>/etc/ansible/ansible.cfg</li>
-</ul>
-
-
-<h4>hosts</h4>
-
-<p>hosts文件指定了我们需要的管理的主机列表：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='C'><span class='line'><span class="cp"># cat hosts</span>
-</span><span class='line'><span class="p">[</span><span class="n">host_iskey</span><span class="p">]</span>
-</span><span class='line'><span class="n">x</span><span class="p">.</span><span class="n">x</span><span class="p">.</span><span class="n">x</span><span class="mf">.1</span>
-</span><span class='line'><span class="n">x</span><span class="p">.</span><span class="n">x</span><span class="p">.</span><span class="n">x</span><span class="mf">.2</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="p">[</span><span class="nl">host_iskey</span><span class="p">:</span><span class="n">vars</span><span class="p">]</span>
-</span><span class='line'><span class="n">ansible_ssh_pass</span><span class="o">=</span><span class="err">&#39;</span><span class="n">xxxxxxxx</span><span class="err">&#39;</span>
-</span><span class='line'><span class="n">ansible_ssh_user</span><span class="o">=</span><span class="err">&#39;</span><span class="n">root</span><span class="err">&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h4>first.yml</h4>
-
-<p>first.yml是我们的playbook，运行了一个很简单的命令，<code>touch /iskey</code></p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='C'><span class='line'><span class="cp"># cat first.yml</span>
-</span><span class='line'><span class="o">-</span> <span class="nl">hosts</span><span class="p">:</span> <span class="n">host_iskey</span>
-</span><span class='line'>  <span class="nl">gather_facts</span><span class="p">:</span> <span class="n">smart</span>
-</span><span class='line'>  <span class="nl">remote_user</span><span class="p">:</span> <span class="n">root</span>
-</span><span class='line'>  <span class="nl">tasks</span><span class="p">:</span>
-</span><span class='line'>    <span class="o">-</span> <span class="nl">name</span><span class="p">:</span> <span class="n">touch_iskey</span>
-</span><span class='line'>      <span class="nl">command</span><span class="p">:</span> <span class="s">&quot;/usr/bin/touch /iskey &amp;&amp; sleep 3&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>hosts:host_iskey</li>
-</ul>
-
-
-<p>说明要对hosts文件中的host_iskey组的主机列表进行操作</p>
-
-<ul>
-<li>gater_facts:smart</li>
-</ul>
-
-
-<p>ansible执行过程中，会收集远程主机的信息，如果每次都收集的话，非常浪费时间，可以设置facts缓存为smart，这样第一次收集之后，后边就不会再收集了，如果不需要收集可以直接设置为<code>no</code>来关掉主机信息收集</p>
-
-<h4>鉴权方式</h4>
-
-<h5>密码</h5>
-
-<p>ansible可以使用密码方式进行鉴权，前提是需要安装<code>sshpass</code>工具，<code>apt install sshpass</code>, ssh命令本身不提供参数来支持密码登陆，一般都是通过<code>sshpass</code>工具来实现。</p>
-
-<p>需要在hosts文件中，添加用户的密码，如下<code>host_iskey:vars</code>字段</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='C'><span class='line'><span class="cp"># cat hosts</span>
-</span><span class='line'><span class="p">[</span><span class="n">host_iskey</span><span class="p">]</span>
-</span><span class='line'><span class="n">x</span><span class="p">.</span><span class="n">x</span><span class="p">.</span><span class="n">x</span><span class="mf">.1</span>
-</span><span class='line'><span class="n">x</span><span class="p">.</span><span class="n">x</span><span class="p">.</span><span class="n">x</span><span class="mf">.2</span>
-</span><span class='line'>
-</span><span class='line'><span class="p">[</span><span class="nl">host_iskey</span><span class="p">:</span><span class="n">vars</span><span class="p">]</span>
-</span><span class='line'><span class="n">ansible_ssh_pass</span><span class="o">=</span><span class="err">&#39;</span><span class="n">xxxxxxxx</span><span class="err">&#39;</span>
-</span><span class='line'><span class="n">ansible_ssh_user</span><span class="o">=</span><span class="err">&#39;</span><span class="n">root</span><span class="err">&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h5>秘钥</h5>
-
-<p>如果使用秘钥的话，可以用ssh-keygen生成秘钥，在当前目录生成名为ansible的秘钥</p>
-
-<pre><code>ssh-keygen -f ansible
-</code></pre>
-
-<p>把生成的公钥，追加到host主机的<code>.ssh/authorized_keys</code>文件中去，</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='C'><span class='line'><span class="cp"># cat hosts</span>
-</span><span class='line'><span class="p">[</span><span class="n">host_iskey</span><span class="p">]</span>
-</span><span class='line'><span class="n">x</span><span class="p">.</span><span class="n">x</span><span class="p">.</span><span class="n">x</span><span class="mf">.1</span>
-</span><span class='line'><span class="n">x</span><span class="p">.</span><span class="n">x</span><span class="p">.</span><span class="n">x</span><span class="mf">.2</span>
-</span><span class='line'>
-</span><span class='line'><span class="p">[</span><span class="nl">host_iskey</span><span class="p">:</span><span class="n">vars</span><span class="p">]</span>
-</span><span class='line'><span class="n">ansible_ssh_user</span><span class="o">=</span><span class="err">&#39;</span><span class="n">root</span><span class="err">&#39;</span>
-</span><span class='line'><span class="n">ansible_ssh_private_key_file</span><span class="o">=</span><span class="err">&#39;</span><span class="p">.</span><span class="o">/</span><span class="n">ansible</span><span class="err">&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>执行ansible-playbook，</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-</pre></td><td class='code'><pre><code class='C'><span class='line'><span class="cp"># ansible-playbook  first.yml</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">PLAY</span> <span class="p">[</span><span class="n">host_iskey</span><span class="p">]</span> <span class="o">****************************************************************************************************************************</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">TASK</span> <span class="p">[</span><span class="n">touch_iskey</span><span class="p">]</span> <span class="o">***************************************************************************************************************************</span>
-</span><span class='line'> <span class="p">[</span><span class="n">WARNING</span><span class="p">]</span><span class="o">:</span> <span class="n">Consider</span> <span class="n">using</span> <span class="n">the</span> <span class="n">file</span> <span class="n">module</span> <span class="n">with</span> <span class="n">state</span><span class="o">=</span><span class="n">touch</span> <span class="n">rather</span> <span class="n">than</span> <span class="n">running</span> <span class="err">&#39;</span><span class="n">touch</span><span class="err">&#39;</span><span class="p">.</span>  <span class="n">If</span> <span class="n">you</span> <span class="n">need</span> <span class="n">to</span> <span class="n">use</span> <span class="n">command</span> <span class="n">because</span> <span class="n">file</span> <span class="n">is</span>
-</span><span class='line'><span class="n">insufficient</span> <span class="n">you</span> <span class="n">can</span> <span class="n">add</span> <span class="err">&#39;</span><span class="nl">warn</span><span class="p">:</span> <span class="nb">false</span><span class="err">&#39;</span> <span class="n">to</span> <span class="n">this</span> <span class="n">command</span> <span class="n">task</span> <span class="n">or</span> <span class="n">set</span> <span class="err">&#39;</span><span class="n">command_warnings</span><span class="o">=</span><span class="n">False</span><span class="err">&#39;</span> <span class="n">in</span> <span class="n">ansible</span><span class="p">.</span><span class="n">cfg</span> <span class="n">to</span> <span class="n">get</span> <span class="n">rid</span> <span class="n">of</span> <span class="n">this</span> <span class="n">message</span><span class="p">.</span>
-</span><span class='line'>
-</span><span class='line'><span class="nl">changed</span><span class="p">:</span> <span class="p">[</span><span class="n">x</span><span class="p">.</span><span class="n">x</span><span class="p">.</span><span class="n">x</span><span class="mf">.1</span><span class="p">]</span>
-</span><span class='line'><span class="nl">changed</span><span class="p">:</span> <span class="p">[</span><span class="n">x</span><span class="p">.</span><span class="n">x</span><span class="p">.</span><span class="n">x</span><span class="mf">.2</span><span class="p">]</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">PLAY</span> <span class="n">RECAP</span> <span class="o">***********************************************************************************************************************************</span>
-</span><span class='line'><span class="n">x</span><span class="p">.</span><span class="n">x</span><span class="p">.</span><span class="n">x</span><span class="mf">.1</span>              <span class="o">:</span> <span class="n">ok</span><span class="o">=</span><span class="mi">1</span>    <span class="n">changed</span><span class="o">=</span><span class="mi">1</span>    <span class="n">unreachable</span><span class="o">=</span><span class="mi">0</span>    <span class="n">failed</span><span class="o">=</span><span class="mi">0</span>    <span class="n">skipped</span><span class="o">=</span><span class="mi">0</span>    <span class="n">rescued</span><span class="o">=</span><span class="mi">0</span>    <span class="n">ignored</span><span class="o">=</span><span class="mi">0</span>
-</span><span class='line'><span class="n">x</span><span class="p">.</span><span class="n">x</span><span class="p">.</span><span class="n">x</span><span class="mf">.2</span>               <span class="o">:</span> <span class="n">ok</span><span class="o">=</span><span class="mi">1</span>    <span class="n">changed</span><span class="o">=</span><span class="mi">1</span>    <span class="n">unreachable</span><span class="o">=</span><span class="mi">0</span>    <span class="n">failed</span><span class="o">=</span><span class="mi">0</span>    <span class="n">skipped</span><span class="o">=</span><span class="mi">0</span>    <span class="n">rescued</span><span class="o">=</span><span class="mi">0</span>    <span class="n">ignored</span><span class="o">=</span><span class="mi">0</span>
-</span><span class='line'><span class="o">****</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h4>当然，可以通过ansible命令来执行一些简单的命令</h4>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='C'><span class='line'><span class="n">ansible</span> <span class="o">-</span><span class="n">i</span> <span class="p">.</span><span class="o">/</span><span class="n">hosts</span> <span class="n">all</span> <span class="o">-</span><span class="n">m</span> <span class="n">command</span>  <span class="o">-</span><span class="n">a</span> <span class="s">&quot;touch /xxxx&quot;</span>  <span class="o">--</span><span class="n">private</span><span class="o">-</span><span class="n">key</span><span class="o">=</span><span class="p">.</span><span class="o">/</span><span class="n">key</span><span class="o">/</span><span class="n">ansible</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>如果密钥的权限不是700，可能会提醒如下错误</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='C'><span class='line'><span class="cp"># ansible -i ./ansible/hosts all -m command  -a &quot;touch /isno&quot;  --private-key=./ansible/ansible</span>
-</span><span class='line'><span class="n">x</span><span class="p">.</span><span class="n">x</span><span class="p">.</span><span class="n">x</span><span class="mf">.1</span> <span class="o">|</span> <span class="n">UNREACHABLE</span><span class="o">!</span> <span class="o">=&gt;</span> <span class="p">{</span>
-</span><span class='line'>    <span class="s">&quot;changed&quot;</span><span class="o">:</span> <span class="nb">false</span><span class="p">,</span>
-</span><span class='line'>    <span class="s">&quot;msg&quot;</span><span class="o">:</span> <span class="s">&quot;Failed to connect to the host via ssh: @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@</span><span class="se">\r\n</span><span class="s">@         WARNING: UNPROTECTED PRIVATE KEY FILE!          @</span><span class="se">\r\n</span><span class="s">@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@</span><span class="se">\r\n</span><span class="s">Permissions 0755 for &#39;./ansible&#39; are too open.</span><span class="se">\r\n</span><span class="s">It is required that your private key files are NOT accessible by others.</span><span class="se">\r\n</span><span class="s">This private key will be ignored.</span><span class="se">\r\n</span><span class="s">Load key </span><span class="se">\&quot;</span><span class="s">./ansible</span><span class="se">\&quot;</span><span class="s">: bad permissions</span><span class="se">\r\n</span><span class="s">Permission denied (publickey,password).&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s">&quot;unreachable&quot;</span><span class="o">:</span> <span class="nb">true</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'><span class="n">x</span><span class="p">.</span><span class="n">x</span><span class="p">.</span><span class="n">x</span><span class="mf">.2</span> <span class="o">|</span> <span class="n">UNREACHABLE</span><span class="o">!</span> <span class="o">=&gt;</span> <span class="p">{</span>
-</span><span class='line'>    <span class="s">&quot;changed&quot;</span><span class="o">:</span> <span class="nb">false</span><span class="p">,</span>
-</span><span class='line'>    <span class="s">&quot;msg&quot;</span><span class="o">:</span> <span class="s">&quot;Failed to connect to the host via ssh: @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@</span><span class="se">\r\n</span><span class="s">@         WARNING: UNPROTECTED PRIVATE KEY FILE!          @</span><span class="se">\r\n</span><span class="s">@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@</span><span class="se">\r\n</span><span class="s">Permissions 0755 for &#39;./ansible&#39; are too open.</span><span class="se">\r\n</span><span class="s">It is required that your private key files are NOT accessible by others.</span><span class="se">\r\n</span><span class="s">This private key will be ignored.</span><span class="se">\r\n</span><span class="s">Load key </span><span class="se">\&quot;</span><span class="s">./ansible</span><span class="se">\&quot;</span><span class="s">: bad permissions</span><span class="se">\r\n</span><span class="s">Permission denied (publickey,password).&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s">&quot;unreachable&quot;</span><span class="o">:</span> <span class="nb">true</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>当然，如果不想用密钥的方式，也可以把密码直接写在hosts文件里。</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2019/07/07/simpe-example-of-kubernetes/">Simpe Example of Kubernetes</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2019-07-07T15:32:37+00:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>7</span><span class='date-suffix'>th</span>, <span class='date-year'>2019</span></span> <span class='time'>3:32 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>在使用kubernetes之前，最好需要知道一些docker的基本指令，这样对整个过程的理解会更深刻一些，这是我第一次使用实际操作kubernetes，基本上是参照网上的教程操作的，这里加上一些自己的理解记录一下。
-本实验基于minikube。</p>
-
-<h4>docker命令基本用法</h4>
-
-<p>首先用docker启动一个nginx服务器，命令如下:</p>
-
-<pre><code>docker container run \
--d \
--p 127.0.0.2:8080:80 \
---rm \
---name mynginx \
-nginx
-</code></pre>
-
-<p>各参数的含义如下：</p>
-
-<pre><code>-d：在后台运行
--p ：容器的80端口映射到127.0.0.2:8080
---rm：容器停止运行后，自动删除容器文件
---name：容器的名字为mynginx
-</code></pre>
-
-<p>容器启动成功后，就可以通过curl <a href="http://127.0.0.2:8080%E6%9D%A5%E8%AE%BF%E9%97%AEnginx%E7%9A%84%E9%BB%98%E8%AE%A4%E9%A1%B5%E9%9D%A2%E4%BA%86%E3%80%82">http://127.0.0.2:8080%E6%9D%A5%E8%AE%BF%E9%97%AEnginx%E7%9A%84%E9%BB%98%E8%AE%A4%E9%A1%B5%E9%9D%A2%E4%BA%86%E3%80%82</a></p>
-
-<p>这里有个疑问，那127.0.0.2的地址在哪里呢？ 秘密就在iptables的规则列表里</p>
-
-<pre><code># iptables -S -t nat
--A OUTPUT ! -d 127.0.0.0/8 -m addrtype --dst-type LOCAL -j DOCKER
--A DOCKER -d 127.0.0.2/32 ! -i docker0 -p tcp -m tcp --dport 8080 -j DNAT --to-destination 172.17.0.7:80
-</code></pre>
-
-<p>目的地址是127网段的数据包被重定向到了DOCKER链表，DOCKER链表里把目的是127.0.0.2地址的报文发到了172.17.0.7:80端口，通过这两条规则，我们就能通过curl命令直接访问nginx服务器的80端口了。
-第二条iptables规则有一个条件很有意思<code>! -i docker0</code>要求不是从docker0接口进来的包，docker0是个虚拟网桥设备，所有的容器都被挂在这个桥设备下，也就是说如果是容器之间互相访问的包，不应该被重定向到172.17.0.7这个地址上。</p>
-
-<p>小提示：我们可以通过&ndash;volume命令把本地的文件目录映射到容器内</p>
-
-<pre><code>docker container run \
--d \
--p 127.0.0.2:8080:80 \
---rm \
---name mynginx \
---volume "$PWD/html":/usr/share/nginx/html \
-nginx
-</code></pre>
-
-<h4>使用kubernetes创建nginx服务器集群</h4>
-
-<p>新建一个部署配置文件，内容如下：</p>
-
-<ul>
-<li>deployment.yaml文件</li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="l-Scalar-Plain">apiVersion</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">apps/v1beta1</span>
-</span><span class='line'><span class="l-Scalar-Plain">kind</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">Deployment</span>
-</span><span class='line'><span class="l-Scalar-Plain">metadata</span><span class="p-Indicator">:</span>
-</span><span class='line'>  <span class="l-Scalar-Plain">name</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">nginx-deployment</span>
-</span><span class='line'><span class="l-Scalar-Plain">spec</span><span class="p-Indicator">:</span>
-</span><span class='line'>  <span class="l-Scalar-Plain">replicas</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">3</span> <span class="c1"># tells deployment to run 2 pods matching the template</span>
-</span><span class='line'>  <span class="l-Scalar-Plain">template</span><span class="p-Indicator">:</span> <span class="c1"># create pods using pod definition in this template</span>
-</span><span class='line'>    <span class="l-Scalar-Plain">metadata</span><span class="p-Indicator">:</span>
-</span><span class='line'>      <span class="c1"># unlike pod-nginx.yaml, the name is not included in the meta data as a unique name is</span>
-</span><span class='line'>      <span class="c1"># generated from the deployment name</span>
-</span><span class='line'>      <span class="l-Scalar-Plain">labels</span><span class="p-Indicator">:</span>
-</span><span class='line'>        <span class="l-Scalar-Plain">app</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">iskey_nginx</span>
-</span><span class='line'>    <span class="l-Scalar-Plain">spec</span><span class="p-Indicator">:</span>
-</span><span class='line'>      <span class="l-Scalar-Plain">containers</span><span class="p-Indicator">:</span>
-</span><span class='line'>      <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">name</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">nginx</span>
-</span><span class='line'>        <span class="l-Scalar-Plain">image</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">nginx:1.7.9</span>
-</span><span class='line'>        <span class="l-Scalar-Plain">ports</span><span class="p-Indicator">:</span>
-</span><span class='line'>        <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">containerPort</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">80</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>这个配置文件的意思是要创建3个POD副本，每个副本是以nginx:1.7.9的镜像创建的容器，容器的服务端口是80</p>
-
-<pre><code># kubectl create -f deployment.yaml
-</code></pre>
-
-<p>查看一下服务状态,可以看到三个副本已经都起来了。</p>
-
-<pre><code># kubectl get pods -o wide -l app=nginx
-NAME                                READY   STATUS    RESTARTS   AGE   IP           NODE
-nginx-deployment-75675f5897-27hs9   1/1     Running   0          1d    172.17.0.5   ecs-xxx
-nginx-deployment-75675f5897-5trcf   1/1     Running   0          1d    172.17.0.6   ecs-xxx
-nginx-deployment-79cb98c794-7whjg   1/1     Running   0          21h   172.17.0.4   ecs-xxx
-</code></pre>
-
-<h4>创建Service服务来访问nginx集群</h4>
-
-<p>我看可以通过这三个IP地址来分别方位三个副本上的nginx服务，但是这里的地址是随机的，而且如果服务故障重启了，kubernetes会重新拉起一个POD，这时地址就又变化了，如何使用这几个副本的服务呢，kubernetes提供了一种类型为Service的对象，创建如下的service.yaml文件：</p>
-
-<ul>
-<li>service.yaml</li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="l-Scalar-Plain">apiVersion</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">v1</span>
-</span><span class='line'><span class="l-Scalar-Plain">kind</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">Service</span>
-</span><span class='line'><span class="l-Scalar-Plain">metadata</span><span class="p-Indicator">:</span>
-</span><span class='line'>  <span class="l-Scalar-Plain">name</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">my-nginx</span>
-</span><span class='line'><span class="l-Scalar-Plain">spec</span><span class="p-Indicator">:</span>
-</span><span class='line'>  <span class="l-Scalar-Plain">ports</span><span class="p-Indicator">:</span>
-</span><span class='line'>  <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">port</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">8125</span>
-</span><span class='line'>    <span class="l-Scalar-Plain">protocol</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">TCP</span>
-</span><span class='line'>    <span class="l-Scalar-Plain">targetPort</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">80</span>
-</span><span class='line'>  <span class="l-Scalar-Plain">selector</span><span class="p-Indicator">:</span>
-</span><span class='line'>    <span class="l-Scalar-Plain">app</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">iskey_nginx</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>该配置文件将创建一个名为‘my-nginx’的Service对象，他开放了端口8125，往该端口发送的请求将被路由到端口为80的，且标签具有"app=iskey_nginx"的Pod上。这个Service将被指派一个IP地址（通常称为'Cluester IP'），通常我们的说法是该请求会被路由到一个名称为‘my-nginx’的Endpoints对象上，由该Endpoints对象来负责负载均衡，并路由到实际的Pod的服务端口80上。</p>
-
-<p>创建命令如下：</p>
-
-<pre><code># kubectl create -f service.yaml
-</code></pre>
-
-<p>可以看到创建了一个Service对象</p>
-
-<pre><code># kubectl get services -o wide
-NAME         TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)    AGE   SELECTOR
-kubernetes   ClusterIP   10.96.0.1       &lt;none&gt;        443/TCP    2d    &lt;none&gt;
-my-nginx     ClusterIP   10.97.126.137   &lt;none&gt;        8125/TCP   18h   app=nginx
-</code></pre>
-
-<h4>Service和Endpoints对象</h4>
-
-<p>在使用如上命令文件创建Service的同时，也创建了一个name与Service相同的Endpoints对象，Endpoints对象与Service通过名字关联</p>
-
-<pre><code># kubectl get endpoints -o wide
-NAME         ENDPOINTS                                   AGE
-kubernetes   192.168.0.29:8443                           2d
-my-nginx     172.17.0.4:80,172.17.0.5:80,172.17.0.6:80   18h
-</code></pre>
-
-<p>思考：如果Service和Endpoints可以通过名字进行管理，就可以灵活的自己分开创建Service和Endpoints，而不是通过Service的selector字段来自动关联Pods。比如我们外部有一个mysql集群，我们需要创建一个服务把他们发布出去，这时候就需要手动创建Service和Endpoints了。如下所示：</p>
-
-<ul>
-<li>mysql-service.yaml</li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="l-Scalar-Plain">apiVersion</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">v1</span>
-</span><span class='line'><span class="l-Scalar-Plain">kind</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">Service</span>
-</span><span class='line'><span class="l-Scalar-Plain">metadata</span><span class="p-Indicator">:</span>
-</span><span class='line'>  <span class="l-Scalar-Plain">name</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">mysql-production</span>
-</span><span class='line'><span class="l-Scalar-Plain">spec</span><span class="p-Indicator">:</span>
-</span><span class='line'>  <span class="l-Scalar-Plain">ports</span><span class="p-Indicator">:</span>
-</span><span class='line'>    <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">port</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">3306</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>mysql-endpoints.yaml</li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="l-Scalar-Plain">kind</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">Endpoints</span>
-</span><span class='line'><span class="l-Scalar-Plain">apiVersion</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">v1</span>
-</span><span class='line'><span class="l-Scalar-Plain">metadata</span><span class="p-Indicator">:</span>
-</span><span class='line'>  <span class="l-Scalar-Plain">name</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">mysql-production</span>
-</span><span class='line'>  <span class="l-Scalar-Plain">namespace</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">default</span>
-</span><span class='line'><span class="l-Scalar-Plain">subsets</span><span class="p-Indicator">:</span>
-</span><span class='line'>  <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">addresses</span><span class="p-Indicator">:</span>
-</span><span class='line'>      <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">ip</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">192.168.1.25</span>
-</span><span class='line'>    <span class="l-Scalar-Plain">ports</span><span class="p-Indicator">:</span>
-</span><span class='line'>      <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">port</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">3306</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h4>Service服务iptables原理</h4>
-
-<p>另外一个问题是，Service如何提供负载均衡的呢？答案还是在iptables的链表里</p>
-
-<pre><code># iptables -S -t nat
--A KUBE-SVC-BEPXDJBUHFCSYIC3 -m comment --comment "default/my-nginx:" -m statistic --mode random --probability 0.33332999982 -j KUBE-SEP-DYSISBZG5TN7BHVN
--A KUBE-SVC-BEPXDJBUHFCSYIC3 -m comment --comment "default/my-nginx:" -m statistic --mode random --probability 0.50000000000 -j KUBE-SEP-BLX3X6UTIG6UGCA2
--A KUBE-SVC-BEPXDJBUHFCSYIC3 -m comment --comment "default/my-nginx:" -j KUBE-SEP-J5WBW7HEOGAHN6ZG
--A KUBE-SEP-BLX3X6UTIG6UGCA2 -s 172.17.0.5/32 -m comment --comment "default/my-nginx:" -j KUBE-MARK-MASQ
--A KUBE-SEP-BLX3X6UTIG6UGCA2 -p tcp -m comment --comment "default/my-nginx:" -m tcp -j DNAT --to-destination 172.17.0.5:80
--A KUBE-SEP-DYSISBZG5TN7BHVN -s 172.17.0.4/32 -m comment --comment "default/my-nginx:" -j KUBE-MARK-MASQ
--A KUBE-SEP-DYSISBZG5TN7BHVN -p tcp -m comment --comment "default/my-nginx:" -m tcp -j DNAT --to-destination 172.17.0.4:80
--A KUBE-SEP-J5WBW7HEOGAHN6ZG -s 172.17.0.6/32 -m comment --comment "default/my-nginx:" -j KUBE-MARK-MASQ
--A KUBE-SEP-J5WBW7HEOGAHN6ZG -p tcp -m comment --comment "default/my-nginx:" -m tcp -j DNAT --to-destination 172.17.0.6:80
-</code></pre>
-
-<p>通过iptables的statistic模块，&ndash;mode random &ndash;probability ，按照如下算法被路由到3个endpoints</p>
-
-<pre><code>1th endpoint: 1/3
-2th endpoint: 2/3 * 1/2 = 1/3
-3th endpoint: 2/3 * 1/2 * 1 = 1/3
-</code></pre>
-
-<p>可见，每个endpoint都承担了3/1的访问请求。</p>
-
-<p>但是有些情况下，可能希望来自于某一个客户端的请求都落在某一个特定的endpoint上，这时候就不能使用默认的负载均衡策略，这时候可以通过sessionAffinity属性来把来自同一个Client的请求亲和到同一个服务器，配置如下：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="l-Scalar-Plain">apiVersion</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">v1</span>
-</span><span class='line'><span class="l-Scalar-Plain">kind</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">Service</span>
-</span><span class='line'><span class="l-Scalar-Plain">metadata</span><span class="p-Indicator">:</span>
-</span><span class='line'>  <span class="l-Scalar-Plain">name</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">my-nginx</span>
-</span><span class='line'>  <span class="l-Scalar-Plain">labels</span><span class="p-Indicator">:</span>
-</span><span class='line'>    <span class="l-Scalar-Plain">app</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">nginx</span>
-</span><span class='line'><span class="l-Scalar-Plain">spec</span><span class="p-Indicator">:</span>
-</span><span class='line'>  <span class="l-Scalar-Plain">ports</span><span class="p-Indicator">:</span>
-</span><span class='line'>  <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">port</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">8125</span>
-</span><span class='line'>    <span class="l-Scalar-Plain">protocol</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">TCP</span>
-</span><span class='line'>    <span class="l-Scalar-Plain">targetPort</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">80</span>
-</span><span class='line'>  <span class="l-Scalar-Plain">selector</span><span class="p-Indicator">:</span>
-</span><span class='line'>    <span class="l-Scalar-Plain">app</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">nginx</span>
-</span><span class='line'>  <span class="l-Scalar-Plain">sessionAffinity</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">ClientIP</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>当前仅支持ClientIP和None两个选项：</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="l-Scalar-Plain">kubectl explain service.spec.sessionAffinity</span>
-</span><span class='line'><span class="l-Scalar-Plain">KIND</span><span class="p-Indicator">:</span>     <span class="l-Scalar-Plain">Service</span>
-</span><span class='line'><span class="l-Scalar-Plain">VERSION</span><span class="p-Indicator">:</span>  <span class="l-Scalar-Plain">v1</span>
-</span><span class='line'>
-</span><span class='line'><span class="l-Scalar-Plain">FIELD</span><span class="p-Indicator">:</span>    <span class="l-Scalar-Plain">sessionAffinity &lt;string&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="l-Scalar-Plain">DESCRIPTION</span><span class="p-Indicator">:</span>
-</span><span class='line'>     <span class="l-Scalar-Plain">Supports &quot;ClientIP&quot; and &quot;None&quot;. Used to maintain session affinity. Enable</span>
-</span><span class='line'>     <span class="l-Scalar-Plain">client IP based session affinity. Must be ClientIP or None. Defaults to</span>
-</span><span class='line'>     <span class="l-Scalar-Plain">None. More info</span><span class="p-Indicator">:</span>
-</span><span class='line'>     <span class="l-Scalar-Plain">https://kubernetes.io/docs/concepts/services-networking/service/#virtual-ips-and-service-proxies</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h5>Service服务userspace原理</h5>
-
-<p>此模式下，kube-proxy进程从服务(Kubernetes master)进程那边拿到Service和Endpoint对象的变化。对每一个Service, 它在本地打开一个port(随机选择)。任何连接这个本地port的请求都会转到backend后的随机一个pod，service中的字段SessionAffinity决定了使用backend的哪个pod。最后在本地建立一些iptables规则，这样访问service的cluster ip以及对应的port时，就能将请求映射到后端的pod中。</p>
-
-<h5>Service服务iptables原理</h5>
-
-<p>此模式下，kube-proxy进程从服务(Kubernetes master)进程那边拿到Service和Endpoint对象的变化。为每个Service创建一个iptables规则，把访问Service的Cluster IP和端口的流量重定向到后端Pod中的一个。为每个选择后端Pod的Endpoints对象都创建iptables规则。</p>
-
-<p>TIP:userspace的方式和iptables方式不同点在于，userspace的模式是外部的服务会被重定向到kube-proxy，然后由kube-proxy重定向到后端的POD，而iptables的重定向请求是不需要kube-proxy参与的，完全由iptables规则链来处理。</p>
-
-<h4>服务发现(Discovering services)</h4>
-
-<p>Kubernetes支持两种方式来发现一个Service，环境变量和DNS。</p>
-
-<ul>
-<li>环境变量</li>
-</ul>
-
-
-<p>POD被创建时，当前环境所有的Service环境变量都会被注入到新建的POD中</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sr">/# env</span>
-</span><span class='line'><span class="sr">HOSTNAME=nginx-new-7fb6bcff7f-dkvrc</span>
-</span><span class='line'><span class="sr">KUBERNETES_PORT_443_TCP_PORT=443</span>
-</span><span class='line'><span class="sr">KUBERNETES_PORT=tcp:/</span><span class="o">/</span><span class="mi">10</span><span class="o">.</span><span class="mi">96</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="mi">1</span><span class="p">:</span><span class="mi">443</span>
-</span><span class='line'><span class="no">TERM</span><span class="o">=</span><span class="n">xterm</span>
-</span><span class='line'><span class="no">MY_NGINX_SERVICE_PORT</span><span class="o">=</span><span class="mi">8125</span>
-</span><span class='line'><span class="no">KUBERNETES_SERVICE_PORT</span><span class="o">=</span><span class="mi">443</span>
-</span><span class='line'><span class="no">MY_NGINX_PORT_8125_TCP</span><span class="o">=</span><span class="ss">tcp</span><span class="p">:</span><span class="sr">//</span><span class="mi">10</span><span class="o">.</span><span class="mi">97</span><span class="o">.</span><span class="mi">126</span><span class="o">.</span><span class="mi">137</span><span class="p">:</span><span class="mi">8125</span>
-</span><span class='line'><span class="no">KUBERNETES_SERVICE_HOST</span><span class="o">=</span><span class="mi">10</span><span class="o">.</span><span class="mi">96</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="mi">1</span>
-</span><span class='line'><span class="no">PATH</span><span class="o">=</span><span class="sr">/usr/</span><span class="n">local</span><span class="o">/</span><span class="ss">sbin</span><span class="p">:</span><span class="sr">/usr/</span><span class="n">local</span><span class="o">/</span><span class="ss">bin</span><span class="p">:</span><span class="sr">/usr/s</span><span class="ss">bin</span><span class="p">:</span><span class="sr">/usr/</span><span class="ss">bin</span><span class="p">:</span><span class="sr">/sbin:/</span><span class="n">bin</span>
-</span><span class='line'><span class="no">PWD</span><span class="o">=</span><span class="sr">/</span>
-</span><span class='line'><span class="sr">NGINX_VERSION=1.7.9-1~wheezy</span>
-</span><span class='line'><span class="sr">MY_NGINX_PORT=tcp:/</span><span class="o">/</span><span class="mi">10</span><span class="o">.</span><span class="mi">97</span><span class="o">.</span><span class="mi">126</span><span class="o">.</span><span class="mi">137</span><span class="p">:</span><span class="mi">8125</span>
-</span><span class='line'><span class="no">MY_NGINX_PORT_8125_TCP_ADDR</span><span class="o">=</span><span class="mi">10</span><span class="o">.</span><span class="mi">97</span><span class="o">.</span><span class="mi">126</span><span class="o">.</span><span class="mi">137</span>
-</span><span class='line'><span class="no">SHLVL</span><span class="o">=</span><span class="mi">1</span>
-</span><span class='line'><span class="no">HOME</span><span class="o">=</span><span class="sr">/root</span>
-</span><span class='line'><span class="sr">KUBERNETES_PORT_443_TCP_PROTO=tcp</span>
-</span><span class='line'><span class="sr">KUBERNETES_SERVICE_PORT_HTTPS=443</span>
-</span><span class='line'><span class="sr">MY_NGINX_PORT_8125_TCP_PORT=8125</span>
-</span><span class='line'><span class="sr">KUBERNETES_PORT_443_TCP_ADDR=10.96.0.1</span>
-</span><span class='line'><span class="sr">KUBERNETES_PORT_443_TCP=tcp:/</span><span class="o">/</span><span class="mi">10</span><span class="o">.</span><span class="mi">96</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="mi">1</span><span class="p">:</span><span class="mi">443</span>
-</span><span class='line'><span class="no">MY_NGINX_SERVICE_HOST</span><span class="o">=</span><span class="mi">10</span><span class="o">.</span><span class="mi">97</span><span class="o">.</span><span class="mi">126</span><span class="o">.</span><span class="mi">137</span>
-</span><span class='line'><span class="no">MY_NGINX_PORT_8125_TCP_PROTO</span><span class="o">=</span><span class="n">tcp</span>
-</span><span class='line'><span class="n">_</span><span class="o">=</span><span class="sr">/usr/</span><span class="n">bin</span><span class="o">/</span><span class="n">env</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>DNS</li>
-</ul>
-
-
-<p>DNS server通过kubernetes api server来观测是否有新service建立，并为其建立对应的dns记录。如果集群已经enable DNS，那么pod可以自动对service做name解析。
-比如说我们在Kubernetes 名字空间”my-ns”中有个叫my-service的服务，DNS服务会创建一条”my-service.my-ns”的DNS记录。同在这个命名空间的Pod就可以通过”my-service”来得到这个Service分配到的Cluster IP，在其它命名空间的Pod则可以用全限定名”my-service.my-ns”来获得这个Service的地址</p>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2019/07/07/helloworld-of-systemd/">Simple Example of Systemd</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2019-07-07T15:31:20+00:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>7</span><span class='date-suffix'>th</span>, <span class='date-year'>2019</span></span> <span class='time'>3:31 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><h2>init系统.</h2>
-
-<p>linux操作系统首先从BIOS启动开始，接下来进入bootloader（桌面系统现在一般用Grub），bootloader载入内核并进行初始化。内核初始化的最好一步就是启动PID为1的init进程。init进程是以守护进程的方式存在，是所有其他进程的祖先。</p>
-
-<p>init系统的演进路线经历了sysvinit->upstart->systemd。</p>
-
-<h2>systemd系统简介</h2>
-
-<p>借用一下帮助文档里的关系图(man bootup)</p>
-
-<pre><code>       local-fs-pre.target
-                |
-                v
-       (various mounts and   (various swap   (various cryptsetup
-        fsck services...)     devices...)        devices...)       (various low-level   (various low-level
-                |                  |                  |             services: udevd,     API VFS mounts:
-                v                  v                  v             tmpfiles, random     mqueue, configfs,
-         local-fs.target      swap.target     cryptsetup.target    seed, sysctl, ...)      debugfs, ...)
-                |                  |                  |                    |                    |
-                \__________________|_________________ | ___________________|____________________/
-                                                     \|/
-                                                      v
-                                               sysinit.target
-                                                      |
-                 ____________________________________/|\________________________________________
-                /                  |                  |                    |                    \
-                |                  |                  |                    |                    |
-                v                  v                  |                    v                    v
-            (various           (various               |                (various          rescue.service
-           timers...)          paths...)              |               sockets...)               |
-                |                  |                  |                    |                    v
-                v                  v                  |                    v              rescue.target
-          timers.target      paths.target             |             sockets.target
-                |                  |                  |                    |
-                \__________________|_________________ | ___________________/
-                                                     \|/
-                                                      v
-                                                basic.target
-                                                      |
-                 ____________________________________/|                                 emergency.service
-                /                  |                  |                                         |
-                |                  |                  |                                         v
-                v                  v                  v                                 emergency.target
-            display-        (various system    (various system
-        manager.service         services           services)
-                |             required for            |
-                |            graphical UIs)           v
-                |                  |           multi-user.target
-                |                  |                  |
-                \_________________ | _________________/
-                                  \|/
-                                   v
-                         graphical.target
-</code></pre>
-
-<h2>systemd 使用</h2>
-
-<ul>
-<li>显示某个服务的实时日志</li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">journalctl</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">pager</span> <span class="o">-</span><span class="n">f</span> <span class="o">-</span><span class="n">u</span> <span class="n">hello</span><span class="o">.</span><span class="na">service</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>编写服务配置文件</li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="err">#</span> <span class="n">cat</span> <span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="n">hello</span>
-</span><span class='line'><span class="n">NAME</span><span class="o">=</span><span class="n">xxxxyyyyzzz</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>编写服务脚本</li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="err">#</span> <span class="n">cat</span> <span class="o">/</span><span class="n">usr</span><span class="c1">//local/bin/hello.sh</span>
-</span><span class='line'><span class="err">#</span><span class="o">!/</span><span class="n">bin</span><span class="o">/</span><span class="n">bash</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">name</span><span class="o">=</span><span class="n">$1</span>
-</span><span class='line'><span class="k">while</span> <span class="kc">true</span>
-</span><span class='line'><span class="k">do</span>
-</span><span class='line'>    <span class="n">echo</span> <span class="n">Hello</span> <span class="n">World</span> <span class="n">$name</span>
-</span><span class='line'>    <span class="n">echo</span> <span class="s">&quot;*&quot;</span> <span class="o">&gt;&gt;</span> <span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="n">hello</span><span class="o">.</span><span class="na">log</span>
-</span><span class='line'>    <span class="n">sleep</span> <span class="mi">1</span>
-</span><span class='line'><span class="n">done</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>编写服务的systemd配置文件
-可以放到<code>/lib/systemd/system</code>目录，也可以放到<code>/etc/systemd/system</code>目录下，<code>/etc/systemd/system</code>的优先级更高</li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="o">[</span><span class="n">Unit</span><span class="o">]</span>
-</span><span class='line'><span class="n">Description</span><span class="o">=</span><span class="n">Hello</span> <span class="n">world</span> <span class="n">Service</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">[</span><span class="n">Service</span><span class="o">]</span>
-</span><span class='line'><span class="n">EnvironmentFile</span><span class="o">=/</span><span class="n">root</span><span class="o">/</span><span class="n">hello</span>
-</span><span class='line'><span class="n">ExecStartPre</span><span class="o">=-/</span><span class="n">usr</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">touch</span> <span class="o">/</span><span class="n">root</span><span class="o">/</span><span class="n">hello</span><span class="o">.</span><span class="na">start</span>
-</span><span class='line'><span class="n">ExecStartPre</span><span class="o">=-/</span><span class="n">usr</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">pkill</span> <span class="n">hello</span><span class="o">.</span><span class="na">sh</span>
-</span><span class='line'><span class="n">ExecStart</span><span class="o">=/</span><span class="n">usr</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">hello</span><span class="o">.</span><span class="na">sh</span> <span class="n">$</span><span class="o">{</span><span class="n">NAME</span><span class="o">}</span>
-</span><span class='line'><span class="err">#</span><span class="n">Type</span><span class="o">=</span><span class="n">forking</span>
-</span><span class='line'><span class="n">Restart</span><span class="o">=</span><span class="n">on</span><span class="o">-</span><span class="n">success</span>
-</span><span class='line'><span class="n">RestartSec</span><span class="o">=</span><span class="mi">5</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>设置服务的cgroups参数</li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">systemctl</span> <span class="n">set</span><span class="o">-</span><span class="n">property</span> <span class="n">hello</span> <span class="n">CPUShares</span><span class="o">=</span><span class="mi">1600</span> <span class="n">MemoryLimit</span><span class="o">=</span><span class="mi">600</span><span class="n">M</span> <span class="o">--</span><span class="n">runtime</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>systemd-run examples</li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='java'><span class='line'><span class="n">systemd</span><span class="o">-</span><span class="n">run</span> <span class="o">--</span><span class="n">user</span> <span class="o">--</span><span class="n">on</span><span class="o">-</span><span class="n">calendar</span> <span class="err">&#39;</span><span class="mi">2017</span><span class="o">-</span><span class="mi">08</span><span class="o">-</span><span class="mi">12</span> <span class="mi">14</span><span class="o">:</span><span class="mi">46</span><span class="err">&#39;</span> <span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">bash</span> <span class="o">-</span><span class="n">c</span> <span class="err">&#39;</span><span class="n">echo</span> <span class="n">done</span> <span class="o">&gt;/</span><span class="n">tmp</span><span class="o">/</span><span class="n">done</span><span class="err">&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>service/socket example</h2>
-
-<ul>
-<li>with golang <a href="https://github.com/coreos/go-systemd/tree/v14/examples/activation/httpserver">Httpserver</a></li>
-<li>with python <a href="https://gist.github.com/drmalex07/333d8a88c4918954e8e4">Httpserver</a></li>
-</ul>
-
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2019/07/07/use-lvm-to-expend-root-partition/">Use Lvm to Expend Root Partition</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2019-07-07T15:28:26+00:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>7</span><span class='date-suffix'>th</span>, <span class='date-year'>2019</span></span> <span class='time'>3:28 pm</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>装完Linux系统后，如果当时规划的根分区太小了，有几种方法：
-- 新挂一个盘，挂着到某个目录，比如<code>/usr1</code>,后续所有的大文件尽量放到/usr1
-- 对跟分区进行扩容</p>
-
-<p>新挂磁盘，比较简单，这里主要介绍一下如何对根分区进行扩容，对根分区进行扩容分两种情况：
-- 根分区是非Linux LVM格式
-- 根分区是Linux LVM格式</p>
-
-<h2>扩容Linux LVM格式的分区</h2>
-
-<p>查看当前分区，根分区挂的是<code>/dev/mapper/rhel-root</code>卷</p>
-
-<pre><code>[root@bms-slave-0001 ~]# df -h
-Filesystem             Size  Used Avail Use% Mounted on
-/dev/mapper/rhel-root  8G  6.5G  8G   80% /
-</code></pre>
-
-<p>查看当前磁盘:</p>
-
-<pre><code>root@bms-slave-0001 ~]# fdisk -l
-
-Disk /dev/sda: 599.0 GB, 598999040000 bytes, 1169920000 sectors
-Units = sectors of 1 * 512 = 512 bytes
-Sector size (logical/physical): 512 bytes / 512 bytes
-I/O size (minimum/optimal): 262144 bytes / 262144 bytes
-Disk label type: dos
-Disk identifier: 0x000afd24
-
-Device Boot      Start         End      Blocks   Id  System
-/dev/sda1   *        2048     2099199     1048576   83  Linux
-/dev/sda2         2099200    20479999     9190400   8e  Linux LVM
-/dev/sda3      1169788928  1169919999       65536   83  Linux
-</code></pre>
-
-<p>发现磁盘上还有很多空间，用fdisk，新建一个分区</p>
-
-<pre><code>[root@bms-slave-0001 ~]# fdisk -l
-
-Disk /dev/sda: 599.0 GB, 598999040000 bytes, 1169920000 sectors
-Units = sectors of 1 * 512 = 512 bytes
-Sector size (logical/physical): 512 bytes / 512 bytes
-I/O size (minimum/optimal): 262144 bytes / 262144 bytes
-Disk label type: dos
-Disk identifier: 0x000afd24
-
-Device Boot      Start         End      Blocks   Id  System
-/dev/sda1   *        2048     2099199     1048576   83  Linux
-/dev/sda2         2099200    20479999     9190400   8e  Linux LVM
-/dev/sda3      1169788928  1169919999       65536   83  Linux
-/dev/sda4        20480000  1169788927   574654464    5  Extended
-/dev/sda5        20482048  1169788927   574653440   8e  Linux LVM
-</code></pre>
-
-<p>新建分区保存退出之后，执行一下<code>partprobe</code>命令，这样不用重启系统就可以重新加载分区表了。</p>
-
-<p>这里有个小知识，如果硬盘的分区模式是BIOS+MBR，受限于MBR的容量，只能有4个主分区
-如果采用ELF+GPT模式，则不受此限制。</p>
-
-<p>我的主机是BIOS+MBR模式，所以就新建一个扩展分区，然后在扩展分区里新建一个分区格式是Linux LVM的分区<code>/dev/sda5</code></p>
-
-<p>现在基于<code>/dev/sda5</code>，创建一个物理卷</p>
-
-<pre><code># pvcreate /dev/sda5
-</code></pre>
-
-<p>把<code>/dev/sda5</code>加入到根分区卷组，但是首先要查看根分区卷组</p>
-
-<pre><code># vgdisplay
---- Volume group ---
-VG Name               rhel
-System ID
-Format                lvm2
-Metadata Areas        2
-Metadata Sequence No  5
-VG Access             read/write
-VG Status             resizable
-MAX LV                0
-Cur LV                2
-Open LV               1
-Max PV                0
-Cur PV                2
-Act PV                2
-VG Size               556.79 GiB
-PE Size               4.00 MiB
-Total PE              142539
-Alloc PE / Size       130243 / 508.76 GiB
-Free  PE / Size       12296 / 48.03 GiB
-VG UUID               1KHMUX-rlrd-Pypj-ucQZ-zPwA-TZd2-5oeHzv
-
-# vgextend rhel /dev/sda5
-</code></pre>
-
-<p>扩容卷组之后，对根分区逻辑卷进行扩容</p>
-
-<pre><code># lvextend -L +500G /dev/mapper/rhel-root
-
-[root@bms-slave-0001 ~]# df -h
-Filesystem             Size  Used Avail Use% Mounted on
-/dev/mapper/rhel-root  508G  6.5G  502G   2% /
-devtmpfs               126G     0  126G   0% /dev
-tmpfs                  126G     0  126G   0% /dev/shm
-tmpfs                  126G   19M  126G   1% /run
-tmpfs                  126G     0  126G   0% /sys/fs/cgroup
-</code></pre>
-
-<p>卷扩容之后，需要用re-size对文件系统进行扩容</p>
-
-<pre><code># resize2fs /dev/mapper/rhel-root
-</code></pre>
-
-<p>如果在centos/redhat上的话，可以用如下命令进行扩容</p>
-
-<pre><code># xfs_growfs /dev/mapper/rhel-root
-</code></pre>
-
-<h2>扩容非Lininx LVM格式的分区</h2>
-</div>
-  
-  
-
-
-    </article>
-  
-  
-    <article>
-      
-  <header>
-    
-      <h1 class="entry-title"><a href="/blog/2019/07/07/install-octopress-on-windows/">Install Octopress on Windows</a></h1>
-    
-    
-      <p class="meta">
-        
-
-
-
-
-<time class='entry-date' datetime='2019-07-07T00:45:05+00:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>7</span><span class='date-suffix'>th</span>, <span class='date-year'>2019</span></span> <span class='time'>12:45 am</span></time>
-        
-      </p>
-    
-  </header>
-
-
-  <div class="entry-content"><p>最近在windows上安装了octopress（在linux的步骤差不多），简单记录一下，防止以后自己忘了</p>
-
-<h2>安装git</h2>
-
-<p>因为我们需要用github来存放我们生成的pages</p>
-
-<h2>安装ruby</h2>
-
-<ul>
-<li>下载安装包</li>
-</ul>
-
-
-<p>这里要注意一下octopress要求的ruby版本，我自己fork的octpress分支的readme.markdown里有如下字样</p>
-
-<pre><code>Note: Octopress requires a minimum Ruby version of 1.9.3-p0
-</code></pre>
-
-<p>到ruby的官方网站下载最接近的ruby版本就可以了，<a href="https://rubyinstaller.org/downloads/">Ruby</a>,
-我选用的是<a href="https://dl.bintray.com/oneclick/rubyinstaller/rubyinstaller-2.2.6-x64.exe">Ruby 2.2.6(x64)</a>.</p>
-
-<p>对应的Developmenet Kit是<a href="DevKit-mingw64-64-4.7.2-20130224-1432-sfx.exe">DevKit-mingw64-64-4.7.2-20130224-1432-sfx.exe</a>
-(<code>注:Developmenet Kit是Ruby的开发工具集，安装octopress过程中，有些库需要编译</code>)</p>
-
-<ul>
-<li><p>安装Ruby（运行安装包，把Ruby安装到<code>D:/Ruby23-64</code>目录）</p></li>
-<li><p>安装DevKit</p></li>
-</ul>
-
-
-<p>解压安装包到<code>D:/DevKit</code>，命令行进到<code>D:/DevKit</code>目录，执行</p>
-
-<pre><code>ruby dk.rb init
-</code></pre>
-
-<p>执行完成后，打开<code>D:/DevKit</code>目录下的<code>config.yml</code>,查看里边有没有<code>- D:\Ruby23-64</code>字样，如果没有需要手动加上，继续执行命令</p>
-
-<pre><code>ruby dk.rb install
-</code></pre>
-
-<p>另外记得把ruby的bin目录添加到系统环境变量</p>
-
-<h3>安装Python</h3>
-
-<p>安装Python2.7,不要用Python3</p>
-
-<h3>安装octopress</h3>
-
-<ul>
-<li>下载octopress，我这里用自己的fork的repo，<a href="https://github.com/iskey/iskey.github.io">My octopres</a></li>
-</ul>
-
-
-<p>新建一个目录，<code>D:/octopress</code>,在该目录下用git</p>
-
-<pre><code>git clone https://github.com/iskey/iskey.github.io
-</code></pre>
-
-<p>切换到<code>D:/octopress</code>，然后执行如下命令，切换一下gem的源（国内访问国外的源比较慢）</p>
-
-<pre><code>gem sources -a https://ruby.taobao.org/
-gem sources -r http://rubygems.org/
-gem sources -l
-</code></pre>
-
-<p>然后，执行如下命令，安装gem库</p>
-
-<pre><code>gem install bundler
-bundle install
-</code></pre>
-
-<p>安装Octopress主题</p>
-
-<pre><code>rake install
-</code></pre>
-
-<h2>octopress使用</h2>
-
-<ul>
-<li><p>编写新文章</p>
-
-<p>  rake new_post</p></li>
-</ul>
-
-
-<p>根据提示输入标题，或者直接使用如下命令</p>
-
-<pre><code>rake new_post['welcome']
-</code></pre>
-
-<ul>
-<li>发布、预览</li>
-</ul>
-
-
-<p>运行命令，设置github的pages地址</p>
-
-<pre><code>rake setup_Github_pages 
-</code></pre>
-
-<p>发布文章到Github</p>
-
-<pre><code>rake generate 
-rake deploy
-</code></pre>
-
-<p>本地预览</p>
-
-<pre><code>rake preview
-</code></pre>
-</div>
-  
-  
-
-
-    </article>
-  
   <div class="pagination">
     
       <a class="prev" href="/posts/2">&larr; Older</a>
@@ -2245,34 +2142,34 @@ rake deploy
   <ul id="recent_posts">
     
       <li class="post">
-        <a href="/blog/2019/08/16/python-decorators/">Python_decorators</a>
+        <a href="/blog/2020/02/08/ovs-qos/">QoS</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2019/07/13/iptables-packets-flow/">Iptables Packets Flow</a>
+        <a href="/blog/2020/02/02/ansible-stress-scripts/">Ansible-stress</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2019/07/13/win-sshfs/">Win Sshfs</a>
+        <a href="/blog/2020/01/05/perf-for-python/">Perf-for-python</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2019/07/13/simple-example-of-rabbitmq/">Simple Example of Rabbitmq</a>
+        <a href="/blog/2020/01/01/cntlm/">Cntlm</a>
       </li>
     
       <li class="post">
-        <a href="/blog/2019/07/13/sample-of-ipsec/">Usage of IPSec</a>
+        <a href="/blog/2019/12/26/iptables-examples-port-forward/">Iptables Examples</a>
       </li>
     
   </ul>
 </section>
 <section>
   <h1>Categories</h1>
-    <ul id="category-list"><li><a href='/blog/categories/ansible/'>ansible (1)</a></li><li><a href='/blog/categories/iptables/'>iptables (3)</a></li><li><a href='/blog/categories/k8s/'>k8s (2)</a></li><li><a href='/blog/categories/kernel/'>kernel (5)</a></li><li><a href='/blog/categories/linux/'>linux (5)</a></li><li><a href='/blog/categories/lvm/'>lvm (1)</a></li><li><a href='/blog/categories/makefile/'>makefile (2)</a></li><li><a href='/blog/categories/mq/'>mq (1)</a></li><li><a href='/blog/categories/netfilter/'>netfilter (1)</a></li><li><a href='/blog/categories/octopress/'>octopress (1)</a></li><li><a href='/blog/categories/ovs/'>ovs (2)</a></li><li><a href='/blog/categories/python/'>python (1)</a></li><li><a href='/blog/categories/regax/'>regax (1)</a></li><li><a href='/blog/categories/shell/'>shell (3)</a></li><li><a href='/blog/categories/socket/'>socket (3)</a></li><li><a href='/blog/categories/sourceinsight/'>sourceinsight (1)</a></li><li><a href='/blog/categories/sysctl/'>sysctl (1)</a></li><li><a href='/blog/categories/systemd/'>systemd (1)</a></li><li><a href='/blog/categories/todo/'>todo (1)</a></li><li><a href='/blog/categories/tool/'>tool (8)</a></li><li><a href='/blog/categories/ubuntu/'>ubuntu (1)</a></li><li><a href='/blog/categories/vim/'>vim (1)</a></li><li><a href='/blog/categories/gong-ju/'>工具 (1)</a></li><li><a href='/blog/categories/shu-tong/'>数通 (1)</a></li><li><a href='/blog/categories/she-ji-mo-shi/'>设计模式 (1)</a></li></ul>
+    <ul id="category-list"><li><a href='/blog/categories/ansible/'>ansible (2)</a></li><li><a href='/blog/categories/iptables/'>iptables (4)</a></li><li><a href='/blog/categories/k8s/'>k8s (2)</a></li><li><a href='/blog/categories/kernel/'>kernel (5)</a></li><li><a href='/blog/categories/linux/'>linux (5)</a></li><li><a href='/blog/categories/lvm/'>lvm (1)</a></li><li><a href='/blog/categories/makefile/'>makefile (2)</a></li><li><a href='/blog/categories/mq/'>mq (1)</a></li><li><a href='/blog/categories/netfilter/'>netfilter (1)</a></li><li><a href='/blog/categories/octopress/'>octopress (1)</a></li><li><a href='/blog/categories/ovs/'>ovs (3)</a></li><li><a href='/blog/categories/powershell/'>powershell (1)</a></li><li><a href='/blog/categories/proxy/'>proxy (1)</a></li><li><a href='/blog/categories/python/'>python (2)</a></li><li><a href='/blog/categories/regax/'>regax (1)</a></li><li><a href='/blog/categories/sdn/'>sdn (1)</a></li><li><a href='/blog/categories/shell/'>shell (4)</a></li><li><a href='/blog/categories/socket/'>socket (3)</a></li><li><a href='/blog/categories/sourceinsight/'>sourceinsight (1)</a></li><li><a href='/blog/categories/sysctl/'>sysctl (1)</a></li><li><a href='/blog/categories/systemd/'>systemd (1)</a></li><li><a href='/blog/categories/todo/'>todo (1)</a></li><li><a href='/blog/categories/tool/'>tool (8)</a></li><li><a href='/blog/categories/ubuntu/'>ubuntu (1)</a></li><li><a href='/blog/categories/vim/'>vim (1)</a></li><li><a href='/blog/categories/gong-ju/'>工具 (1)</a></li><li><a href='/blog/categories/shu-tong/'>数通 (1)</a></li><li><a href='/blog/categories/she-ji-mo-shi/'>设计模式 (1)</a></li></ul>
 </section>
 <section>
   <h1>Tag Cloud</h1>
-    <span id="tag-cloud"><a href='/blog/categories/ansible' style='font-size: 107.5%'>ansible(1)</a> <a href='/blog/categories/iptables' style='font-size: 122.5%'>iptables(3)</a> <a href='/blog/categories/k8s' style='font-size: 115.0%'>k8s(2)</a> <a href='/blog/categories/kernel' style='font-size: 137.5%'>kernel(5)</a> <a href='/blog/categories/linux' style='font-size: 137.5%'>linux(5)</a> <a href='/blog/categories/lvm' style='font-size: 107.5%'>lvm(1)</a> <a href='/blog/categories/makefile' style='font-size: 115.0%'>makefile(2)</a> <a href='/blog/categories/mq' style='font-size: 107.5%'>mq(1)</a> <a href='/blog/categories/netfilter' style='font-size: 107.5%'>netfilter(1)</a> <a href='/blog/categories/octopress' style='font-size: 107.5%'>octopress(1)</a> <a href='/blog/categories/ovs' style='font-size: 115.0%'>ovs(2)</a> <a href='/blog/categories/python' style='font-size: 107.5%'>python(1)</a> <a href='/blog/categories/regax' style='font-size: 107.5%'>regax(1)</a> <a href='/blog/categories/shell' style='font-size: 122.5%'>shell(3)</a> <a href='/blog/categories/socket' style='font-size: 122.5%'>socket(3)</a> <a href='/blog/categories/sourceinsight' style='font-size: 107.5%'>sourceinsight(1)</a> <a href='/blog/categories/sysctl' style='font-size: 107.5%'>sysctl(1)</a> <a href='/blog/categories/systemd' style='font-size: 107.5%'>systemd(1)</a> <a href='/blog/categories/todo' style='font-size: 107.5%'>todo(1)</a> <a href='/blog/categories/tool' style='font-size: 160.0%'>tool(8)</a> <a href='/blog/categories/ubuntu' style='font-size: 107.5%'>ubuntu(1)</a> <a href='/blog/categories/vim' style='font-size: 107.5%'>vim(1)</a> <a href='/blog/categories/gong-ju' style='font-size: 107.5%'>工具(1)</a> <a href='/blog/categories/shu-tong' style='font-size: 107.5%'>数通(1)</a> <a href='/blog/categories/she-ji-mo-shi' style='font-size: 107.5%'>设计模式(1)</a> </span>
+    <span id="tag-cloud"><a href='/blog/categories/ansible' style='font-size: 115.0%'>ansible(2)</a> <a href='/blog/categories/iptables' style='font-size: 130.0%'>iptables(4)</a> <a href='/blog/categories/k8s' style='font-size: 115.0%'>k8s(2)</a> <a href='/blog/categories/kernel' style='font-size: 137.5%'>kernel(5)</a> <a href='/blog/categories/linux' style='font-size: 137.5%'>linux(5)</a> <a href='/blog/categories/lvm' style='font-size: 107.5%'>lvm(1)</a> <a href='/blog/categories/makefile' style='font-size: 115.0%'>makefile(2)</a> <a href='/blog/categories/mq' style='font-size: 107.5%'>mq(1)</a> <a href='/blog/categories/netfilter' style='font-size: 107.5%'>netfilter(1)</a> <a href='/blog/categories/octopress' style='font-size: 107.5%'>octopress(1)</a> <a href='/blog/categories/ovs' style='font-size: 122.5%'>ovs(3)</a> <a href='/blog/categories/powershell' style='font-size: 107.5%'>powershell(1)</a> <a href='/blog/categories/proxy' style='font-size: 107.5%'>proxy(1)</a> <a href='/blog/categories/python' style='font-size: 115.0%'>python(2)</a> <a href='/blog/categories/regax' style='font-size: 107.5%'>regax(1)</a> <a href='/blog/categories/sdn' style='font-size: 107.5%'>sdn(1)</a> <a href='/blog/categories/shell' style='font-size: 130.0%'>shell(4)</a> <a href='/blog/categories/socket' style='font-size: 122.5%'>socket(3)</a> <a href='/blog/categories/sourceinsight' style='font-size: 107.5%'>sourceinsight(1)</a> <a href='/blog/categories/sysctl' style='font-size: 107.5%'>sysctl(1)</a> <a href='/blog/categories/systemd' style='font-size: 107.5%'>systemd(1)</a> <a href='/blog/categories/todo' style='font-size: 107.5%'>todo(1)</a> <a href='/blog/categories/tool' style='font-size: 160.0%'>tool(8)</a> <a href='/blog/categories/ubuntu' style='font-size: 107.5%'>ubuntu(1)</a> <a href='/blog/categories/vim' style='font-size: 107.5%'>vim(1)</a> <a href='/blog/categories/gong-ju' style='font-size: 107.5%'>工具(1)</a> <a href='/blog/categories/shu-tong' style='font-size: 107.5%'>数通(1)</a> <a href='/blog/categories/she-ji-mo-shi' style='font-size: 107.5%'>设计模式(1)</a> </span>
 </section>
 
 
@@ -2285,7 +2182,7 @@ rake deploy
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2019 - Iskey -
+  Copyright &copy; 2020 - Iskey -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a></span>
 </p>
 
