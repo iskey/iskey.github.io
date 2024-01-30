@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunk=self.webpackChunk||[]).push([[935],{2921:e=>{e.exports=JSON.parse('{"label":"perf","permalink":"/tags/perf","allTagsPath":"/tags","count":1,"items":[{"id":"Linux/Tools/perf for python","title":"perf for python","description":"- 1. \u5408\u9002\u7684\u5de5\u5177","permalink":"/Linux/Tools/perf for python"}]}')}}]);

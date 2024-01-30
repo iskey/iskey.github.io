@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunk=self.webpackChunk||[]).push([[8389],{6513:u=>{u.exports=JSON.parse('{"label":"ubuntu","permalink":"/tags/ubuntu","allTagsPath":"/tags","count":1,"items":[{"id":"Linux/System/\u5347\u7ea7xubuntu","title":"\u5347\u7ea7xubuntu","description":"---","permalink":"/Linux/System/\u5347\u7ea7xubuntu"}]}')}}]);

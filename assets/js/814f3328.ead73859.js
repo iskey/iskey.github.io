@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunk=self.webpackChunk||[]).push([[2535],{5641:e=>{e.exports=JSON.parse('{"title":"All posts","items":[{"title":"OCP\u5f00\u6e90\u4ea4\u6362\u673a\u4e4bONIE\u6742\u8bb0","permalink":"/blog/OCP\u5f00\u6e90\u4ea4\u6362\u673a\u4e4bONIE\u6742\u8bb0"}]}')}}]);

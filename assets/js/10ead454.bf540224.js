@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunk=self.webpackChunk||[]).push([[6629],{9178:a=>{a.exports=JSON.parse('{"label":"clang","permalink":"/tags/clang","allTagsPath":"/tags","count":1,"items":[{"id":"Linux/Tools/Clang format","title":"Clang format","description":"\u5bfc\u51faclang\u5f53\u524d\u914d\u7f6e","permalink":"/Linux/Tools/Clang format"}]}')}}]);

@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunk=self.webpackChunk||[]).push([[3662],{5746:e=>{e.exports=JSON.parse('{"label":"ftrace","permalink":"/tags/ftrace","allTagsPath":"/tags","count":1,"items":[{"id":"Linux/Tools/\u5185\u6838\u4f7f\u7528ftrace","title":"\u5185\u6838\u4f7f\u7528ftrace","description":"","permalink":"/Linux/Tools/\u5185\u6838\u4f7f\u7528ftrace"}]}')}}]);

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+    <id>https://iskey.github.io/blog</id>
+    <title>Xie Yichao Blog</title>
+    <updated>2016-01-23T03:46:31.000Z</updated>
+    <generator>https://github.com/jpmonette/feed</generator>
+    <link rel="alternate" href="https://iskey.github.io/blog"/>
+    <subtitle>Xie Yichao Blog</subtitle>
+    <icon>https://iskey.github.io/img/favicon.ico</icon>
+    <entry>
+        <title type="html"><![CDATA[OCP开源交换机之ONIE杂记]]></title>
+        <id>/OCP开源交换机之ONIE杂记</id>
+        <link href="https://iskey.github.io/blog/OCP开源交换机之ONIE杂记"/>
+        <updated>2016-01-23T03:46:31.000Z</updated>
+        <summary type="html"><![CDATA[OCP全称是Open Computer Project，是Facebook发起并主导的一个硬件开源组织。该组织主要关注数据中心产品的开源及共享，标准化产品的硬件设计，以期打破数据中心产品提供商的硬件壁垒，从而降低成本，提高效率。]]></summary>
+        <content type="html"><![CDATA[<p>OCP全称是Open Computer Project，是Facebook发起并主导的一个硬件开源组织。该组织主要关注数据中心产品的开源及共享，标准化产品的硬件设计，以期打破数据中心产品提供商的硬件壁垒，从而降低成本，提高效率。</p><p>目前该组织关注的产品包括，存储设备、服务器主板、服务器机柜、虚拟I/O、硬件驱动管理、数据中心基础架构设计、三层交换机等。</p><p>ONIE软件相当于一个集成众多工具包的微型Linux系统，通过这个微型Linux环境，可以安装和启动符合要求的交换机软件系统。
+如此依赖，交换机被分割为两个独立的部分，OCP组织负责指定硬件设计规范，代工厂商，如天弘等根据规范生产硬件。软件厂商适配自己的交换机系统到OCP硬件上，这样组合起来的交换机就是白牌交换机。</p>]]></content>
+        <category label="ovs" term="ovs"/>
+        <category label="ONIE" term="ONIE"/>
+    </entry>
+</feed>
