@@ -6,7 +6,7 @@
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://iskey.github.io/blog"/>
     <subtitle>Xie Yichao Blog</subtitle>
-    <icon>https://iskey.github.io/img/crab.png</icon>
+    <icon>https://iskey.github.io/img/crab.svg</icon>
     <entry>
         <title type="html"><![CDATA[OCP开源交换机之ONIE杂记]]></title>
         <id>/OCP开源交换机之ONIE杂记</id>
