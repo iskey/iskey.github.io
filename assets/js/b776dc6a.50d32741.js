@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunk=self.webpackChunk||[]).push([[133],{3673:s=>{s.exports=JSON.parse('{"label":"ovs","permalink":"/tags/ovs","allTagsPath":"/tags","count":1,"items":[{"id":"Linux/Architecture/ovs qos","title":"Ovs Qos","description":"ovs command","permalink":"/Linux/Architecture/ovs qos"}]}')}}]);
