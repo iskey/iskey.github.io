@@ -6,7 +6,6 @@ tags:
   - kernel
   - ARM
 ---
-
 # Kernel Defines for ARM
 
 Linux Kernel对于ARM的一些有用的宏定义.
