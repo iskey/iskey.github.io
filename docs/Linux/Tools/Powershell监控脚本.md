@@ -4,12 +4,7 @@ date: 2019-07-13 11:45:27 +0000
 comments: true
 tags: [powerShell]
 ---
-
 # Powershell监控实用脚本
-
-标签（空格分隔）： 未分类
-
----
 
 ## 监控文件变化
 ```

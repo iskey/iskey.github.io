@@ -9,7 +9,7 @@ tags:
 
 ## Xray
 
-![](http://pic.isnokey.shop/20221022110300.png)
+![](http://pic.isnokey.shop/PicRepo/20221022110300.png)
 
 ### Xray Server
 
@@ -96,13 +96,13 @@ tags:
 #### Server
 ##### 在server上创建隧道
 
-![](http://pic.isnokey.shop/20221021094113.png)
+![](http://pic.isnokey.shop/PicRepo/20221021094113.png)
 
 ##### 查看隧道信息
 
 在浮居网页面，查看自己的隧道信息
 
-![](http://pic.isnokey.shop/20221021094356.png)
+![](http://pic.isnokey.shop/PicRepo/20221021094356.png)
 
 #### Frp Client
 #####  CONFIG
@@ -155,7 +155,7 @@ curl --socks5-hostname free1.frp.cool:12508 http://www.google.com
 
 使用内网代理服务器CCProxy（内网的机器可以访问google），配置了socks代理，作为frp的跳板。在linux下，也可以使用socks 5搭建socks代理[Linux下搭建socks5代理](https://blog.51cto.com/wzlinux/1692775)。
 
-![](http://pic.isnokey.shop/20221021102700.png)
+![](http://pic.isnokey.shop/PicRepo/20221021102700.png)
 
 ## Proxy本地代理
 
@@ -182,5 +182,5 @@ C:\Program Files (x86)\Google\Chrome\Application\chrome.exe   --show-app-list  -
 
 ### Windows10使用socks代理
 
-![](http://pic.isnokey.shop/20221021103259.png)
+![](http://pic.isnokey.shop/PicRepo/20221021103259.png)
 

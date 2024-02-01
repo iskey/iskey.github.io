@@ -2,6 +2,8 @@
 tags:
 - powerShell
 ---
+# ColorTool
+
 ## 简介
 ColorTool 是微软团队开发的修改颜色的小程序，可以很便捷地把 Windows 控制台包括 PowerShell 或者 cmd 的颜色方案按照别人分享的配置修改。
 

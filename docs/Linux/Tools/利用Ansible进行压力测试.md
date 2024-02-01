@@ -5,9 +5,9 @@ categories: ansible
 tags: [ansible]
 ---
 
-# 1. 利用ansible、stress-ng进行压力测试
+# 利用ansible、stress-ng进行压力测试
 
-## 1.1. 压测利器-stress-ng
+## 压测利器-stress-ng
 
 stress-ng是stress的加强版，完全兼容stress，并在此基础上增加了几百个参数，堪称压测工具中的瑞士军刀。
 
@@ -137,14 +137,14 @@ stress-ng --cpu `nproc` --pthread 1024 timeout 300
 
 ```
 
-## 1.2. 最简单的运维工具-ansible
+## 最简单的运维工具-ansible
 
 在小规模的机器上执行命令，最简单非ansible莫属，因为ansible默认是不需要在待运维的机器上安装额外的服务，
 只要开启了ssh服务就可以了。
 
 一个简单的ansible使用样例，[simple-example-of-ansible](https://iskey.github.io/blog/2019/07/07/simple-example-of-ansible/)
 
-## 1.3. 如何管理压测进程-给压测进程找个爹
+## 如何管理压测进程-给压测进程找个爹
 
 使用ansible进行加压时，如果执行stress-ng命令，然后马上退出，压测工具进程也就被杀死了，这是因为压测工具默认的父进程是ansible的ssh会话
 这时候可以使用nohup、setsid命令让stress-ng命令后台执行。
@@ -161,7 +161,7 @@ stress-ng --cpu `nproc` --pthread 1024 timeout 300
 screen -S stress -d -m stress-ng -c 1 --timeout 300
 ```
 
-## 1.4. 负载场景剧本设计-playbook
+## 负载场景剧本设计-playbook
 
 在云计算场景下，经常会需要用压测工具来模拟一些业务场景，stress-ng是最常用到的工具之一，通常ansible+stress-ng就能应付绝大多数的压测场景。
 如果需要模拟的CPU、MEM、磁盘IO模型比较多，用命令行就显得不是那么方便了，这时候就可以用playbook。
@@ -181,7 +181,7 @@ playbook支持如下角色变量：
     - bytes_per_hdd_worker
     - bytes_per_vm_worker
 
-## 1.5. 自动重试-ansile经常不靠谱
+## 自动重试-ansile经常不靠谱
 
 使用playbook操作大量机器时，经常会出现机器执行命令失败，比如网络不通、网络闪断等，这时候需要对失败的机器重新执行命令，playbook可以如下命令进行重试
 
@@ -193,7 +193,7 @@ ansible-playbook -i host stress.yml --extra-vars "host=all" --limit @$playbook_r
 的IP列表，通过ansible-playbook进行重试。
 
 
-```
+```bash
 #!/bin/sh
 
 hosts=(

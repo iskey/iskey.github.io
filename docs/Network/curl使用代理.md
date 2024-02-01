@@ -23,9 +23,9 @@ tags:
 
 ## Linux curl命令代理设置参数
 
-　　linux curl命令可以使用下面参数设置http(s)代理、socks代理，已经设置它们的用户名、密码以及认证方式：
+linux curl命令可以使用下面参数设置http(s)代理、socks代理，已经设置它们的用户名、密码以及认证方式：
 
-![](http://pic.isnokey.shop/20221021101402.png)
+![](http://pic.isnokey.shop/PicRepo/20221021101402.png)
 
 
 

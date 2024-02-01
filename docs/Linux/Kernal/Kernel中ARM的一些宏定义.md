@@ -1,8 +1,8 @@
 ---
 date: 2016-6-18 20:21:00+00:00
-title: Kernel Defines for ARM
-tags: 
-  - linux 
+title: Kernel中ARM的一些宏定义
+tags:
+  - linux
   - kernel
   - ARM
 ---

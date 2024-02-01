@@ -4,7 +4,6 @@ title: Kernel C.tom for SourceInsight
 categories: SourceInsight 
 tags: [kernel,sourceInsight]
 ---
-
 # Kernel C.tom for SourceInsight
 
 ```

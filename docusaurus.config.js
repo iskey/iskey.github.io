@@ -12,7 +12,7 @@ const config = {
     baseUrl: '/',
     onBrokenLinks: 'throw',
     onBrokenMarkdownLinks: 'warn',
-    favicon: 'img/favicon.ico',
+    favicon: 'img/crab.svg',
 
     // GitHub pages deployment config.
     // If you aren't using GitHub pages, you don't need these.
@@ -33,13 +33,14 @@ const config = {
             /** @type {import('@docusaurus/preset-classic').Options} */
             ({
                 docs: {
+                    showLastUpdateTime: true,
                     sidebarPath: require.resolve('./sidebars.js'),
                     routeBasePath: "/",
                     path: "docs",
                     // Please change this to your repo.
                     // Remove this to remove the "edit this page" links.
                     editUrl:
-                        'https://github.com/iskey/docusaurus-2/tree/main/packages/create-docusaurus/templates/shared/',
+                        'https://github.com/iskey/iskey.github.io/tree/main/',
                 },
                 blog: {
                     showReadingTime: true,
@@ -48,7 +49,7 @@ const config = {
                     // Please change this to your repo.
                     // Remove this to remove the "edit this page" links.
                     editUrl:
-                        'https://github.com/iskey/docusaurus-2/tree/main/packages/create-docusaurus/templates/shared/',
+                        'https://github.com/iskey/iskey.github.io/tree/main/',
                 },
                 theme: {
                     customCss: require.resolve('./src/css/custom.css'),
@@ -60,11 +61,16 @@ const config = {
     themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
         ({
+            docs: {
+                sidebar: {
+                    autoCollapseCategories: true,
+                },
+            },
             navbar: {
                 title: "Iskey's Site",
                 logo: {
                     alt: 'My Site Logo',
-                    src: 'img/crab.png',
+                    src: 'img/crab.svg',
                 },
                 items: [
                     // {
@@ -73,14 +79,14 @@ const config = {
                     //     position: 'left',
                     //     label: '知识库',
                     // },
-                    {
-                        to: '/blog',
-                        label: 'Blog',
-                        position: 'left'
-                    },
+                    // {
+                    //     to: '/blog',
+                    //     label: 'Blog',
+                    //     position: 'left'
+                    // },
                     {
                         to: '/tags',
-                        label: '知识库标签',
+                        label: 'Tags',
                         position: 'left'
                     },
                     // {
@@ -127,10 +133,10 @@ const config = {
                     {
                         title: 'More',
                         items: [
-                            {
-                                label: 'Blog',
-                                to: '/blog',
-                            },
+                            // {
+                            //     label: 'Blog',
+                            //     to: '/blog',
+                            // },
                             {
                                 label: 'GitHub',
                                 href: 'https://github.com/facebook/docusaurus',
