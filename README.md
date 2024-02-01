@@ -1,6 +1,8 @@
-# Docusaurus 2
+# Iskey's site
 
-This directory is a brief example of a [Docusaurus](https://v2.docusaurus.io) site that can be deployed to Vercel with zero configuration.
+This is my private site built on Docusaurus 2.
+
+This site can be deployed to Vercel with zero configuration.
 
 ## Deploy Your Own
 
