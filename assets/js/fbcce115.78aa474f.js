@@ -1,1 +1,0 @@
-"use strict";(self.webpackChunk=self.webpackChunk||[]).push([[605],{5613:e=>{e.exports=JSON.parse('{"label":"sourceInsight","permalink":"/tags/source-insight","allTagsPath":"/tags","count":1,"items":[{"id":"Linux/Tools/Kernel C.tom for SourceInsight","title":"Kernel C.tom for SourceInsight","description":"","permalink":"/Linux/Tools/Kernel C.tom for SourceInsight"}]}')}}]);
