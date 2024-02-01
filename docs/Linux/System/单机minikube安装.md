@@ -5,7 +5,6 @@ comments: true
 tags:
   - k8s
 ---
-
 # 单机minikube安装
 
 ubuntu环境，单机安装minikube.
